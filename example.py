@@ -10,7 +10,7 @@ if __name__ == '__main__':
     scheduler = Scheduler(base_url)
     session_id = scheduler.login(username, password)
 
-    print(session_id)
+    print("Logged in with session id %s" % session_id)
     job_id = scheduler.submit_job(session_id, path_to_job_file)
 
     print("Job %s submitted" % job_id)

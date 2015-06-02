@@ -2,7 +2,15 @@ import requests
 
 
 class Scheduler:
+    """
+    Simple client for the ProActive scheduler REST API
+    See also https://try.activeeon.com/rest/doc/jaxrsdocs/overview-summary.html
+    """
+
     def __init__(self, base_url):
+        """
+        :param base_url: REST API base URL including host and port, for instance http://localhost:8080
+        """
         self.base_url = base_url
 
     def login(self, username, password):
