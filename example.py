@@ -1,11 +1,16 @@
 import time
+import sys
 from scheduler import Scheduler
 
 if __name__ == '__main__':
-    base_url = "http://localhost:8080"
-    username = 'admin'
-    password = 'admin'
-    path_to_job_file = 'job.xml'
+
+    if len(sys.argv) != 5:
+        sys.exit("4 arguments expected, <URL> <username> <password> <job XML file>")
+
+    base_url = sys.argv[1]
+    username = sys.argv[2]
+    password = sys.argv[3]
+    path_to_job_file = sys.argv[4]
 
     scheduler = Scheduler(base_url)
     session_id = scheduler.login(username, password)
