@@ -48,3 +48,7 @@ class Scheduler:
     def get_job_progress(job):
         return (job['jobInfo']['numberOfFinishedTasks'], job['jobInfo']['totalNumberOfTasks'])
 
+    @staticmethod
+    def get_task_progress(job, task_id):
+        return job['tasks'][task_id]['taskInfo']['progress']
+

@@ -28,6 +28,10 @@ if __name__ == '__main__':
 
         print("Progress %s/%s" % (running, total))
 
+        for task_id in list(job['tasks']):
+            progress = scheduler.get_task_progress(job, task_id)
+            print("Task %s progression is: %s%%" % (job['tasks'][task_id]['name'], progress))
+
         if job_status != 'FINISHED':
             time.sleep(1)
 
