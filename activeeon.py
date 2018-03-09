@@ -1,7 +1,7 @@
 import requests
 
 
-class Scheduler:
+class Proactive:
     """
     Simple client for the ProActive scheduler REST API
     See also https://try.activeeon.com/rest/doc/jaxrsdocs/overview-summary.html
@@ -13,7 +13,7 @@ class Scheduler:
         """
         self.base_url = base_url
 
-    def login(self, username, password):
+    def pa_connect(self, username, password):
         payload = {'username': username, 'password': password}
         r = requests.post("%s/rest/scheduler/login" % self.base_url, data=payload)
 
@@ -23,7 +23,7 @@ class Scheduler:
         return r.text
 
 
-    def submit_job(self, session_id, path_to_job_file):
+    def pa_submit_job(self, session_id, path_to_job_file):
         headers = {'sessionid': session_id}
         files = {'file': ('job.xml', open('%s' % path_to_job_file, 'rb'), 'application/xml')}
         r = requests.post("%s/rest/scheduler/submit" % self.base_url, headers=headers, files=files)
@@ -34,7 +34,7 @@ class Scheduler:
         return r.json()['id']
 
 
-    def get_job(self, session_id, job_id):
+    def pa_get_job(self, session_id, job_id):
         headers = {'sessionid': session_id}
         r = requests.get("%s/rest/scheduler/jobs/%s" % (self.base_url, job_id), headers=headers)
 
@@ -45,10 +45,10 @@ class Scheduler:
 
 
     @staticmethod
-    def get_job_progress(job):
+    def pa_get_job_progress(job):
         return (job['jobInfo']['numberOfFinishedTasks'], job['jobInfo']['totalNumberOfTasks'])
 
     @staticmethod
-    def get_task_progress(job, task_id):
+    def pa_get_task_progress(job, task_id):
         return job['tasks'][task_id]['taskInfo']['progress']
 
