@@ -40,7 +40,7 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'proactive-client'
+project = u'scheduler_client'
 copyright = u'2018, ActiveEon'
 author = 'ActiveEon'
 
@@ -214,7 +214,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'proactive-client', u'Proactive-client Documentation',
+    ('index', 'scheduler_client', u'Proactive-client Documentation',
      [u'ActivEon'], 1)
 ]
 
@@ -228,8 +228,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'proactive-client', u'Proactive-client Documentation',
-   u'ActiveEon', 'proactive-client', 'One line description of project.',
+  ('index', 'scheduler_client', u'Proactive-client Documentation',
+   u'ActiveEon', 'scheduler_client', 'One line description of project.',
    'Miscellaneous'),
 ]
 

@@ -3,7 +3,7 @@ import requests
 
 from . import helpers
 
-class proactive_client:
+class scheduler_client:
     """
     Simple client for the ProActive scheduler REST API
     See also https://try.activeeon.com/rest/doc/jaxrsdocs/overview-summary.html
