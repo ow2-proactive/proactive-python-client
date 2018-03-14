@@ -1,7 +1,9 @@
+# -*- coding: utf-8 -*-
 import requests
 
+from . import helpers
 
-class Proactive:
+class proactive_client:
     """
     Simple client for the ProActive scheduler REST API
     See also https://try.activeeon.com/rest/doc/jaxrsdocs/overview-summary.html
@@ -51,4 +53,3 @@ class Proactive:
     @staticmethod
     def pa_get_task_progress(job, task_id):
         return job['tasks'][task_id]['taskInfo']['progress']
-
