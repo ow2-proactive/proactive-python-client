@@ -12,13 +12,13 @@ with open('LICENSE') as f:
     license = f.read()
 
 setup(
-    name='proactive-client',
+    name='scheduler_client',
     version='0.1.0',
-    description='Sample package for Python-Guide.org',
+    description='ProActicve scheduler client module',
     long_description=readme,
-    author='Kenneth Reitz',
-    author_email='me@kennethreitz.com',
-    url='https://github.com/ow2-proactive/client-python',
+    author='Activeeon',
+    author_email='info@activeeon.com',
+    url='https://github.com/ow2-proactive/proactive-python-client',
     license=license,
     test_suite='pytest',
     tests_require=[
