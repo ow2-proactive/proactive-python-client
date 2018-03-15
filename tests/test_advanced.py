@@ -13,7 +13,6 @@ class AdvancedTestSuite(unittest.TestCase):
         my_client = proactive.scheduler_client("https://trydev.activeeon.com")
              
         self.assertIsNotNone("Test")
-        self.assertIsNone("Test")
 
        
 
