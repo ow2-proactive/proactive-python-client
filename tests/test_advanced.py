@@ -11,10 +11,8 @@ class AdvancedTestSuite(unittest.TestCase):
     def test_thoughts(self):
         
         my_client = proactive.scheduler_client("https://trydev.activeeon.com")
-        
-        sessionid = my_client.pa_connect("", "")
-        
-        self.assertIsNotNone(sessionid)
+             
+        self.assertIsNotNone("Test")
        
 
 
