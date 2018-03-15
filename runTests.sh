@@ -4,4 +4,7 @@ command -v source >/dev/null 2>&1 || {
 }
 source activate
 pip install pytest-html
-pytest --html=build/test-report/index.html --self-contained-html
+pytest --junit-xml=build/reports/TEST-report.xml
+
+
+
