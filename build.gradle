@@ -1,0 +1,39 @@
+buildscript {
+    repositories {
+        mavenCentral()
+        jcenter()
+      ivy {
+        url "${System.getProperty("user.home")}/local-repo"
+        layout('pattern') {
+          ivy "[organisation]/[module]/[revision]/[module]-[revision].ivy"
+          artifact "[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"
+          m2compatible true
+        }
+      }
+    }
+    dependencies{
+      classpath 'com.linkedin.pygradle:pygradle-plugin:0.6.1'
+}
+}
+
+apply plugin: "com.linkedin.python-sdist"
+
+dependencies {
+    python 'pypi:requests:2.9.1'
+    test 'pypi:pytest'
+}
+
+repositories {
+   pyGradlePyPi()
+}
+
+// generate Tests report via a script.
+task runTests(type:Exec) {
+  workingDir '.'
+  // Create the output folder
+  doFirst {
+    mkdir('build/test-report')
+  }
+
+  commandLine './runTests.sh'
+}

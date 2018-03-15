@@ -95,4 +95,8 @@ ENV3/
 .classpath
 .project
 .settings/
+.gradle
+gradle/ext/
+build/
+.pytest_cache/
 
