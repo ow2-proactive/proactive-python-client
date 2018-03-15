@@ -137,15 +137,27 @@ class GradleDistribution(Distribution, object):
         except IOError:
             raise StopIteration
 
-#setup(
-#    distclass=GradleDistribution,
-#    package_dir={'': 'src'},
-#    packages=find_packages('src'),
-#    include_package_data=True,
-#
-#    entry_points={
-#        'console_scripts': [
-#            'hello_world = foo.hello:main',
-#        ],
-#    }
-#)
+
+setup(
+    name='scheduler_client',
+    version='0.1.0',
+    description='ProActicve scheduler client module',
+    author='Activeeon',
+    author_email='info@activeeon.com',
+    url='https://github.com/ow2-proactive/proactive-python-client',
+    license=license,
+    test_suite='pytest',
+    tests_require=[
+          'mock',
+          'coverage',
+          'coveralls',
+          'pytest',
+          'python-dateutil'
+    ],
+    packages=find_packages(exclude=('tests', 'docs')),
+    install_requires=[
+          'requests'
+      ],
+    zip_safe=False
+)
+

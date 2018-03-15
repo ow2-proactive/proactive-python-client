@@ -18,10 +18,12 @@ buildscript {
 
 apply plugin: "com.linkedin.python-sdist"
 
+
 dependencies {
     python 'pypi:requests:2.9.1'
     test 'pypi:pytest'
 }
+
 
 repositories {
    pyGradlePyPi()
