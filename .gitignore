@@ -99,4 +99,4 @@ ENV3/
 gradle/ext/
 build/
 .pytest_cache/
-
+.DS_Store

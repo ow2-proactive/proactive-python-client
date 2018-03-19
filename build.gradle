@@ -1,57 +1,50 @@
+apply plugin: 'java'
+apply plugin: 'maven'
+
+repositories {
+    if (project.hasProperty('local')) {
+        mavenLocal()
+    }
+    jcenter()
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
+    maven { url 'http://repository.activeeon.com/content/groups/proactive/'}
+}
+
 buildscript {
     repositories {
-        mavenCentral()
-        jcenter()
-        maven {
-            url "http://repository.activeeon.com/content/groups/proactive/"
-        }
         maven {
             url "https://plugins.gradle.org/m2/"
         }
-      ivy {
-        url "${System.getProperty("user.home")}/local-repo"
-        layout('pattern') {
-          ivy "[organisation]/[module]/[revision]/[module]-[revision].ivy"
-          artifact "[organisation]/[module]/[revision]/[artifact]-[revision](-[classifier]).[ext]"
-          m2compatible true
+        maven {
+            url "http://repository.activeeon.com/content/groups/proactive/"
         }
-      }
     }
-    dependencies{
-      classpath 'com.linkedin.pygradle:pygradle-plugin:0.6.1'
-}
+    dependencies {
+    }
 }
 
-apply plugin: "com.linkedin.python-sdist"
-apply plugin: 'maven'
-
+configurations {
+    localDeps
+}
 
 dependencies {
-    python 'pypi:requests:2.9.1'
-    test 'pypi:pytest'
+    localDeps "org.ow2.proactive_grid_cloud_portal:rest-client:$version"
+    compile configurations.localDeps
+    
 }
 
-
-repositories {
-   pyGradlePyPi()
+task copyToLib(type: Copy) {
+    from configurations.localDeps
+    into "./proactive/java/lib"
 }
 
-// generate Tests report via a script.
-task runTests(type:Exec) {
-  workingDir '.'
-  // Create the output folder
-  doFirst {
-    mkdir('build/test-report')
-  }
-
-  commandLine './runTests.sh'
-}
-
-task install(dependsOn: ':build')
+task runPython(type:Exec) {
+   commandLine './build.sh'
+} 
 
 
-
-
-
-
-
+runPython.dependsOn copyToLib
+build.dependsOn runPython
+install.dependsOn build
