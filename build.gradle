@@ -2,6 +2,12 @@ buildscript {
     repositories {
         mavenCentral()
         jcenter()
+        maven {
+            url "http://repository.activeeon.com/content/groups/proactive/"
+        }
+        maven {
+            url "https://plugins.gradle.org/m2/"
+        }
       ivy {
         url "${System.getProperty("user.home")}/local-repo"
         layout('pattern') {
@@ -17,6 +23,7 @@ buildscript {
 }
 
 apply plugin: "com.linkedin.python-sdist"
+apply plugin: 'maven'
 
 
 dependencies {
@@ -39,3 +46,12 @@ task runTests(type:Exec) {
 
   commandLine './runTests.sh'
 }
+
+task install(dependsOn: ':build')
+
+
+
+
+
+
+
