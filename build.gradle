@@ -25,6 +25,11 @@ buildscript {
     }
 }
 
+group = 'org.ow2.proactive'
+version = version
+
+
+
 configurations {
     localDeps
 }
