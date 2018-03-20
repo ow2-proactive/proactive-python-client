@@ -34,7 +34,7 @@ with open('gradle.properties') as fp:
   
   
 setup(
-    name='scheduler_client',
+    name='proactive',
     version=gralde_properties['version'],
     description='ProActicve scheduler client module',
     author='Activeeon',
