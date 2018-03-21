@@ -71,7 +71,7 @@ task publish(type:Exec) {
 } 
 
 
-
+copyDependenciesToLib.dependsOn clean
 setup.dependsOn copyDependenciesToLib
 build.dependsOn setup
 publish.dependsOn build
