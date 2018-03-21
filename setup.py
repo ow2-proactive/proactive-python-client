@@ -1,6 +1,7 @@
 from __future__ import print_function
 import os
 import sys
+import time
 import pkg_resources
 import platform
 from setuptools import setup, find_packages, Command
@@ -11,13 +12,18 @@ gradle_properties={}
 with open('gradle.properties') as fp:
   for line in fp:
     if '=' in line:
-      name, value = line.split('=', 1)
-      gradle_properties[name] = value.replace('\n','')
+      name, value = line.replace('\n','').split('=', 1)
+      if "SNAPSHOT" in value:
+          dev_version = ".dev" + str(int(time.time()))
+          value = value.replace("-SNAPSHOT", dev_version)              
+          
+      gradle_properties[name] = value
+      
   
 setup(
   name='proactive',
 #  version=gradle_properties['version'],
-  version='1.0.0a2',
+  version=gradle_properties["version"],
   description='ProActive scheduler client module',
   author='Activeeon',
   author_email='contact@activeeon.com',

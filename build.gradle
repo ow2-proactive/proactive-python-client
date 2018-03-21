@@ -53,16 +53,26 @@ dependencies {
     
 }
 
-task copyToLib(type: Copy) {
+clean.doFirst {
+    delete "${rootDir}/dist/"
+}
+
+task copyDependenciesToLib(type: Copy) {
     from configurations.localDeps
     into "./proactive/java/lib"
 }
 
-task runPython(type:Exec) {
+task setup(type:Exec) {
    commandLine './build.sh'
 } 
 
+task publish(type:Exec) {
+   commandLine './publish.sh'
+} 
 
-runPython.dependsOn copyToLib
-build.dependsOn runPython
-install.dependsOn build
+
+
+setup.dependsOn copyDependenciesToLib
+build.dependsOn setup
+publish.dependsOn build
+install.dependsOn publish
