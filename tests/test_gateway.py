@@ -9,21 +9,9 @@ class GatewayTestSuite(unittest.TestCase):
     """Advanced test cases."""
 
     def test_gateway(self):
+         gateway = proactive.scheduler_gateway("http://trydev.activeeon.com:8080","bobot", None, '/Users/mcastigliego/Downloads/bobot_cred9.txt')
+         print(gateway.submitFromCatalog("basic-examples","native_task_linux"))
         
-        import os
-        f = open(os.devnull,"r")
-        
-        gateway = proactive.scheduler_gateway
-        
-        print(gateway.getStatus())
-        
-        
-        print(f.read())
-             
-        
-
-       
-
 
 if __name__ == '__main__':
     unittest.main()

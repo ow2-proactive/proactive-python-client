@@ -48,7 +48,7 @@ configurations {
 }
 
 dependencies {
-    localDeps "org.ow2.proactive_grid_cloud_portal:rest-client:$version"
+    localDeps "org.ow2.proactive_grid_cloud_portal:rest-smartproxy:$version"
     compile configurations.localDeps
     
 }
