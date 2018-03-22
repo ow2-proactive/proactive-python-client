@@ -7,4 +7,10 @@ source env/bin/activate
 
 pip install twine
 
-twine upload -r pypi dist/*
+
+if [[ $JENKINS_JNLP_URL ]]
+then
+   twine upload -r pypi dist/* --config-file /home/activeeon/.pypirc
+else
+   twine upload -r pypi dist/*
+fi
