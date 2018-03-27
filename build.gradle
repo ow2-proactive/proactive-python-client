@@ -49,7 +49,7 @@ task copyDependenciesToLib(type: Copy) {
 }
 
 task setup(type:Exec) {
-   commandLine './build.sh'
+   commandLine "./build.sh", "${proactive_url}", "${username}", "${password}"   
 } 
 
 task publish(type:Exec) {
