@@ -80,6 +80,16 @@ class GatewayTestSuite(unittest.TestCase):
          self.assertTrue(str(job_info.getJobId().value()) == str(jobId))
          self.assertTrue(str(job_info.getJobOwner()) == self.username)
          self.gateway.disconnect()
+    
+    def test_get_all_jobs(self):
+         self.gateway.connect(self.username, self.password)
+         jobId = self.gateway.submitFromCatalog("basic-examples","print_file_name")
+         jobs = self.gateway.getAllJobs()
+         self.assertTrue(jobs.size() > 0)
+         for job_info in jobs:
+             self.assertTrue(str(job_info.getJobOwner()) is not None) 
+             self.assertTrue(str(job_info.getStatus().name()) in ['FINISHED','KILLED','FAILED','IN_ERROR','CANCELED', 'PAUSED', 'FINISHED', 'STALLED', 'RUNNING', 'PENDING' ]) 
+         self.gateway.disconnect()
         
 
 if __name__ == '__main__':

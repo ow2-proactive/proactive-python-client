@@ -55,5 +55,10 @@ class scheduler_gateway:
     
     def getJobInfo(self,job_id):
         return self.proactive_schduler_client.getJobInfo(str(job_id));
-
+    
+    def getAllJobs(self, max_number_of_jobs=1000):
+        job_filter_criteria = self.gg.jvm.org.ow2.proactive.scheduler.common.JobFilterCriteria(False, False, True, False)
+        jobs_page = self.proactive_schduler_client.getJobs(0, max_number_of_jobs,job_filter_criteria, None );
+        return jobs_page.getList()
         
+
