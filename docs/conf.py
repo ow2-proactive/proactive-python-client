@@ -184,7 +184,7 @@ latex_elements = {
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'Proactive-client.tex', u'Proactive client Documentation',
+  ('index', 'proactive_client.tex', u'Proactive client Documentation',
    u'ActiveEon', 'manual'),
 ]
 
@@ -214,7 +214,7 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'scheduler_client', u'Proactive-client Documentation',
+    ('index', 'proactive_client', u'Proactive-client Documentation',
      [u'ActivEon'], 1)
 ]
 
@@ -228,8 +228,8 @@ man_pages = [
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
 texinfo_documents = [
-  ('index', 'scheduler_client', u'Proactive-client Documentation',
-   u'ActiveEon', 'scheduler_client', 'One line description of project.',
+  ('index', 'proactive_client', u'Proactive-client Documentation',
+   u'ActiveEon', 'proactive_client', 'One line description of project.',
    'Miscellaneous'),
 ]
 
