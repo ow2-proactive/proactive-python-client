@@ -36,7 +36,8 @@ setup(
     'coveralls',
     'pytest',
     'python-dateutil',
-    'py4j'
+    'py4j',
+    'dill'
   ],
   packages=find_packages(exclude=('tests', 'docs')),
   install_requires=[

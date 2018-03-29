@@ -49,7 +49,11 @@ task copyDependenciesToLib(type: Copy) {
 }
 
 task setup(type:Exec) {
-   commandLine "./build.sh", "${proactive_url}", "${username}", "${password}"   
+   if ( project.hasProperty("proactive_url") && project.hasProperty("username") && project.hasProperty("password") ) {
+       commandLine "./build.sh", "${proactive_url}", "${username}", "${password}"   
+   }else{
+       commandLine "./build.sh", "", "", ""   
+   }
 } 
 
 task publish(type:Exec) {

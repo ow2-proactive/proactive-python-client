@@ -73,6 +73,15 @@ class GatewayTestSuite(unittest.TestCase):
          self.assertTrue(isinstance(jobId, numbers.Number))     
          self.gateway.disconnect()
          
+    def test_submit_lambda(self):
+         self.gateway.connect(self.username, self.password)
+         jobId = self.gateway.submitLambda(lambda: 88-20*10, "python3")
+         self.assertIsNotNone(jobId)
+         self.assertTrue(isinstance(jobId, numbers.Number))     
+         self.gateway.disconnect()         
+         
+         
+         
     def test_get_job_info(self):
          self.gateway.connect(self.username, self.password)
          jobId = self.gateway.submitFromCatalog("basic-examples","print_file_name")
