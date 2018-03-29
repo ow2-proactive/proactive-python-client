@@ -25,7 +25,7 @@ class serialisation_helper:
         script_function += "import codecs"
         script_function += "\n"
    
-        script_function += f"unpickled = pickle.loads(codecs.decode({self.pickled}, \"base64\"))"
+        script_function += "unpickled = pickle.loads(codecs.decode(%s, \"base64\"))" % self.pickled
         
         script_function += "\n"
         
