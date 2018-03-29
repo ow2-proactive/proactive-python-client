@@ -15,6 +15,8 @@ python setup.py sdist --formats=zip
 pip install pytest-html
 pip install requests
 pip install py4j
+pip install cloudpickle
+pip install codecs
 
 if [ -z "$1" ]
   then
