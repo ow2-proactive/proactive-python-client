@@ -37,7 +37,8 @@ setup(
     'pytest',
     'python-dateutil',
     'py4j',
-    'dill'
+    'cloudpickle',
+    'codecs'
   ],
   packages=find_packages(exclude=('tests', 'docs')),
   install_requires=[
