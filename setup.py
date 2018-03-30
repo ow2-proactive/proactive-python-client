@@ -36,7 +36,9 @@ setup(
     'coveralls',
     'pytest',
     'python-dateutil',
-    'py4j'
+    'py4j',
+    'cloudpickle',
+    'codecs'
   ],
   packages=find_packages(exclude=('tests', 'docs')),
   install_requires=[
