@@ -10,6 +10,11 @@ class ProActiveGateway:
   Simple client for the ProActive scheduler REST API
   See also https://try.activeeon.com/rest/doc/jaxrsdocs/overview-summary.html
   """
+  base_url = None
+  gateway = None
+  runtime_gateway = None
+  serialisation_helper = None
+  proactive_scheduler_client = None
 
   def __init__(self, base_url):
     """
@@ -33,47 +38,51 @@ class ProActiveGateway:
     if credentials_path is not None:
       credentials_file = self.runtime_gateway.jvm.java.io.File(credentials_path)
 
-    self.proactive_schduler_client = self.runtime_gateway.jvm.org.ow2.proactive_grid_cloud_portal.smartproxy.RestSmartProxyImpl()
+    self.proactive_scheduler_client = self.runtime_gateway.jvm.org.ow2.proactive_grid_cloud_portal.smartproxy.RestSmartProxyImpl()
     connection_info = self.runtime_gateway.jvm.org.ow2.proactive.authentication.ConnectionInfo(self.base_url + "/rest",
                                                                                                username, password,
                                                                                                credentials_file,
                                                                                                insecure)
-    self.proactive_schduler_client.init(connection_info)
+    self.proactive_scheduler_client.init(connection_info)
 
   def disconnect(self):
-    self.proactive_schduler_client.disconnect()
+    self.proactive_scheduler_client.disconnect()
 
   def submitFromCatalog(self, bucket_name, workflow_name, workflow_variables={}):
     workflow_variables_java_map = MapConverter().convert(workflow_variables, self.runtime_gateway._gateway_client)
-    return self.proactive_schduler_client.submitFromCatalog(self.base_url + "/catalog", bucket_name, workflow_name,
-                                                            workflow_variables_java_map).longValue()
+    return self.proactive_scheduler_client.submitFromCatalog(self.base_url + "/catalog", bucket_name, workflow_name,
+                                                             workflow_variables_java_map).longValue()
 
   def submitFile(self, workflow_xml_file_path, workflow_variables={}):
     workflow_variables_java_map = MapConverter().convert(workflow_variables, self.runtime_gateway._gateway_client)
-    return self.proactive_schduler_client.submit(self.runtime_gateway.jvm.java.io.File(workflow_xml_file_path),
-                                                 workflow_variables_java_map).longValue()
+    return self.proactive_scheduler_client.submit(self.runtime_gateway.jvm.java.io.File(workflow_xml_file_path),
+                                                  workflow_variables_java_map).longValue()
 
   def submitURL(self, workflow_url_spec, workflow_variables={}):
     workflow_variables_java_map = MapConverter().convert(workflow_variables, self.runtime_gateway._gateway_client)
-    return self.proactive_schduler_client.submit(self.runtime_gateway.jvm.java.net.URL(workflow_url_spec),
-                                                 workflow_variables_java_map).longValue()
+    return self.proactive_scheduler_client.submit(self.runtime_gateway.jvm.java.net.URL(workflow_url_spec),
+                                                  workflow_variables_java_map).longValue()
 
-  def submitLambda(self, l, python_path):
-    job = self.serialisation_helper.create_task_from_function(l, python_path)
-    return self.proactive_schduler_client.submit(job).longValue()
+  def submitLambda(self, l, python_path=None):
+    job = self.serialisation_helper.create_python_task_from_function(l, python_path)
+    return self.proactive_scheduler_client.submit(job).longValue()
+
+  def submitPythonTask(self, script_python, script_params = {}):
+    job = self.serialisation_helper.create_python_task_from_script(script_python, script_params)
+    return self.proactive_scheduler_client.submit(job).longValue()
 
   def getJobState(self, job_id):
-    return self.proactive_schduler_client.getJobState(job_id).getName()
+    return self.proactive_scheduler_client.getJobState(job_id).getName()
 
   def isJobFinished(self, job_id):
-    return self.proactive_schduler_client.isJobFinished(job_id)
+    return self.proactive_scheduler_client.isJobFinished(job_id)
 
   def getJobInfo(self, job_id):
-    return self.proactive_schduler_client.getJobInfo(str(job_id))
+    return self.proactive_scheduler_client.getJobInfo(str(job_id))
 
   def getAllJobs(self, max_number_of_jobs=1000):
     job_filter_criteria = self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.JobFilterCriteria(False, False,
                                                                                                         True, False)
-    jobs_page = self.proactive_schduler_client.getJobs(0, max_number_of_jobs, job_filter_criteria, None)
+    jobs_page = self.proactive_scheduler_client.getJobs(0, max_number_of_jobs, job_filter_criteria, None)
     return jobs_page.getList()
 
