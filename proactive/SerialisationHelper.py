@@ -1,3 +1,4 @@
+import os
 import cloudpickle
 import codecs
 
@@ -27,6 +28,13 @@ class SerialisationHelper:
 
   def create_job(self):
     return self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.job.TaskFlowJob()
+
+  def create_python_task_from_file(self, file_python, script_params={}):
+    script_python = ''
+    if os.path.exists(file_python):
+      with open(file_python, 'r') as content_file:
+        script_python = content_file.read()
+    return self.create_python_task_from_script(script_python, script_params)
 
   def create_python_task_from_script(self, script_python, script_params={}):
     python_script = self.create_simple_script(script_python, self.script_language.python())

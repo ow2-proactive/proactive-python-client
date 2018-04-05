@@ -48,27 +48,31 @@ class ProActiveGateway:
   def disconnect(self):
     self.proactive_scheduler_client.disconnect()
 
-  def submitFromCatalog(self, bucket_name, workflow_name, workflow_variables={}):
+  def submitWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables={}):
     workflow_variables_java_map = MapConverter().convert(workflow_variables, self.runtime_gateway._gateway_client)
     return self.proactive_scheduler_client.submitFromCatalog(self.base_url + "/catalog", bucket_name, workflow_name,
                                                              workflow_variables_java_map).longValue()
 
-  def submitFile(self, workflow_xml_file_path, workflow_variables={}):
+  def submitWorkflowFromFile(self, workflow_xml_file_path, workflow_variables={}):
     workflow_variables_java_map = MapConverter().convert(workflow_variables, self.runtime_gateway._gateway_client)
     return self.proactive_scheduler_client.submit(self.runtime_gateway.jvm.java.io.File(workflow_xml_file_path),
                                                   workflow_variables_java_map).longValue()
 
-  def submitURL(self, workflow_url_spec, workflow_variables={}):
+  def submitWorkflowFromURL(self, workflow_url_spec, workflow_variables={}):
     workflow_variables_java_map = MapConverter().convert(workflow_variables, self.runtime_gateway._gateway_client)
     return self.proactive_scheduler_client.submit(self.runtime_gateway.jvm.java.net.URL(workflow_url_spec),
                                                   workflow_variables_java_map).longValue()
 
-  def submitLambda(self, l, python_path=None):
+  def submitPythonLambda(self, l, python_path=None):
     job = self.serialisation_helper.create_python_task_from_function(l, python_path)
     return self.proactive_scheduler_client.submit(job).longValue()
 
   def submitPythonTask(self, script_python, script_params = {}):
     job = self.serialisation_helper.create_python_task_from_script(script_python, script_params)
+    return self.proactive_scheduler_client.submit(job).longValue()
+
+  def submitPythonTaskFromFile(self, file_python, script_params = {}):
+    job = self.serialisation_helper.create_python_task_from_file(file_python, script_params)
     return self.proactive_scheduler_client.submit(job).longValue()
 
   def getJobState(self, job_id):
