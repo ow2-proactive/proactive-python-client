@@ -71,10 +71,6 @@ class ProActiveGateway:
       self.proactive_helper.buildJob(job)
     ).longValue()
 
-  def submitPythonLambda(self, l, python_path=None):
-    job = self.proactive_helper.create_python_task_from_function(l, python_path)
-    return self.proactive_scheduler_client.submit(job).longValue()
-
   def getJobState(self, job_id):
     return self.proactive_scheduler_client.getJobState(job_id).getName()
 
