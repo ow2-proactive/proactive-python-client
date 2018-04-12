@@ -1,12 +1,6 @@
-import os
-import cloudpickle
-import codecs
-
-from .ScriptLanguage import *
 
 
-class ProactiveObjectsFactory:
-
+class ProactiveFactory:
   runtime_gateway = None
 
   def __init__(self, runtime_gateway):
@@ -24,4 +18,5 @@ class ProactiveObjectsFactory:
   def create_job(self):
     return self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.job.TaskFlowJob()
 
-  
+  def create_fork_environment(self):
+    return self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.task.ForkEnvironment()

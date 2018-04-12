@@ -2,7 +2,8 @@ import os
 
 from py4j.java_gateway import JavaGateway
 from py4j.java_collections import MapConverter
-from .SerialisationHelper import *
+
+from .ProactiveHelper import *
 
 
 class ProActiveGateway:
@@ -10,28 +11,21 @@ class ProActiveGateway:
   Simple client for the ProActive scheduler REST API
   See also https://try.activeeon.com/rest/doc/jaxrsdocs/overview-summary.html
   """
+  root_dir = ''
+  current_path = ''
   base_url = None
   gateway = None
   runtime_gateway = None
-  serialisation_helper = None
+  proactive_helper = None
   proactive_scheduler_client = None
 
   def __init__(self, base_url):
-    """
-    :param base_url: REST API base URL including host and port, for instance http://localhost:8080
-    """
-    ROOT_DIR = os.path.dirname(os.path.abspath(__file__))
-    current_path = ROOT_DIR + "/java/lib/*"
+    self.root_dir = os.path.dirname(os.path.abspath(__file__))
+    self.current_path = self.root_dir + "/java/lib/*"
     self.base_url = base_url
     self.gateway = JavaGateway()
-    self.runtime_gateway = self.gateway.launch_gateway(classpath=os.path.normpath(current_path), die_on_exit=True)
-    self.serialisation_helper = SerialisationHelper(self.runtime_gateway)
-
-  def get_runtime_gateway(self):
-    return self.runtime_gateway
-
-  def get_serialisation_helper(self):
-    return self.serialisation_helper
+    self.runtime_gateway = self.gateway.launch_gateway(classpath=os.path.normpath(self.current_path), die_on_exit=True)
+    self.proactive_helper = ProactiveHelper(self.runtime_gateway)
 
   def connect(self, username, password, credentials_path=None, insecure=True):
     credentials_file = None
@@ -63,17 +57,19 @@ class ProActiveGateway:
     return self.proactive_scheduler_client.submit(self.runtime_gateway.jvm.java.net.URL(workflow_url_spec),
                                                   workflow_variables_java_map).longValue()
 
-  def submitPythonLambda(self, l, python_path=None):
-    job = self.serialisation_helper.create_python_task_from_function(l, python_path)
-    return self.proactive_scheduler_client.submit(job).longValue()
+  def createTask(self):
+    return self.proactive_helper.createTask()
 
-  def submitPythonTask(self, script_python, script_params = {}):
-    job = self.serialisation_helper.create_python_task_from_script(script_python, script_params)
-    return self.proactive_scheduler_client.submit(job).longValue()
+  def createPythonTask(self):
+    return self.proactive_helper.createPythonTask()
 
-  def submitPythonTaskFromFile(self, file_python, script_params = {}):
-    job = self.serialisation_helper.create_python_task_from_file(file_python, script_params)
-    return self.proactive_scheduler_client.submit(job).longValue()
+  def createJob(self):
+    return self.proactive_helper.createJob()
+
+  def submitJob(self, job):
+    return self.proactive_scheduler_client.submit(
+      self.proactive_helper.buildJob(job)
+    ).longValue()
 
   def getJobState(self, job_id):
     return self.proactive_scheduler_client.getJobState(job_id).getName()
