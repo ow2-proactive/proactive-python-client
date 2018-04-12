@@ -1,6 +1,6 @@
 
 
-class ScriptLanguage:
+class ProactiveScriptLanguage:
   language = {
     'Linux_Bash': 'bash',
     'Windows_Cmd': 'cmd',

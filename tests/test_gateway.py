@@ -62,26 +62,51 @@ class GatewayTestSuite(unittest.TestCase):
 
   def test_submit_python_lambda(self):
     self.gateway.connect(self.username, self.password)
-    jobId = self.gateway.submitPythonLambda(lambda: 88 - 20 * 10, "/usr/bin/python3") # for trydev
-    #jobId = self.gateway.submitPythonLambda(lambda: 88 - 20 * 10) # for local server
+
+    pythonTask = self.gateway.createPythonTask()
+    pythonTask.setTaskName("SimplePythonLambdaTask")
+    pythonTask.setTaskImplementationFromLambdaFunction(lambda: 88 - 20 * 10)
+    #pythonTask.addGenericInformation("PYTHON_COMMAND", "/usr/bin/python3") # uncomment for trydev
+
+    myJob = self.gateway.createJob()
+    myJob.setJobName("SimplePythonLambdaJob")
+    myJob.addTask(pythonTask)
+    jobId = self.gateway.submitJob(myJob)
+
     self.assertIsNotNone(jobId)
     self.assertTrue(isinstance(jobId, numbers.Number))
     self.gateway.disconnect()
 
   def test_submit_python_script(self):
     self.gateway.connect(self.username, self.password)
-    script_python = '''print('Hello world!')'''
-    script_params = {}
-    jobId = self.gateway.submitPythonTask(script_python, script_params)
+
+    pythonTask = self.gateway.createPythonTask()
+    pythonTask.setTaskName("SimplePythonTask")
+    pythonTask.setTaskImplementation("""print("Hello world!")""")
+
+    myJob = self.gateway.createJob()
+    myJob.setJobName("SimplePythonJob")
+    myJob.addTask(pythonTask)
+    jobId = self.gateway.submitJob(myJob)
+
     self.assertIsNotNone(jobId)
     self.assertTrue(isinstance(jobId, numbers.Number))
     self.gateway.disconnect()
 
   def test_submit_python_script_from_file(self):
     self.gateway.connect(self.username, self.password)
+
     script_python = os.getcwd() + '/tests/random_number.py'
-    script_params = {}
-    jobId = self.gateway.submitPythonTaskFromFile(script_python, script_params)
+
+    pythonTask = self.gateway.createPythonTask()
+    pythonTask.setTaskName("SimplePythonTaskFromFile")
+    pythonTask.setTaskImplementationFromFile(script_python)
+
+    myJob = self.gateway.createJob()
+    myJob.setJobName("SimplePythonJobFromFile")
+    myJob.addTask(pythonTask)
+    jobId = self.gateway.submitJob(myJob)
+
     self.assertIsNotNone(jobId)
     self.assertTrue(isinstance(jobId, numbers.Number))
     self.gateway.disconnect()
