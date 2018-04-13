@@ -3,9 +3,6 @@ command -v source >/dev/null 2>&1 || {
   echo "I require source but it's not installed.  Aborting." >&2; exit 1;
 }
 
-rm -rf env
-rm -rf dist
-
 virtualenv -p python3 env
 source env/bin/activate
 

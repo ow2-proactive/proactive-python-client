@@ -41,6 +41,9 @@ dependencies {
 
 clean.doFirst {
     delete "${rootDir}/dist/"
+    delete "${rootDir}/env/"
+    delete "${rootDir}/proactive.egg-info"
+    delete "${rootDir}/__pycache__"
 }
 
 task copyDependenciesToLib(type: Copy) {
