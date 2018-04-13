@@ -46,9 +46,7 @@ class ProactiveTask:
     task_implementation += "\n"
     task_implementation += "import codecs"
     task_implementation += "\n"
-    task_implementation += "unpickled = pickle.loads(codecs.decode(%s, \"base64\"))" % pickled_lambda
-    task_implementation += "\n"
-    task_implementation += "print(unpickled())"
+    task_implementation += "result = pickle.loads(codecs.decode(%s, \"base64\"))" % pickled_lambda
 
     self.setTaskImplementation(task_implementation)
 
