@@ -1,5 +1,5 @@
-from .ProactiveTask import *
-from .ProactiveJob import *
+from .model.ProactiveTask import *
+from .model.ProactiveJob import *
 
 
 class ProactiveBuilder:
