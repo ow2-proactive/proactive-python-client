@@ -20,3 +20,6 @@ class ProactiveFactory:
 
   def create_fork_environment(self):
     return self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.task.ForkEnvironment()
+
+  def create_selection_script(self,script_code, script_language, is_dynamic):
+    return self.runtime_gateway.jvm.org.ow2.proactive.scripting.SelectionScript(script_code,script_language,is_dynamic  );  

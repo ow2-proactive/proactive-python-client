@@ -1,5 +1,4 @@
 from .ProactiveGateway import *
-from .ProactiveHelper import *
 from .ProactiveFactory import *
 from .ProactiveBuilder import *
 
