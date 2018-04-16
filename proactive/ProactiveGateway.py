@@ -3,7 +3,13 @@ import os
 from py4j.java_gateway import JavaGateway
 from py4j.java_collections import MapConverter
 
-from .ProactiveHelper import *
+from .ProactiveFactory import *
+from .ProactiveBuilder import *
+
+from .model.ProactiveScriptLanguage import *
+from .model.ProactiveSelectionScript import *
+from .model.ProactiveTask import *
+from .model.ProactiveJob import *
 
 
 class ProActiveGateway:
@@ -16,8 +22,8 @@ class ProActiveGateway:
   base_url = None
   gateway = None
   runtime_gateway = None
-  proactive_helper = None
   proactive_scheduler_client = None
+  proactive_factory = None
 
   def __init__(self, base_url):
     self.root_dir = os.path.dirname(os.path.abspath(__file__))
@@ -25,7 +31,7 @@ class ProActiveGateway:
     self.base_url = base_url
     self.gateway = JavaGateway()
     self.runtime_gateway = self.gateway.launch_gateway(classpath=os.path.normpath(self.current_path), die_on_exit=True)
-    self.proactive_helper = ProactiveHelper(self.runtime_gateway)
+    self.proactive_factory = ProactiveFactory(self.runtime_gateway)
 
   def connect(self, username, password, credentials_path=None, insecure=True):
     credentials_file = None
@@ -57,19 +63,25 @@ class ProActiveGateway:
     return self.proactive_scheduler_client.submit(self.runtime_gateway.jvm.java.net.URL(workflow_url_spec),
                                                   workflow_variables_java_map).longValue()
 
-  def createTask(self):
-    return self.proactive_helper.createTask()
-
-  def createPythonTask(self):
-    return self.proactive_helper.createPythonTask()
-
-  def createJob(self):
-    return self.proactive_helper.createJob()
 
   def submitJob(self, job):
-    return self.proactive_scheduler_client.submit(
-      self.proactive_helper.buildJob(job)
-    ).longValue()
+    proactive_job = ProactiveJobBuilder(self.proactive_factory, job).create();  
+    return self.proactive_scheduler_client.submit(proactive_job).longValue()
+
+  def createTask(self):
+    return ProactiveTask()
+
+  def createPythonTask(self):
+    return ProactivePythonTask()
+
+  def createJob(self):
+    return ProactiveJob()
+
+  def createSelectionScript(self, language):
+    return ProactiveSelectionScript(language)
+
+  def createPythonSelectionScript(self):
+    return ProactivePythonSelectionScript()
 
   def getJobState(self, job_id):
     return self.proactive_scheduler_client.getJobState(job_id).getName()
@@ -85,4 +97,10 @@ class ProActiveGateway:
                                                                                                         True, False)
     jobs_page = self.proactive_scheduler_client.getJobs(0, max_number_of_jobs, job_filter_criteria, None)
     return jobs_page.getList()
+  
+  def getProactiveScriptLanguage(self):
+      return ProactiveScriptLanguage();
+
+
+
 

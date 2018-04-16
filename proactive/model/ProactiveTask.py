@@ -3,6 +3,8 @@ import cloudpickle
 import codecs
 
 from .ProactiveScriptLanguage import *
+from .ProactiveSelectionScript import *
+
 
 
 class ProactiveTask:
@@ -18,6 +20,7 @@ class ProactiveTask:
   task_name = ''
   task_implementation = ''
   generic_information = {}
+  selection_script = None
 
   def __init__(self, script_language):
     self.setScriptLanguage(script_language)
@@ -27,6 +30,12 @@ class ProactiveTask:
 
   def getScriptLanguage(self):
     return self.script_language
+
+  def setSelectionScript(self, selection_script):
+    self.selection_script = selection_script
+
+  def getSelectionScript(self):
+    return self.selection_script
 
   def setTaskName(self, task_name):
     self.task_name = task_name
@@ -46,7 +55,7 @@ class ProactiveTask:
     task_implementation += "\n"
     task_implementation += "import codecs"
     task_implementation += "\n"
-    task_implementation += "result = pickle.loads(codecs.decode(%s, \"base64\"))" % pickled_lambda
+    task_implementation += "result = pickle.loads(codecs.decode(%s, \"base64\"))()" % pickled_lambda
 
     self.setTaskImplementation(task_implementation)
 

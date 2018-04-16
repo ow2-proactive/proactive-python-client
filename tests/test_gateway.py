@@ -130,6 +130,54 @@ class GatewayTestSuite(unittest.TestCase):
         str(job_info.getStatus().name()) in ['FINISHED', 'KILLED', 'FAILED', 'IN_ERROR', 'CANCELED', 'PAUSED',
                                              'FINISHED', 'STALLED', 'RUNNING', 'PENDING'])
     self.gateway.disconnect()
+    
+    
+    
+  def test_submit_python_script_from_file_with_selection_script(self):
+    self.gateway.connect(self.username, self.password)
+    
+    script_python = os.getcwd() + '/tests/random_number.py'
+    
+    pythonTask = self.gateway.createPythonTask()
+    pythonTask.setTaskName("PythonTaskFromFileWithSelection")
+    pythonTask.setTaskImplementationFromFile(script_python)
+        
+    selection_script = self.gateway.createPythonSelectionScript()
+    selection_script.setImplementation("selected = True")
+    pythonTask.setSelectionScript(selection_script)
+    
+    myJob = self.gateway.createJob()
+    myJob.setJobName("SimplePythonJobFromFile")
+    myJob.addTask(pythonTask)
+    jobId = self.gateway.submitJob(myJob)
+    
+    self.assertIsNotNone(jobId)
+    self.assertTrue(isinstance(jobId, numbers.Number))
+    self.gateway.disconnect()
+
+
+  def test_submit_with_selection_script_groovy(self):
+    self.gateway.connect(self.username, self.password)
+    
+    script_python = os.getcwd() + '/tests/random_number.py'
+    
+    pythonTask = self.gateway.createPythonTask()
+    pythonTask.setTaskName("PythonTaskFromFileWithSelectionGroovy")
+    pythonTask.setTaskImplementationFromFile(script_python)
+        
+    selection_script = self.gateway.createSelectionScript(self.gateway.getProactiveScriptLanguage().groovy())
+    selection_script.setImplementation("selected = true;")
+    pythonTask.setSelectionScript(selection_script)
+    
+    myJob = self.gateway.createJob()
+    myJob.setJobName("SimplePythonJobFromFileGroovySelection")
+    myJob.addTask(pythonTask)
+    jobId = self.gateway.submitJob(myJob)
+    
+    self.assertIsNotNone(jobId)
+    self.assertTrue(isinstance(jobId, numbers.Number))
+    self.gateway.disconnect()
+
 
 
 if __name__ == '__main__':

@@ -61,11 +61,19 @@ class ProactiveTaskBuilder(ProactiveBuilder):
     self.script_task = self.proactive_factory.create_script_task()
     self.script_task.setName(self.proactive_task.getTaskName())
     self.script_task.setScript(task_script)
+    if self.proactive_task.getSelectionScript() is not None:
+      self.script_task.setSelectionScript(self.__create_selection_script__(self.proactive_task.getSelectionScript()))
+
 
     for key, value in self.proactive_task.getGenericInformation().items():
       self.script_task.addGenericInformation(key, value)
 
     return self.script_task
+  
+  
+  def __create_selection_script__(self, selection_script):
+      return self.proactive_factory.create_selection_script(selection_script.getImplementation(),selection_script.getScriptLanguage(), selection_script.isDynamic())
+
 
   def create(self):
     return self.__createScriptTask__(
