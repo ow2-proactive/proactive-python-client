@@ -42,7 +42,7 @@ pythonTask.setForkEnvironment(fork_env)
 print("Add a selection script to the python task")
 selection_script = gateway.createDefaultSelectionScript()
 #selection_script.setImplementation("selected = True")
-selection_script.setTaskImplementationFromFile("scripts/selection_script.py")
+selection_script.setImplementationFromFile("scripts/selection_script.py")
 pythonTask.setSelectionScript(selection_script)
 
 print("Creating a proactive job...")
