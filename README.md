@@ -14,7 +14,7 @@ proactive_url  = "http://"+proactive_host+":"+proactive_port
 print("Connecting on: " + proactive_url)
 gateway = proactive.ProActiveGateway(proactive_url)
 
-gateway.connect("bobot", "proactive")
+gateway.connect(user, pass) # set your login here
 print("Connected")
 
 print("Creating a proactive python task...")
