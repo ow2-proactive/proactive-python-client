@@ -11,7 +11,8 @@ class ProactiveJob:
   job_tasks = []
 
   def __init__(self):
-    pass
+    self.job_name = ''
+    self.job_tasks = []
 
   def setJobName(self, job_name):
     self.job_name = job_name
@@ -24,3 +25,4 @@ class ProactiveJob:
 
   def getTasks(self):
     return self.job_tasks
+
