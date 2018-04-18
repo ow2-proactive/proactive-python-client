@@ -8,6 +8,7 @@ from .ProactiveBuilder import *
 
 from .model.ProactiveScriptLanguage import *
 from .model.ProactiveSelectionScript import *
+from .model.ProactiveForkEnv import *
 from .model.ProactiveTask import *
 from .model.ProactiveJob import *
 
@@ -63,25 +64,40 @@ class ProActiveGateway:
     return self.proactive_scheduler_client.submit(self.runtime_gateway.jvm.java.net.URL(workflow_url_spec),
                                                   workflow_variables_java_map).longValue()
 
-
-  def submitJob(self, job):
-    proactive_job = ProactiveJobBuilder(self.proactive_factory, job).create();  
-    return self.proactive_scheduler_client.submit(proactive_job).longValue()
-
-  def createTask(self):
-    return ProactiveTask()
+  def createTask(self, language=None):
+    return ProactiveTask(language)
 
   def createPythonTask(self):
-    return ProactivePythonTask()
+    return ProactiveTask(self.getProactiveScriptLanguage().python())
 
   def createJob(self):
     return ProactiveJob()
 
-  def createSelectionScript(self, language):
+  def submitJob(self, job_model, debug=False):
+    return self.proactive_scheduler_client.submit(
+      ProactiveJobBuilder(self.proactive_factory, job_model).create().display(debug).getProactiveJob()
+    ).longValue()
+
+  def createForkEnvironment(self, language=None):
+    return ProactiveForkEnv(language)
+
+  def createDefaultForkEnvironment(self):
+    return ProactiveForkEnv(self.getProactiveScriptLanguage().jython())
+
+  def createPythonForkEnvironment(self):
+    return ProactiveForkEnv(self.getProactiveScriptLanguage().python())
+
+  def createSelectionScript(self, language=None):
     return ProactiveSelectionScript(language)
 
+  def createDefaultSelectionScript(self):
+    return ProactiveSelectionScript(self.getProactiveScriptLanguage().jython())
+
   def createPythonSelectionScript(self):
-    return ProactivePythonSelectionScript()
+    return ProactiveSelectionScript(self.getProactiveScriptLanguage().python())
+
+  def getProactiveScriptLanguage(self):
+      return ProactiveScriptLanguage()
 
   def getJobState(self, job_id):
     return self.proactive_scheduler_client.getJobState(job_id).getName()
@@ -97,10 +113,4 @@ class ProActiveGateway:
                                                                                                         True, False)
     jobs_page = self.proactive_scheduler_client.getJobs(0, max_number_of_jobs, job_filter_criteria, None)
     return jobs_page.getList()
-  
-  def getProactiveScriptLanguage(self):
-      return ProactiveScriptLanguage();
-
-
-
 
