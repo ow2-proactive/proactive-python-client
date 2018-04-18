@@ -1,6 +1,15 @@
+![License BSD](https://img.shields.io/badge/License-BSD-blue.svg "License BSD")
+![Python 3](https://img.shields.io/badge/Python-3-brightgreen.svg "Python 3")
+
 # ProActive Scheduler Client
 
 This module allows users to interact with a running ProActive Scheduler and Resource Manager.
+
+### Requirements
+* Python 3
+
+### Installation
+`pip install proactive --upgrade`
 
 ### Usage
 
