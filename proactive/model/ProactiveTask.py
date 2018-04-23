@@ -67,10 +67,18 @@ class ProactiveTask:
   def getTaskName(self):
     return self.task_name
 
-  def setTaskImplementationFromFile(self, task_file):
+  def setTaskImplementationFromFileOLD(self, task_file):
     if os.path.exists(task_file):
       with open(task_file, 'r') as content_file:
         self.task_implementation = content_file.read()
+
+  def setTaskImplementationFromFile(self, task_file):
+    if os.path.exists(task_file):
+      task_implementation = "import subprocess"
+      task_implementation += "\n"
+      task_implementation += "result = subprocess.check_output('python %s' % '"+task_file+"', shell=True).strip()"
+      self.setTaskImplementation(task_implementation)
+    
 
   def setTaskImplementationFromLambdaFunction(self, lambda_function):
     pickled_lambda = codecs.encode(cloudpickle.dumps(lambda_function), "base64")

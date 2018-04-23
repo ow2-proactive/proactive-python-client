@@ -108,6 +108,18 @@ class ProActiveGateway:
   def getJobInfo(self, job_id):
     return self.proactive_scheduler_client.getJobInfo(str(job_id))
 
+  def getJobResult(self, job_id, timeout=30000):
+    job_result = self.proactive_scheduler_client.waitForJob(str(job_id),timeout)
+    all_results = []
+    for result in job_result.getAllResults().values():
+      all_results.append(result.getValue())
+    return '\n'.join(all_results)
+
+  def getTaskResult(self, job_id, task_name, timeout=30000):
+    job_result = self.proactive_scheduler_client.waitForJob(str(job_id),timeout)
+    return job_result.getAllResults().get(task_name).getValue()
+  
+  
   def getAllJobs(self, max_number_of_jobs=1000):
     job_filter_criteria = self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.JobFilterCriteria(False, False,
                                                                                                         True, False)
