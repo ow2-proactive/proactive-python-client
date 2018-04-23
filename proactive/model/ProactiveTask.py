@@ -67,11 +67,6 @@ class ProactiveTask:
   def getTaskName(self):
     return self.task_name
 
-  def setTaskImplementationFromFileOLD(self, task_file):
-    if os.path.exists(task_file):
-      with open(task_file, 'r') as content_file:
-        self.task_implementation = content_file.read()
-
   def setTaskImplementationFromFile(self, task_file):
     if os.path.exists(task_file):
       task_implementation = "import subprocess"
