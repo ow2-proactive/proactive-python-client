@@ -67,11 +67,12 @@ class ProactiveTask:
   def getTaskName(self):
     return self.task_name
 
-  def setTaskImplementationFromFile(self, task_file):
+  def setTaskImplementationFromFile(self, task_file, parameters = []):
     if os.path.exists(task_file):
+      params_string = ' '.join(parameters)
       task_implementation = "import subprocess"
       task_implementation += "\n"
-      task_implementation += "result = subprocess.check_output('python %s' % '"+task_file+"', shell=True).strip()"
+      task_implementation += "result = subprocess.check_output('python "+task_file+" "+params_string+"' , shell=True).strip()"
       self.setTaskImplementation(task_implementation)
     
 

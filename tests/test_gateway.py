@@ -100,7 +100,7 @@ class GatewayTestSuite(unittest.TestCase):
 
     pythonTask = self.gateway.createPythonTask()
     pythonTask.setTaskName("SimplePythonTaskFromFile")
-    pythonTask.setTaskImplementationFromFile(script_python)
+    pythonTask.setTaskImplementationFromFile(script_python, ['param1', 'param2'])
 
     myJob = self.gateway.createJob()
     myJob.setJobName("SimplePythonJobFromFile")
