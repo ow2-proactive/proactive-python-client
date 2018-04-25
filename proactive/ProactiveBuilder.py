@@ -153,8 +153,8 @@ class ProactiveJobBuilder:
     for task in self.proactive_job_model.getTasks():
       self.proactive_job.addTask(ProactiveTaskBuilder(self.proactive_factory, task).create())
 
-    self.proactive_job.setInputSpace(self.proactive_job_model.getInputFolder())
-    self.proactive_job.setOutputSpace(self.proactive_job_model.getOutputFolder())
+    #self.proactive_job.setInputSpace(self.proactive_job_model.getInputFolder())
+    #self.proactive_job.setOutputSpace(self.proactive_job_model.getOutputFolder())
 
     return self
 

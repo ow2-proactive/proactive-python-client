@@ -21,20 +21,6 @@ class ProactiveFactory:
     """
     return self.runtime_gateway.jvm.org.ow2.proactive_grid_cloud_portal.smartproxy.RestSmartProxyImpl()
 
-  # @classmethod
-  # def create_smart_proxy(cls):
-  #   """
-  #     https://doc.activeeon.com/javadoc/latest/org/ow2/proactive_grid_cloud_portal/smartproxy/RestSmartProxyImpl.html
-  #   """
-  #   return cls.runtime_gateway.jvm.org.ow2.proactive_grid_cloud_portal.smartproxy.RestSmartProxyImpl()
-
-  # @staticmethod
-  # def create_smart_proxy():
-  #   """
-  #     https://doc.activeeon.com/javadoc/latest/org/ow2/proactive_grid_cloud_portal/smartproxy/RestSmartProxyImpl.html
-  #   """
-  #   return ProactiveFactory.runtime_gateway.jvm.org.ow2.proactive_grid_cloud_portal.smartproxy.RestSmartProxyImpl()
-
   def create_connection_info(self, url, username, password, credentials_file, insecure):
     """
       https://www.activeeon.com/public_content/documentation/javadoc/latest/org/ow2/proactive/authentication/ConnectionInfo.html
