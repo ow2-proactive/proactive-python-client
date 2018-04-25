@@ -28,10 +28,14 @@ class ProActiveGateway:
 
   def __init__(self, base_url):
     self.root_dir = os.path.dirname(os.path.abspath(__file__))
+    print(self.root_dir)
     self.current_path = self.root_dir + "/java/lib/*"
     self.base_url = base_url
     self.gateway = JavaGateway()
-    self.runtime_gateway = self.gateway.launch_gateway(classpath=os.path.normpath(self.current_path), die_on_exit=True)
+    self.runtime_gateway = self.gateway.launch_gateway(
+      classpath=os.path.normpath(self.current_path),
+      die_on_exit=True
+    )
     self.proactive_factory = ProactiveFactory(self.runtime_gateway)
 
   def connect(self, username, password, credentials_path=None, insecure=True):
@@ -39,15 +43,28 @@ class ProActiveGateway:
     if credentials_path is not None:
       credentials_file = self.runtime_gateway.jvm.java.io.File(credentials_path)
 
+    # self.proactive_scheduler_client = self.proactive_factory.create_smart_proxy()
+    # connection_info = self.proactive_factory.create_connection_info(
+    #   self.base_url + "/rest", username, password, credentials_file, insecure
+    # )
+    # self.proactive_scheduler_client.init(connection_info)
+
     self.proactive_scheduler_client = self.runtime_gateway.jvm.org.ow2.proactive_grid_cloud_portal.smartproxy.RestSmartProxyImpl()
-    connection_info = self.runtime_gateway.jvm.org.ow2.proactive.authentication.ConnectionInfo(self.base_url + "/rest",
-                                                                                               username, password,
-                                                                                               credentials_file,
-                                                                                               insecure)
+    connection_info = self.runtime_gateway.jvm.org.ow2.proactive.authentication.ConnectionInfo(
+      self.base_url + "/rest", username, password, credentials_file, insecure)
     self.proactive_scheduler_client.init(connection_info)
+
+  def isConnected(self):
+    return self.proactive_scheduler_client.isConnected()
 
   def disconnect(self):
     self.proactive_scheduler_client.disconnect()
+
+  def reconnect(self):
+    self.proactive_scheduler_client.reconnect()
+
+  def terminate(self):
+    self.proactive_scheduler_client.terminate()
 
   def submitWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables={}):
     workflow_variables_java_map = MapConverter().convert(workflow_variables, self.runtime_gateway._gateway_client)
@@ -74,8 +91,47 @@ class ProActiveGateway:
     return ProactiveJob()
 
   def submitJob(self, job_model, debug=False):
+    """
+    /**
+     * Submits a job to the scheduler and handle data transfer via the SmartProxy, the dataspace server will be the default user space
+     *
+     * @param job                   job to submit
+     * @param localInputFolderPath  path to the local directory containing input files
+     * @param localOutputFolderPath path to the local directory which will contain output files
+     * @param isolateTaskOutputs    if set to true, output files from each tasks will be isolated from each other in the dataspace server (to prevent overlapping)
+     * @param automaticTransfer     if set to true, output files will be automatically transferred from the dataspace server to the local machine as soon as the task is finished.
+     *                              If set to false, the files will not be automatically transferred and a call to pullData must be done to transfer files
+     * @return the new job id
+     * @throws NotConnectedException
+     * @throws PermissionException
+     * @throws SubmissionClosedException
+     * @throws JobCreationException
+     * @throws Exception
+     */
+    public JobId submit(TaskFlowJob job, String localInputFolderPath, String localOutputFolderPath,
+            boolean isolateTaskOutputs, boolean automaticTransfer) throws NotConnectedException, PermissionException,
+            SubmissionClosedException, JobCreationException, Exception {
+        return submit(job,
+                      localInputFolderPath,
+                      null,
+                      localOutputFolderPath,
+                      null,
+                      isolateTaskOutputs,
+                      automaticTransfer);
+    }
+    :param job_model: ProactiveJob
+    :param debug: boolean
+    :return: long
+    """
+    # return self.proactive_scheduler_client.submit(
+    #   ProactiveJobBuilder(self.proactive_factory, job_model).create().display(debug).getProactiveJob()
+    # ).longValue()
     return self.proactive_scheduler_client.submit(
-      ProactiveJobBuilder(self.proactive_factory, job_model).create().display(debug).getProactiveJob()
+      ProactiveJobBuilder(self.proactive_factory, job_model).create().display(debug).getProactiveJob(),
+      job_model.getInputFolder(),
+      job_model.getOutputFolder(),
+      False,
+      True
     ).longValue()
 
   def createForkEnvironment(self, language=None):

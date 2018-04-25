@@ -10,7 +10,7 @@ class ProactiveBuilder:
   """
   proactive_factory = None
 
-  def __init__(self, proactive_factory):
+  def __init__(self, proactive_factory=None):
     self.setProactiveFactory(proactive_factory)
 
   def setProactiveFactory(self, proactive_factory):
@@ -34,7 +34,7 @@ class ProactiveTaskBuilder(ProactiveBuilder):
   task_script = None
   script_task = None
 
-  def __init__(self, proactive_factory, proactive_task_model = None):
+  def __init__(self, proactive_factory, proactive_task_model=None):
     super().__init__(proactive_factory)
     self.setProactiveTaskModel(proactive_task_model)
 
@@ -98,6 +98,13 @@ class ProactiveTaskBuilder(ProactiveBuilder):
     for key, value in self.proactive_task_model.getGenericInformation().items():
       self.script_task.addGenericInformation(key, value)
 
+    InputAccessMode = self.proactive_factory.get_input_access_mode()
+    transferFromInputSpace = InputAccessMode.getAccessMode("transferFromInputSpace")
+    print("Files to transfer: ", len(self.proactive_task_model.getInputFiles()))
+    for file in self.proactive_task_model.getInputFiles():
+      self.script_task.addInputFiles(file, transferFromInputSpace)
+
+    print(self.script_task.__dict__)
     return self.script_task
 
   def create(self):
@@ -120,7 +127,7 @@ class ProactiveJobBuilder:
   proactive_job_model = None
   proactive_job = None
 
-  def __init__(self, proactive_factory, proactive_job_model = None):
+  def __init__(self, proactive_factory, proactive_job_model=None):
     self.setProactiveFactory(proactive_factory)
     self.setProactiveJobModel(proactive_job_model)
 
@@ -146,8 +153,8 @@ class ProactiveJobBuilder:
     for task in self.proactive_job_model.getTasks():
       self.proactive_job.addTask(ProactiveTaskBuilder(self.proactive_factory, task).create())
 
-    self.proactive_job.setInputSpace("")
-    self.proactive_job.setOutputSpace("")
+    self.proactive_job.setInputSpace(self.proactive_job_model.getInputFolder())
+    self.proactive_job.setOutputSpace(self.proactive_job_model.getOutputFolder())
 
     return self
 
