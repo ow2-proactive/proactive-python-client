@@ -35,14 +35,14 @@ try:
   proactive_task.setSelectionScript(proactive_selection_script)
 
   print("Creating a proactive job...")
-  proactiveJob = gateway.createJob()
-  proactiveJob.setJobName("SimpleJob")
-  proactiveJob.addTask(proactive_task)
-  proactiveJob.setInputFolder(os.getcwd())
-  proactiveJob.setOutputFolder(os.getcwd())
+  proactive_job = gateway.createJob()
+  proactive_job.setJobName("SimpleJob")
+  proactive_job.addTask(proactive_task)
+  proactive_job.setInputFolder(os.getcwd())
+  proactive_job.setOutputFolder(os.getcwd())
 
   print("Submitting the job to the proactive scheduler...")
-  job_id = gateway.submitJob(proactiveJob, debug=False)
+  job_id = gateway.submitJob(proactive_job, debug=False)
   print("job_id: " + str(job_id))
 
 finally:
