@@ -1,4 +1,5 @@
 import os
+import sys
 
 from py4j.java_gateway import JavaGateway
 from py4j.java_collections import MapConverter
@@ -26,17 +27,21 @@ class ProActiveGateway:
   proactive_scheduler_client = None
   proactive_factory = None
 
-  def __init__(self, base_url):
+  def __init__(self, base_url, javaopts=[]):
     self.root_dir = os.path.dirname(os.path.abspath(__file__))
     self.current_path = self.root_dir + "/java/lib/*"
     self.base_url = base_url
     self.gateway = JavaGateway()
-    self.javaopts = []
-    #self.javaopts.append('-Dlog4j.configuration=file:'+os.path.join(os.getcwd(),'log4j'))
+    self.javaopts = javaopts
+    #self.javaopts.append('-Dlog4j.configuration=file:'+os.path.join(os.getcwd(),'log4j.properties'))
+    #print(self.javaopts)
     self.runtime_gateway = self.gateway.launch_gateway(
       classpath=os.path.normpath(self.current_path),
       die_on_exit=True,
-      javaopts=self.javaopts
+      javaopts=self.javaopts,
+      redirect_stdout=sys.stdout,
+      redirect_stderr=sys.stderr,
+      daemonize_redirect=True
     )
     self.proactive_factory = ProactiveFactory(self.runtime_gateway)
 

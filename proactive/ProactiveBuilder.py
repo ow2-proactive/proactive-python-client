@@ -104,7 +104,7 @@ class ProactiveTaskBuilder(ProactiveBuilder):
     for file in self.proactive_task_model.getInputFiles():
       self.script_task.addInputFiles(file, transferFromInputSpace)
 
-    print(self.script_task.__dict__)
+    #print(self.script_task.__dict__)
     return self.script_task
 
   def create(self):
