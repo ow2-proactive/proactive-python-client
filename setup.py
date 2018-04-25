@@ -28,7 +28,7 @@ setup(
   author='Activeeon',
   author_email='contact@activeeon.com',
   url='https://github.com/ow2-proactive/proactive-python-client',
-  license='AGPLv3',
+  license='Apache-2.0',
   test_suite='pytest',
   tests_require=[
     'mock',

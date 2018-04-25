@@ -100,7 +100,7 @@ class GatewayTestSuite(unittest.TestCase):
 
     pythonTask = self.gateway.createPythonTask()
     pythonTask.setTaskName("SimplePythonTaskFromFile")
-    pythonTask.setTaskImplementationFromFile(script_python)
+    pythonTask.setTaskImplementationFromFile(script_python, ['param1', 'param2'])
 
     myJob = self.gateway.createJob()
     myJob.setJobName("SimplePythonJobFromFile")
@@ -109,6 +109,16 @@ class GatewayTestSuite(unittest.TestCase):
 
     self.assertIsNotNone(jobId)
     self.assertTrue(isinstance(jobId, numbers.Number))
+    
+    
+    job_result = self.gateway.getJobResult(jobId)
+
+    self.assertIsNotNone(jobId)
+    self.assertTrue(RepresentsInt(job_result))
+    self.gateway.disconnect()
+    
+    
+    
     self.gateway.disconnect()
 
   def test_get_job_info(self):
@@ -197,6 +207,34 @@ class GatewayTestSuite(unittest.TestCase):
     self.assertIsNotNone(jobId)
     self.assertTrue(isinstance(jobId, numbers.Number))
     self.gateway.disconnect()
+
+
+  def test_submit_python_script(self):
+    self.gateway.connect(self.username, self.password)
+
+    pythonTask = self.gateway.createPythonTask()
+    pythonTask.setTaskName("SimplePythonTask")
+    pythonTask.setTaskImplementation("""result = "This is Sparta!"  """)
+
+    myJob = self.gateway.createJob()
+    myJob.setJobName("SimplePythonJob")
+    myJob.addTask(pythonTask)
+    jobId = self.gateway.submitJob(myJob)
+    
+    job_result = self.gateway.getJobResult(jobId)
+    task_result = self.gateway.getTaskResult(jobId,"SimplePythonTask")
+
+    self.assertIsNotNone(jobId)
+    self.assertTrue(job_result == 'This is Sparta!' )
+    self.assertTrue(job_result == task_result )
+    self.gateway.disconnect()
+
+def RepresentsInt(s):
+    try: 
+        int(s)
+        return True
+    except ValueError:
+        return False
 
 
 if __name__ == '__main__':
