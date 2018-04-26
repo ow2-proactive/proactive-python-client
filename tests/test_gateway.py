@@ -96,19 +96,26 @@ class GatewayTestSuite(unittest.TestCase):
   def test_submit_python_script_from_file(self):
     self.gateway.connect(self.username, self.password)
 
-    script_python = os.getcwd() + '/scripts/random_number.py'
-
     pythonTask = self.gateway.createPythonTask()
     pythonTask.setTaskName("SimplePythonTaskFromFile")
-    pythonTask.setTaskImplementationFromFile(script_python)
+    pythonTask.setTaskImplementationFromFile('main.py', ['param1', 'param2'])
+    pythonTask.addInputFile('scripts/__init__.py')
+    pythonTask.addInputFile('scripts/hello.py')
 
     myJob = self.gateway.createJob()
     myJob.setJobName("SimplePythonJobFromFile")
     myJob.addTask(pythonTask)
+    myJob.setInputFolder(os.getcwd())
+    myJob.setOutputFolder(os.getcwd())
+
     jobId = self.gateway.submitJob(myJob)
 
     self.assertIsNotNone(jobId)
     self.assertTrue(isinstance(jobId, numbers.Number))
+
+    job_result = self.gateway.getJobResult(jobId)
+    self.assertIsNotNone(job_result)
+
     self.gateway.disconnect()
 
   def test_get_job_info(self):
@@ -134,13 +141,11 @@ class GatewayTestSuite(unittest.TestCase):
   def test_submit_python_script_from_file_with_fork_environment(self):
     self.gateway.connect(self.username, self.password)
 
-    script_python = os.getcwd() + '/scripts/random_number.py'
-    script_forkenv = os.getcwd() + '/scripts/fork_env.py'
-
     pythonTask = self.gateway.createPythonTask()
     pythonTask.setTaskName("PythonTaskFromFileWithForkEnv")
-    pythonTask.setTaskImplementationFromFile(script_python)
+    pythonTask.setTaskImplementation("""print("Hello world!")""")
 
+    script_forkenv = os.getcwd() + '/scripts/fork_env.py'
     fork_env = self.gateway.createDefaultForkEnvironment()
     fork_env.setImplementationFromFile(script_forkenv)
     pythonTask.setForkEnvironment(fork_env)
@@ -156,44 +161,40 @@ class GatewayTestSuite(unittest.TestCase):
 
   def test_submit_python_script_from_file_with_selection_script(self):
     self.gateway.connect(self.username, self.password)
-    
-    script_python = os.getcwd() + '/scripts/random_number.py'
-    
+
     pythonTask = self.gateway.createPythonTask()
     pythonTask.setTaskName("PythonTaskFromFileWithSelection")
-    pythonTask.setTaskImplementationFromFile(script_python)
+    pythonTask.setTaskImplementation("""print("Hello world!")""")
 
     selection_script = self.gateway.createDefaultSelectionScript()
     selection_script.setImplementation("selected = True")
     pythonTask.setSelectionScript(selection_script)
-    
+
     myJob = self.gateway.createJob()
     myJob.setJobName("SimplePythonJobFromFile")
     myJob.addTask(pythonTask)
     jobId = self.gateway.submitJob(myJob)
-    
+
     self.assertIsNotNone(jobId)
     self.assertTrue(isinstance(jobId, numbers.Number))
     self.gateway.disconnect()
 
   def test_submit_with_selection_script_groovy(self):
     self.gateway.connect(self.username, self.password)
-    
-    script_python = os.getcwd() + '/scripts/random_number.py'
-    
+
     pythonTask = self.gateway.createPythonTask()
     pythonTask.setTaskName("PythonTaskFromFileWithSelectionGroovy")
-    pythonTask.setTaskImplementationFromFile(script_python)
-        
+    pythonTask.setTaskImplementation("""print("Hello world!")""")
+
     selection_script = self.gateway.createSelectionScript(self.gateway.getProactiveScriptLanguage().groovy())
     selection_script.setImplementation("selected = true;")
     pythonTask.setSelectionScript(selection_script)
-    
+
     myJob = self.gateway.createJob()
     myJob.setJobName("SimplePythonJobFromFileGroovySelection")
     myJob.addTask(pythonTask)
     jobId = self.gateway.submitJob(myJob)
-    
+
     self.assertIsNotNone(jobId)
     self.assertTrue(isinstance(jobId, numbers.Number))
     self.gateway.disconnect()

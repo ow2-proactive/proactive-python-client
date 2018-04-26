@@ -17,10 +17,9 @@ print("Connected")
 
 try:
   print("Creating a proactive task...")
-  proactive_task = gateway.createTask(gateway.getProactiveScriptLanguage().linux_bash())
-  proactive_task.setTaskName("SimpleBashTask")
-  proactive_task.setTaskImplementation("""python main.py""")
-  proactive_task.addInputFile('main.py')
+  proactive_task = gateway.createPythonTask()
+  proactive_task.setTaskName("SimplePythonTask")
+  proactive_task.setTaskImplementationFromFile('main.py', ['param1', 'param2'])
   proactive_task.addInputFile('scripts/__init__.py')
   proactive_task.addInputFile('scripts/hello.py')
 
@@ -44,6 +43,10 @@ try:
   print("Submitting the job to the proactive scheduler...")
   job_id = gateway.submitJob(proactive_job, debug=False)
   print("job_id: " + str(job_id))
+
+  print("Getting job output...")
+  job_result = gateway.getJobResult(job_id)
+  print(job_result)
 
 finally:
   print("Disconnecting")

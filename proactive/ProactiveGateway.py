@@ -141,3 +141,17 @@ class ProActiveGateway:
     jobs_page = self.proactive_scheduler_client.getJobs(0, max_number_of_jobs, job_filter_criteria, None)
     return jobs_page.getList()
 
+  def getJobResult(self, job_id, timeout=60000):
+    job_result = self.proactive_scheduler_client.waitForJob(str(job_id), timeout)
+    all_results = []
+    for result in job_result.getAllResults().values():
+      if type(result.getValue()) is bytes:
+        all_results.append(result.getValue().decode('ascii'))
+      else:
+        all_results.append(str(result.getValue()))
+    return '\n'.join(v for v in all_results)
+
+  def getTaskResult(self, job_id, task_name, timeout=60000):
+    job_result = self.proactive_scheduler_client.waitForJob(str(job_id), timeout)
+    return job_result.getAllResults().get(task_name).getValue()
+

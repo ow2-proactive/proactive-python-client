@@ -73,10 +73,25 @@ class ProactiveTask:
   def getTaskName(self):
     return self.task_name
 
-  def setTaskImplementationFromFile(self, task_file):
+  def setTaskImplementationFromFile(self, task_file, parameters=[], displayTaskResultOnScheduler=True):
     if os.path.exists(task_file):
-      with open(task_file, 'r') as content_file:
-        self.task_implementation = content_file.read()
+      params_string = ' '.join(parameters)
+      task_implementation = "import subprocess"
+      task_implementation += "\n"
+      task_implementation += "print('Running " + task_file + " with " + params_string + " as parameters...')"
+      task_implementation += "\n"
+      task_implementation += "result = subprocess.check_output('python " + task_file + " " + params_string + "', shell=True).strip()"
+      task_implementation += "\n"
+      if displayTaskResultOnScheduler:
+        task_implementation += "print('---')"
+        task_implementation += "\n"
+        task_implementation += "print(result.decode('ascii'))"
+        task_implementation += "\n"
+        task_implementation += "print('---')"
+        task_implementation += "\n"
+      task_implementation += "print('Finished')"
+      self.setTaskImplementation(task_implementation)
+      self.addInputFile(task_file)
 
   def setTaskImplementationFromLambdaFunction(self, lambda_function):
     pickled_lambda = codecs.encode(cloudpickle.dumps(lambda_function), "base64")
