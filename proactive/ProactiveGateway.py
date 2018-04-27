@@ -27,21 +27,26 @@ class ProActiveGateway:
   proactive_scheduler_client = None
   proactive_factory = None
 
-  def __init__(self, base_url, javaopts=[]):
+  def __init__(self, base_url, javaopts=[], redirectJVMOutput=False):
     self.root_dir = os.path.dirname(os.path.abspath(__file__))
     self.current_path = self.root_dir + "/java/lib/*"
     self.base_url = base_url
     self.gateway = JavaGateway()
     self.javaopts = javaopts
     #self.javaopts.append('-Dlog4j.configuration=file:'+os.path.join(os.getcwd(),'log4j.properties'))
-    #print(self.javaopts)
+    self.redirect_stdout = None
+    self.redirect_stderr = None
+
+    if redirectJVMOutput:
+      self.redirect_stdout = sys.stdout
+      self.redirect_stderr = sys.stderr
+
     self.runtime_gateway = self.gateway.launch_gateway(
       classpath=os.path.normpath(self.current_path),
       die_on_exit=True,
       javaopts=self.javaopts,
-      redirect_stdout=sys.stdout,
-      redirect_stderr=sys.stderr,
-      daemonize_redirect=True
+      redirect_stdout=self.redirect_stdout,
+      redirect_stderr=self.redirect_stderr,
     )
     self.proactive_factory = ProactiveFactory(self.runtime_gateway)
 
