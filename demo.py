@@ -9,7 +9,8 @@ print("Connecting on: " + proactive_url)
 javaopts=[]
 # uncomment for detailed logs
 # javaopts.append('-Dlog4j.configuration=file:'+os.path.join(os.getcwd(),'log4j.properties'))
-gateway = proactive.ProActiveGateway(proactive_url, javaopts)
+redirectJVMOutput=False
+gateway = proactive.ProActiveGateway(proactive_url, javaopts, redirectJVMOutput)
 
 gateway.connect(username="", password="")  # put your login here!
 assert gateway.isConnected() is True
