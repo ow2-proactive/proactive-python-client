@@ -10,6 +10,9 @@ class ProactiveJob:
   job_name = ''
   job_tasks = []
 
+  input_folder = '.'
+  output_folder = '.'
+
   def __init__(self):
     self.job_name = ''
     self.job_tasks = []
@@ -25,4 +28,16 @@ class ProactiveJob:
 
   def getTasks(self):
     return self.job_tasks
+
+  def setInputFolder(self, input_folder):
+    self.input_folder = input_folder
+
+  def getInputFolder(self):
+    return self.input_folder
+
+  def setOutputFolder(self, output_folder):
+    self.output_folder = output_folder
+
+  def getOutputFolder(self):
+    return self.output_folder
 

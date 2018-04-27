@@ -1,4 +1,5 @@
 import os
+import sys
 
 from py4j.java_gateway import JavaGateway
 from py4j.java_collections import MapConverter
@@ -26,12 +27,22 @@ class ProActiveGateway:
   proactive_scheduler_client = None
   proactive_factory = None
 
-  def __init__(self, base_url):
+  def __init__(self, base_url, javaopts=[]):
     self.root_dir = os.path.dirname(os.path.abspath(__file__))
     self.current_path = self.root_dir + "/java/lib/*"
     self.base_url = base_url
     self.gateway = JavaGateway()
-    self.runtime_gateway = self.gateway.launch_gateway(classpath=os.path.normpath(self.current_path), die_on_exit=True)
+    self.javaopts = javaopts
+    #self.javaopts.append('-Dlog4j.configuration=file:'+os.path.join(os.getcwd(),'log4j.properties'))
+    #print(self.javaopts)
+    self.runtime_gateway = self.gateway.launch_gateway(
+      classpath=os.path.normpath(self.current_path),
+      die_on_exit=True,
+      javaopts=self.javaopts,
+      redirect_stdout=sys.stdout,
+      redirect_stderr=sys.stderr,
+      daemonize_redirect=True
+    )
     self.proactive_factory = ProactiveFactory(self.runtime_gateway)
 
   def connect(self, username, password, credentials_path=None, insecure=True):
@@ -39,15 +50,23 @@ class ProActiveGateway:
     if credentials_path is not None:
       credentials_file = self.runtime_gateway.jvm.java.io.File(credentials_path)
 
-    self.proactive_scheduler_client = self.runtime_gateway.jvm.org.ow2.proactive_grid_cloud_portal.smartproxy.RestSmartProxyImpl()
-    connection_info = self.runtime_gateway.jvm.org.ow2.proactive.authentication.ConnectionInfo(self.base_url + "/rest",
-                                                                                               username, password,
-                                                                                               credentials_file,
-                                                                                               insecure)
+    self.proactive_scheduler_client = self.proactive_factory.create_smart_proxy()
+    connection_info = self.proactive_factory.create_connection_info(
+      self.base_url + "/rest", username, password, credentials_file, insecure
+    )
     self.proactive_scheduler_client.init(connection_info)
+
+  def isConnected(self):
+    return self.proactive_scheduler_client.isConnected()
 
   def disconnect(self):
     self.proactive_scheduler_client.disconnect()
+
+  def reconnect(self):
+    self.proactive_scheduler_client.reconnect()
+
+  def terminate(self):
+    self.proactive_scheduler_client.terminate()
 
   def submitWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables={}):
     workflow_variables_java_map = MapConverter().convert(workflow_variables, self.runtime_gateway._gateway_client)
@@ -74,8 +93,16 @@ class ProActiveGateway:
     return ProactiveJob()
 
   def submitJob(self, job_model, debug=False):
+    proactive_job = ProactiveJobBuilder(self.proactive_factory, job_model).create().display(debug).getProactiveJob()
+    user_space_uri = self.proactive_scheduler_client.getUserSpaceURIs()[0]
+    proactive_job.setInputSpace(user_space_uri)
+    proactive_job.setOutputSpace(user_space_uri)
     return self.proactive_scheduler_client.submit(
-      ProactiveJobBuilder(self.proactive_factory, job_model).create().display(debug).getProactiveJob()
+      proactive_job,
+      job_model.getInputFolder(),
+      job_model.getOutputFolder(),
+      False,
+      True
     ).longValue()
 
   def createForkEnvironment(self, language=None):
@@ -113,4 +140,18 @@ class ProActiveGateway:
                                                                                                         True, False)
     jobs_page = self.proactive_scheduler_client.getJobs(0, max_number_of_jobs, job_filter_criteria, None)
     return jobs_page.getList()
+
+  def getJobResult(self, job_id, timeout=60000):
+    job_result = self.proactive_scheduler_client.waitForJob(str(job_id), timeout)
+    all_results = []
+    for result in job_result.getAllResults().values():
+      if type(result.getValue()) is bytes:
+        all_results.append(result.getValue().decode('ascii'))
+      else:
+        all_results.append(str(result.getValue()))
+    return '\n'.join(v for v in all_results)
+
+  def getTaskResult(self, job_id, task_name, timeout=60000):
+    job_result = self.proactive_scheduler_client.waitForJob(str(job_id), timeout)
+    return job_result.getAllResults().get(task_name).getValue()
 
