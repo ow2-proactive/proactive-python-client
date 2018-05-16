@@ -60,7 +60,12 @@ task setup(type:Exec) {
 } 
 
 task publish(type:Exec) {
-   commandLine './publish.sh'
+   ignoreExitValue true
+   try {
+       commandLine './publish.sh'
+   } catch (all) {
+       println 'the archive probably already exist so no need to publish twice'
+   }
 } 
 
 
