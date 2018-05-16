@@ -43,7 +43,8 @@ setup(
   packages=find_packages(exclude=('tests', 'docs')),
   install_requires=[
     'requests',
-    'py4j'
+    'py4j',
+    'cloudpickle'
   ],
   package_dir={'proactive': 'proactive'},
   package_data={'proactive': ['java/lib/*.jar']},
