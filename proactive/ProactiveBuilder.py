@@ -100,9 +100,16 @@ class ProactiveTaskBuilder(ProactiveBuilder):
 
     InputAccessMode = self.proactive_factory.get_input_access_mode()
     transferFromInputSpace = InputAccessMode.getAccessMode("transferFromInputSpace")
-    print("Files to transfer: ", len(self.proactive_task_model.getInputFiles()))
+    print("Input Files to transfer: ", len(self.proactive_task_model.getInputFiles()))
     for file in self.proactive_task_model.getInputFiles():
       self.script_task.addInputFiles(file, transferFromInputSpace)
+      
+      
+    OutputAccessMode = self.proactive_factory.get_output_access_mode()
+    transferToOutputSpace = OutputAccessMode.getAccessMode("transferToOutputSpace")
+    print("Output Files to transfer: ", len(self.proactive_task_model.getOutputFiles()))
+    for file in self.proactive_task_model.getOutputFiles():
+      self.script_task.addOutputFiles(file, transferToOutputSpace)  
 
     #print(self.script_task.__dict__)
     return self.script_task
