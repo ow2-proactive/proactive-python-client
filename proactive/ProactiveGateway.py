@@ -99,9 +99,6 @@ class ProActiveGateway:
 
   def submitJob(self, job_model, debug=False):
     proactive_job = ProactiveJobBuilder(self.proactive_factory, job_model).create().display(debug).getProactiveJob()
-    user_space_uri = self.proactive_scheduler_client.getUserSpaceURIs()[0]
-    proactive_job.setInputSpace(user_space_uri)
-    proactive_job.setOutputSpace(user_space_uri)
     return self.proactive_scheduler_client.submit(
       proactive_job,
       job_model.getInputFolder(),
