@@ -124,7 +124,10 @@ class ProActiveGateway:
 
   def createPythonSelectionScript(self):
     return ProactiveSelectionScript(self.getProactiveScriptLanguage().python())
-
+  
+  def getProactiveClient(self):
+    return self.proactive_scheduler_client
+  
   def getProactiveScriptLanguage(self):
       return ProactiveScriptLanguage()
 
