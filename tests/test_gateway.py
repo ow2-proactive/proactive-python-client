@@ -120,7 +120,7 @@ class GatewayTestSuite(unittest.TestCase):
 
   def test_get_job_info(self):
     self.gateway.connect(self.username, self.password)
-    jobId = self.gateway.submitWorkflowFromCatalog("basic-examples", "print_file_name")
+    jobId = self.gateway.submitWorkflowFromCatalog("basic-examples", "Print_File_Name")
     job_info = self.gateway.getJobInfo(jobId)
     self.assertTrue(str(job_info.getJobId().value()) == str(jobId))
     self.assertTrue(str(job_info.getJobOwner()) == self.username)
@@ -128,7 +128,7 @@ class GatewayTestSuite(unittest.TestCase):
 
   def test_get_all_jobs(self):
     self.gateway.connect(self.username, self.password)
-    jobId = self.gateway.submitWorkflowFromCatalog("basic-examples", "print_file_name")
+    jobId = self.gateway.submitWorkflowFromCatalog("basic-examples", "Print_File_Name")
     jobs = self.gateway.getAllJobs()
     self.assertTrue(jobs.size() > 0)
     for job_info in jobs:
