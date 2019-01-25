@@ -52,13 +52,13 @@ class GatewayTestSuite(unittest.TestCase):
     self.assertTrue(isinstance(jobId, numbers.Number))
     self.gateway.disconnect()
 
-  def test_submit_workflow_from_URL(self):
-    self.gateway.connect(self.username, self.password)
-    workflow_url = 'https://raw.githubusercontent.com/ow2-proactive/proactive-python-client/master/tests/print_file_name.xml'
-    jobId = self.gateway.submitWorkflowFromURL(workflow_url, {'file': 'test_submit_URL'})
-    self.assertIsNotNone(jobId)
-    self.assertTrue(isinstance(jobId, numbers.Number))
-    self.gateway.disconnect()
+  #def test_submit_workflow_from_URL(self):
+  #  self.gateway.connect(self.username, self.password)
+  #  workflow_url = 'https://raw.githubusercontent.com/ow2-proactive/proactive-python-client/master/tests/print_file_name.xml'
+  #  jobId = self.gateway.submitWorkflowFromURL(workflow_url, {'file': 'test_submit_URL'})
+  #  self.assertIsNotNone(jobId)
+  #  self.assertTrue(isinstance(jobId, numbers.Number))
+  #  self.gateway.disconnect()
 
   def test_submit_python_lambda(self):
     self.gateway.connect(self.username, self.password)
@@ -66,7 +66,7 @@ class GatewayTestSuite(unittest.TestCase):
     pythonTask = self.gateway.createPythonTask()
     pythonTask.setTaskName("SimplePythonLambdaTask")
     pythonTask.setTaskImplementationFromLambdaFunction(lambda: 88 - 20 * 10)
-    #pythonTask.addGenericInformation("PYTHON_COMMAND", "/usr/bin/python3") # uncomment for python3
+    pythonTask.addGenericInformation("PYTHON_COMMAND", "/usr/bin/python3") # uncomment for python3
 
     myJob = self.gateway.createJob()
     myJob.setJobName("SimplePythonLambdaJob")
