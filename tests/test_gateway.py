@@ -23,14 +23,14 @@ class GatewayTestSuite(unittest.TestCase):
 
   def test_submit_workflow_from_catalog(self):
     self.gateway.connect(self.username, self.password)
-    jobId = self.gateway.submitWorkflowFromCatalog("basic-examples", "print_file_name")
+    jobId = self.gateway.submitWorkflowFromCatalog("basic-examples", "Print_File_Name")
     self.assertIsNotNone(jobId)
     self.assertTrue(isinstance(jobId, numbers.Number))
     self.gateway.disconnect()
 
   def test_submit_workflow_from_catalog_with_variables(self):
     self.gateway.connect(self.username, self.password)
-    jobId = self.gateway.submitWorkflowFromCatalog("basic-examples", "print_file_name",
+    jobId = self.gateway.submitWorkflowFromCatalog("basic-examples", "Print_File_Name",
                                            {'file': 'test_submit_from_catalog_with_variables'})
     self.assertIsNotNone(jobId)
     self.assertTrue(isinstance(jobId, numbers.Number))
