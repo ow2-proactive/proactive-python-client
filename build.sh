@@ -3,6 +3,11 @@ command -v source >/dev/null 2>&1 || {
   echo "I require source but it's not installed.  Aborting." >&2; exit 1;
 }
 
+pip list
+
+pip install virtualenv
+which virtualenv
+
 virtualenv -p python3 env
 source env/bin/activate
 
@@ -16,6 +21,8 @@ pip install requests
 pip install py4j
 pip install cloudpickle
 pip install codecs
+
+pip list
 
 if [ -z "$1" ]
   then
