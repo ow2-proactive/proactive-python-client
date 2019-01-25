@@ -54,7 +54,7 @@ class GatewayTestSuite(unittest.TestCase):
 
   def test_submit_workflow_from_URL(self):
     self.gateway.connect(self.username, self.password)
-    workflow_url = 'https://gist.githubusercontent.com/marcocast/5b9df0478f9e093663eaae36ca2f55b0/raw/ad98492428243db5ebb812205488281b65189077/print_file_name.xml'
+    workflow_url = 'https://raw.githubusercontent.com/ow2-proactive/proactive-python-client/master/tests/print_file_name.xml'
     jobId = self.gateway.submitWorkflowFromURL(workflow_url, {'file': 'test_submit_URL'})
     self.assertIsNotNone(jobId)
     self.assertTrue(isinstance(jobId, numbers.Number))
@@ -66,7 +66,7 @@ class GatewayTestSuite(unittest.TestCase):
     pythonTask = self.gateway.createPythonTask()
     pythonTask.setTaskName("SimplePythonLambdaTask")
     pythonTask.setTaskImplementationFromLambdaFunction(lambda: 88 - 20 * 10)
-    pythonTask.addGenericInformation("PYTHON_COMMAND", "/usr/bin/python3") # uncomment for trydev
+    #pythonTask.addGenericInformation("PYTHON_COMMAND", "/usr/bin/python3") # uncomment for python3
 
     myJob = self.gateway.createJob()
     myJob.setJobName("SimplePythonLambdaJob")
