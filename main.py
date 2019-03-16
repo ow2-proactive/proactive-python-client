@@ -4,11 +4,11 @@ from scripts.hello import *
 
 
 def main():
-  print(hello())
+    print(hello())
 
-  for arg in sys.argv[1:]:
-    print(hello(arg))
+    for arg in sys.argv[1:]:
+        print(hello(arg))
 
 
 if __name__ == '__main__':
-  main()
+    main()

@@ -3,10 +3,10 @@ command -v source >/dev/null 2>&1 || {
   echo "I require source but it's not installed.  Aborting." >&2; exit 1;
 }
 
-pip list
+#pip list
 
-pip install virtualenv
-which virtualenv
+#pip install virtualenv
+#which virtualenv
 
 virtualenv -p python3 env
 source env/bin/activate
@@ -16,13 +16,9 @@ pip install jprops
 python setup.py sdist --formats=zip
 pip install dist/proactive*.zip
 
-pip install pytest-html
-pip install requests
-pip install py4j
-pip install cloudpickle
-pip install codecs
+pip install pytest-html requests py4j cloudpickle
 
-pip list
+#pip list
 
 if [ -z "$1" ]
   then
