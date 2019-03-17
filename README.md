@@ -11,7 +11,19 @@ This module allows users to interact with a running ProActive Scheduler and Reso
 ### 2. Installation
 `pip install proactive --upgrade`
 
-### 3. Usage
+### 3. How to build
+Just run `gradlew clean build`
+
+This will generate the `proactive-XXX.zip` file inside project's `dist` folder.
+
+Run `pip install dist/proactive-XXX.zip` to install the package in your python environment.
+
+### 4. Build and run tests
+`./gradlew clean build -Pproactive_url=XXX -Pusername=XXX -Ppassword=XXX`
+
+Replace `XXX` with the respective information.
+
+### 5. Usage
 
 ```
 import os
@@ -32,108 +44,108 @@ assert gateway.isConnected() is True
 print("Connected")
 
 try:
-  print("Creating a proactive task...")
-  proactive_task = gateway.createPythonTask()
-  proactive_task.setTaskName("SimplePythonTask")
-  proactive_task.setTaskImplementationFromFile('main.py', ['param1', 'param2'])
-  proactive_task.addInputFile('scripts/__init__.py')
-  proactive_task.addInputFile('scripts/hello.py')
-
-  print("Adding a fork environment to the proactive task...")
-  proactive_fork_env = gateway.createDefaultForkEnvironment()
-  proactive_fork_env.setImplementationFromFile("scripts/fork_env.py")
-  proactive_task.setForkEnvironment(proactive_fork_env)
-
-  print("Adding a selection script to the proactive task...")
-  proactive_selection_script = gateway.createDefaultSelectionScript()
-  proactive_selection_script.setImplementationFromFile("scripts/selection_script.py")
-  proactive_task.setSelectionScript(proactive_selection_script)
-
-  print("Creating a proactive job...")
-  proactive_job = gateway.createJob()
-  proactive_job.setJobName("SimpleJob")
-  proactive_job.addTask(proactive_task)
-  proactive_job.setInputFolder(os.getcwd())
-  proactive_job.setOutputFolder(os.getcwd())
-
-  print("Submitting the job to the proactive scheduler...")
-  job_id = gateway.submitJob(proactive_job, debug=False)
-  print("job_id: " + str(job_id))
-
-  print("Getting job output...")
-  job_result = gateway.getJobResult(job_id)
-  print(job_result)
+    print("Creating a proactive task...")
+    proactive_task = gateway.createPythonTask()
+    proactive_task.setTaskName("SimplePythonTask")
+    proactive_task.setTaskImplementationFromFile('main.py', ['param1', 'param2'])
+    proactive_task.addInputFile('scripts/__init__.py')
+    proactive_task.addInputFile('scripts/hello.py')
+    
+    print("Adding a fork environment to the proactive task...")
+    proactive_fork_env = gateway.createDefaultForkEnvironment()
+    proactive_fork_env.setImplementationFromFile("scripts/fork_env.py")
+    proactive_task.setForkEnvironment(proactive_fork_env)
+    
+    print("Adding a selection script to the proactive task...")
+    proactive_selection_script = gateway.createDefaultSelectionScript()
+    proactive_selection_script.setImplementationFromFile("scripts/selection_script.py")
+    proactive_task.setSelectionScript(proactive_selection_script)
+    
+    print("Creating a proactive job...")
+    proactive_job = gateway.createJob()
+    proactive_job.setJobName("SimpleJob")
+    proactive_job.addTask(proactive_task)
+    proactive_job.setInputFolder(os.getcwd())
+    proactive_job.setOutputFolder(os.getcwd())
+    
+    print("Submitting the job to the proactive scheduler...")
+    job_id = gateway.submitJob(proactive_job, debug=False)
+    print("job_id: " + str(job_id))
+    
+    print("Getting job output...")
+    job_result = gateway.getJobResult(job_id)
+    print(job_result)
 
 finally:
-  print("Disconnecting")
-  gateway.disconnect()
-  print("Disconnected")
-  gateway.terminate()
-  print("Finished")
+    print("Disconnecting")
+    gateway.disconnect()
+    print("Disconnected")
+    gateway.terminate()
+    print("Finished")
 ```
 
-### 4. Examples
+### 6. Examples
 
-#### 4.1 Creating a Python task
+#### 6.1 Creating a Python task
 ```
 ...
-my_task = gateway.createPythonTask()
-my_task.setTaskName("SimplePythonTask")
-my_task.setTaskImplementation("""print("Hello world!")""")
+proactive_task = gateway.createPythonTask()
+proactive_task.setTaskName("SimplePythonTask")
+proactive_task.setTaskImplementation("""print("Hello world!")""")
 
 # or by
-# my_task.setTaskImplementationFromFile("scripts/print_python_env.py")
-# my_task.setTaskImplementationFromLambdaFunction(lambda: 88 - 20 * 10)
+# proactive_task.setTaskImplementationFromFile("scripts/print_python_env.py")
+# proactive_task.setTaskImplementationFromLambdaFunction(lambda: 88 - 20 * 10)
 
 # add attached files
-# my_task.addInputFile('scripts/hello.py')
+# proactive_task.addInputFile('scripts/hello.py')
 
 # select your python version
-# my_task.addGenericInformation("PYTHON_COMMAND", "/usr/bin/python3")
+# proactive_task.addGenericInformation("PYTHON_COMMAND", "/usr/bin/python3")
 ...
 ```
 
-#### 4.2 Adding a fork environment
+#### 6.2 Adding a fork environment
 ```
 ...
 fork_env = gateway.createDefaultForkEnvironment()
 fork_env.setImplementationFromFile("scripts/fork_env.py")
 
-my_task.setForkEnvironment(fork_env)
+proactive_task.setForkEnvironment(fork_env)
 ...
 ```
 
-#### 4.3 Adding a selection script
+#### 6.3 Adding a selection script
 ```
 ...
 selection_script = gateway.createDefaultSelectionScript()
 selection_script.setImplementationFromFile("scripts/selection_script.py")
 
-my_task.setSelectionScript(selection_script)
+proactive_task.setSelectionScript(selection_script)
 ...
 ```
 
-#### 4.4 Create a job and add your task
+#### 6.4 Create a job and add your task
 ```
 ...
-my_job = gateway.createJob()
-my_job.setJobName("SimpleJob")
-my_job.addTask(my_task)
+proactive_job = gateway.createJob()
+proactive_job.setJobName("SimpleJob")
+proactive_job.addTask(proactive_task)
 
 # for file transfer
-# my_job.setInputFolder(os.getcwd())
-# my_job.setOutputFolder(os.getcwd())
+# proactive_job.setInputFolder(os.getcwd())
+# proactive_job.setOutputFolder(os.getcwd())
 ...
 ```
 
-#### 4.5 Submit your job to the scheduler
+#### 6.5 Submit your job to the scheduler
 ```
 ...
-job_id = gateway.submitJob(my_job, debug=False) # set debug=True for more debug info
+job_id = gateway.submitJob(proactive_job, debug=False) # set debug=True for more debug info
 ...
 ```
 
-#### 4.6 Get the job results
+#### 6.6 Get the job results
 ```
 ...
 print("Getting job output...")
