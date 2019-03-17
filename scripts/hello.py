@@ -1,4 +1,4 @@
-
+import sys
 
 def hello(name=None):
     if name is not None:
@@ -8,7 +8,10 @@ def hello(name=None):
 
 
 def main():
-    hello()
+    print(hello())
+
+    for arg in sys.argv[1:]:
+        print(hello(arg))
 
 
 if __name__ == '__main__':

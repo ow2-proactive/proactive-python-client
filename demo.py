@@ -20,9 +20,14 @@ try:
     print("Creating a proactive task...")
     proactive_task = gateway.createPythonTask()
     proactive_task.setTaskName("SimplePythonTask")
-    proactive_task.setTaskImplementationFromFile('main.py', ['param1', 'param2'])
-    proactive_task.addInputFile('scripts/__init__.py')
-    proactive_task.addInputFile('scripts/hello.py')
+    proactive_task.setTaskImplementation("""print("Hello world!")""")
+    # proactive_task.setTaskImplementationFromFile("scripts/print_python_env.py")
+    # proactive_task.setTaskImplementationFromFile("scripts/hello.py", ['param_a', 'param_b'])
+    # proactive_task.setTaskImplementationFromFile('main.py', ['param_1', 'param_2'])
+    # proactive_task.addInputFile('scripts/__init__.py')
+    # proactive_task.addInputFile('scripts/hello.py')
+    # proactive_task.setTaskImplementationFromLambdaFunction(lambda: 88 - 20 * 10)
+    # proactive_task.addGenericInformation("PYTHON_COMMAND", "/usr/local/bin/python3")
 
     print("Adding a fork environment to the proactive task...")
     proactive_fork_env = gateway.createDefaultForkEnvironment()
@@ -31,7 +36,8 @@ try:
 
     print("Adding a selection script to the proactive task...")
     proactive_selection_script = gateway.createDefaultSelectionScript()
-    proactive_selection_script.setImplementationFromFile("scripts/selection_script.py")
+    proactive_selection_script.setImplementation("selected = True")
+    #proactive_selection_script.setImplementationFromFile("scripts/selection_script.py")
     proactive_task.setSelectionScript(proactive_selection_script)
 
     print("Creating a proactive job...")
