@@ -35,7 +35,7 @@ class ProactiveTaskBuilder(ProactiveBuilder):
     script_task = None
 
     def __init__(self, proactive_factory, proactive_task_model=None):
-        super().__init__(proactive_factory)
+        super(ProactiveTaskBuilder, self).__init__(proactive_factory)
         self.setProactiveTaskModel(proactive_task_model)
 
     def setProactiveTaskModel(self, proactive_task_model):
