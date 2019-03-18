@@ -7,6 +7,9 @@ import platform
 from setuptools import setup, find_packages, Command
 from setuptools.command.install_egg_info import install_egg_info as _install_egg_info
 from setuptools.dist import Distribution
+import datetime
+
+now = datetime.datetime.now()
 
 gradle_properties={}
 with open('gradle.properties') as fp:
@@ -14,7 +17,8 @@ with open('gradle.properties') as fp:
         if '=' in line:
             name, value = line.replace('\n','').split('=', 1)
             if "SNAPSHOT" in value:
-                dev_version = ".dev" + str(int(time.time()))
+                #dev_version = ".dev" + str(int(time.time()))
+                dev_version = "." + now.strftime("%Y.%m.%d.%H.%M")
                 value = value.replace("-SNAPSHOT", dev_version)
             gradle_properties[name] = value
 
