@@ -46,6 +46,6 @@ setup(
     ],
     package_dir={'proactive': 'proactive'},
     package_data={'proactive': ['java/lib/*.jar']},
-    python_requires='>=3',
+    python_requires='>=2.7',
     zip_safe=False
 )

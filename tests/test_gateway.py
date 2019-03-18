@@ -66,7 +66,11 @@ class GatewayTestSuite(unittest.TestCase):
         pythonTask = self.gateway.createPythonTask()
         pythonTask.setTaskName("SimplePythonLambdaTask")
         pythonTask.setTaskImplementationFromLambdaFunction(lambda: 88 - 20 * 10)
-        pythonTask.addGenericInformation("PYTHON_COMMAND", "/usr/bin/python3") # uncomment for python3
+        #pythonTask.addGenericInformation("PYTHON_COMMAND", "/usr/local/bin/python3")
+        script_forkenv = os.getcwd() + '/scripts/fork_env.py'
+        forkEnv = self.gateway.createDefaultForkEnvironment()
+        forkEnv.setImplementationFromFile(script_forkenv)
+        pythonTask.setForkEnvironment(forkEnv)
 
         myJob = self.gateway.createJob()
         myJob.setJobName("SimplePythonLambdaJob")
@@ -151,7 +155,7 @@ class GatewayTestSuite(unittest.TestCase):
         pythonTask.setForkEnvironment(fork_env)
 
         myJob = self.gateway.createJob()
-        myJob.setJobName("SimplePythonJobFromFile")
+        myJob.setJobName("SimplePythonJobWithForkEnv")
         myJob.addTask(pythonTask)
         jobId = self.gateway.submitJob(myJob)
 
@@ -171,7 +175,7 @@ class GatewayTestSuite(unittest.TestCase):
         pythonTask.setSelectionScript(selection_script)
 
         myJob = self.gateway.createJob()
-        myJob.setJobName("SimplePythonJobFromFile")
+        myJob.setJobName("SimplePythonJobWithSelection")
         myJob.addTask(pythonTask)
         jobId = self.gateway.submitJob(myJob)
 
@@ -191,7 +195,7 @@ class GatewayTestSuite(unittest.TestCase):
         pythonTask.setSelectionScript(selection_script)
 
         myJob = self.gateway.createJob()
-        myJob.setJobName("SimplePythonJobFromFileGroovySelection")
+        myJob.setJobName("SimplePythonJobWithGroovySelection")
         myJob.addTask(pythonTask)
         jobId = self.gateway.submitJob(myJob)
 

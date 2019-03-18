@@ -9,6 +9,7 @@ command -v source >/dev/null 2>&1 || {
 #which virtualenv
 
 virtualenv -p python3 env
+#virtualenv -p python2 env
 source env/bin/activate
 
 pip install jprops

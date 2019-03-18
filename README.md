@@ -6,7 +6,7 @@
 This module allows users to interact with a running ProActive Scheduler and Resource Manager.
 
 ### 1. Requirements
-* Python 3
+* Python 2 and 3
 
 ### 2. Installation
 `pip install proactive --upgrade`

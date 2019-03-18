@@ -83,11 +83,11 @@ class ProactiveTask:
             task_implementation += "result = subprocess.check_output('python " + task_file + " " + params_string + "', shell=True).strip()"
             task_implementation += "\n"
             if displayTaskResultOnScheduler:
-                task_implementation += "print('---')"
+                task_implementation += "print('-' * 10)"
                 task_implementation += "\n"
                 task_implementation += "print(result.decode('ascii'))"
                 task_implementation += "\n"
-                task_implementation += "print('---')"
+                task_implementation += "print('-' * 10)"
                 task_implementation += "\n"
             task_implementation += "print('Finished')"
             self.setTaskImplementation(task_implementation)
@@ -101,6 +101,8 @@ class ProactiveTask:
         task_implementation += "import codecs"
         task_implementation += "\n"
         task_implementation += "result = pickle.loads(codecs.decode(%s, \"base64\"))()" % pickled_lambda
+        task_implementation += "\n"
+        task_implementation += "print('result: ', result)"
 
         self.setTaskImplementation(task_implementation)
 

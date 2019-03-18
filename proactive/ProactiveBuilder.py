@@ -1,7 +1,7 @@
 from .model.ProactiveTask import *
 from .model.ProactiveJob import *
 
-
+__metaclass__ = type
 class ProactiveBuilder:
     """
       Represent a generic builder

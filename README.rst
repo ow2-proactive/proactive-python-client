@@ -19,7 +19,7 @@ This module allows users to interact with a running ProActive Scheduler and Reso
 ^^^^^^^^^^^^^^^
 
 
-* Python 3
+* Python 2 and 3
 
 2. Installation
 ^^^^^^^^^^^^^^^
