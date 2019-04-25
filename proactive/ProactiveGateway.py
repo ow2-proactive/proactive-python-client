@@ -90,8 +90,11 @@ class ProActiveGateway:
     def createJob(self):
         return ProactiveJob()
 
+    def buildJob(self, job_model, debug=False):
+        return ProactiveJobBuilder(self.proactive_factory, job_model).create().display(debug).getProactiveJob()
+
     def submitJob(self, job_model, debug=False):
-        proactive_job = ProactiveJobBuilder(self.proactive_factory, job_model).create().display(debug).getProactiveJob()
+        proactive_job = self.buildJob(job_model, debug)
         return self.proactive_scheduler_client.submit(
             proactive_job,
             job_model.getInputFolder(),
@@ -152,4 +155,14 @@ class ProActiveGateway:
     def getTaskResult(self, job_id, task_name, timeout=60000):
         job_result = self.proactive_scheduler_client.waitForJob(str(job_id), timeout)
         return job_result.getAllResults().get(task_name).getValue()
+
+    def exportJob2XML(self, job_model, debug=False):
+        proactive_job = self.buildJob(job_model, debug)
+        Job2XMLTransformer = self.proactive_factory.create_job2xml_transformer()
+        return Job2XMLTransformer.jobToxmlString(proactive_job)
+
+    def saveJob2XML(self, job_model, xml_file_path, debug=False):
+        job_xml_data = self.exportJob2XML(job_model, debug)
+        with open(xml_file_path, "w") as text_file:
+            text_file.write("{0}".format(job_xml_data))
 

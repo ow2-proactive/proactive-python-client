@@ -76,3 +76,9 @@ class ProactiveFactory:
         """
         return self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.task.dataspaces.OutputAccessMode
 
+    def create_job2xml_transformer(self):
+        """
+          https://www.activeeon.com/public_content/documentation/javadoc/latest/org/ow2/proactive/scheduler/common/job/factories/Job2XMLTransformer.html
+        """
+        return self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.job.factories.Job2XMLTransformer()
+
