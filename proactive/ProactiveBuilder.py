@@ -8,7 +8,6 @@ class ProactiveBuilder:
 
       proactive_factory (ProactiveFactory)
     """
-    proactive_factory = None
 
     def __init__(self, proactive_factory=None):
         self.setProactiveFactory(proactive_factory)
@@ -29,10 +28,6 @@ class ProactiveTaskBuilder(ProactiveBuilder):
       task_script (jvm.org.ow2.proactive.scripting.TaskScript)
       script_task (jvm.org.ow2.proactive.scheduler.common.task.ScriptTask)
     """
-    proactive_task_model = None
-    script = None
-    task_script = None
-    script_task = None
 
     def __init__(self, proactive_factory, proactive_task_model=None):
         super(ProactiveTaskBuilder, self).__init__(proactive_factory)
@@ -111,7 +106,6 @@ class ProactiveTaskBuilder(ProactiveBuilder):
         for file in self.proactive_task_model.getOutputFiles():
             self.script_task.addOutputFiles(file, transferToOutputSpace)
 
-            #print(self.script_task.__dict__)
         return self.script_task
 
     def create(self):
@@ -130,9 +124,6 @@ class ProactiveJobBuilder:
       proactive_job (ProactiveJob)
       job (jvm.org.ow2.proactive.scheduler.common.job.TaskFlowJob)
     """
-    proactive_factory = None
-    proactive_job_model = None
-    proactive_job = None
 
     def __init__(self, proactive_factory, proactive_job_model=None):
         self.setProactiveFactory(proactive_factory)
@@ -157,8 +148,23 @@ class ProactiveJobBuilder:
         self.proactive_job = self.proactive_factory.create_job()
         self.proactive_job.setName(self.proactive_job_model.getJobName())
 
-        for task in self.proactive_job_model.getTasks():
-            self.proactive_job.addTask(ProactiveTaskBuilder(self.proactive_factory, task).create())
+        #proactive_task_list = []
+        proactive_task_map = {}
+        for proactive_task_model in self.proactive_job_model.getTasks():
+            print("Adding task ", proactive_task_model.getTaskName(), " to the job ", self.proactive_job.getName())
+            proactive_task = ProactiveTaskBuilder(self.proactive_factory, proactive_task_model).create()
+            self.proactive_job.addTask(proactive_task)
+            #proactive_task_list.append(proactive_task)
+            proactive_task_map[proactive_task_model.getTaskName()] = [proactive_task_model, proactive_task]
+
+        #for proactive_task in proactive_task_list:
+        for task_name in proactive_task_map:
+            proactive_task_model, proactive_task = proactive_task_map[task_name]
+            #task = proactive_task.getProactiveTaskModel()
+            for dependency_task_model in proactive_task_model.getDependencesList():
+                print("Adding task ", dependency_task_model.getTaskName(), " as a dependency of ", proactive_task_model.getTaskName())
+                _, proactive_dependency_task = proactive_task_map[dependency_task_model.getTaskName()]
+                proactive_task.addDependence(proactive_dependency_task)
 
         #self.proactive_job.setInputSpace(self.proactive_job_model.getInputFolder())
         #self.proactive_job.setOutputSpace(self.proactive_job_model.getOutputFolder())

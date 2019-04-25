@@ -19,13 +19,6 @@ class ProActiveGateway:
     Simple client for the ProActive scheduler REST API
     See also https://try.activeeon.com/rest/doc/jaxrsdocs/overview-summary.html
     """
-    root_dir = ''
-    current_path = ''
-    base_url = None
-    gateway = None
-    runtime_gateway = None
-    proactive_scheduler_client = None
-    proactive_factory = None
 
     def __init__(self, base_url, javaopts=[], redirectJVMOutput=False):
         self.root_dir = os.path.dirname(os.path.abspath(__file__))

@@ -17,15 +17,8 @@ class ProactiveTask:
     generic_information (map)
     input_files (list)
     output_files (list)
+    dependences (list[ProactiveTask])
     """
-    script_language = None
-    fork_environment = None
-    selection_script = None
-    task_name = ''
-    task_implementation = ''
-    generic_information = {}
-    input_files = []
-    output_files = []
 
     def __init__(self, script_language=None):
         self.script_language = script_language
@@ -36,6 +29,14 @@ class ProactiveTask:
         self.generic_information = {}
         self.input_files = []
         self.output_files = []
+        self.dependences = []
+        self.description = []
+
+    def __str__(self):
+        return self.getTaskName()
+
+    def __repr__(self):
+        return self.getTaskName()
 
     def setScriptLanguage(self, script_language):
         self.script_language = script_language
@@ -129,4 +130,16 @@ class ProactiveTask:
 
     def getOutputFiles(self):
         return self.output_files
+
+    def addDependence(self, task):
+        self.dependences.append(task)
+
+    def getDependencesList(self):
+        return self.dependences
+
+    def setDescription(self, description):
+        self.description = description
+
+    def getDescription(self):
+        return self.description
 

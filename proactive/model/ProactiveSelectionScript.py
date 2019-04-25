@@ -8,9 +8,6 @@ class ProactiveSelectionScript:
     script_language (ProactiveScriptLanguage)
     script_code (string)
     """
-    script_language = None
-    implementation = ''
-    is_dynamic = True
 
     def __init__(self, script_language):
         self.script_language = script_language

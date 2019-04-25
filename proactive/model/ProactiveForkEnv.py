@@ -9,9 +9,6 @@ class ProactiveForkEnv:
     task_name (string)
     generic_information (map)
     """
-    script_language = None
-    task_implementation = ''
-    java_home = '/usr'
 
     def __init__(self, script_language = None):
         self.script_language = script_language

@@ -6,16 +6,22 @@ class ProactiveJob:
 
       job_name (string)
       job_tasks (list)
+      input_folder (string)
+      output_folder (string)
     """
-    job_name = ''
-    job_tasks = []
-
-    input_folder = '.'
-    output_folder = '.'
 
     def __init__(self):
         self.job_name = ''
         self.job_tasks = []
+        self.input_folder = '.'
+        self.output_folder = '.'
+
+
+    def __str__(self):
+        return self.getJobName()
+
+    def __repr__(self):
+        return self.getJobName()
 
     def setJobName(self, job_name):
         self.job_name = job_name

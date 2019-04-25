@@ -4,7 +4,6 @@
 https://www.activeeon.com/public_content/documentation/javadoc/latest/index.html
 """
 class ProactiveFactory:
-    runtime_gateway = None
 
     def __init__(self, runtime_gateway=None):
         self.setRuntimeGateway(runtime_gateway)
