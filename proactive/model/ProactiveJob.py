@@ -32,6 +32,12 @@ class ProactiveJob:
     def addTask(self, task):
         self.job_tasks.append(task)
 
+    def removeTask(self, task):
+        self.job_tasks.remove(task)
+
+    def clearTasks(self):
+        self.job_tasks = []
+
     def getTasks(self):
         return self.job_tasks
 

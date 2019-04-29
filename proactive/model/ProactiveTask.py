@@ -134,6 +134,12 @@ class ProactiveTask:
     def addDependence(self, task):
         self.dependences.append(task)
 
+    def removeDependence(self, task):
+        self.dependences.remove(task)
+
+    def clearDependencesList(self):
+        self.dependences = []
+
     def getDependencesList(self):
         return self.dependences
 
