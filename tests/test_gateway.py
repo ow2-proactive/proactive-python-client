@@ -97,6 +97,35 @@ class GatewayTestSuite(unittest.TestCase):
         self.assertTrue(isinstance(jobId, numbers.Number))
         self.gateway.disconnect()
 
+    def test_submit_python_script_with_dependencies(self):
+        self.gateway.connect(self.username, self.password)
+
+        myJob = self.gateway.createJob()
+        myJob.setJobName("SimplePythonJobWithDependencies")
+
+        pythonTask1 = self.gateway.createPythonTask()
+        pythonTask1.setTaskName("SimplePythonTask1")
+        pythonTask1.setTaskImplementation("""print("Hello world (1)!")""")
+        myJob.addTask(pythonTask1)
+
+        pythonTask2 = self.gateway.createPythonTask()
+        pythonTask2.setTaskName("SimplePythonTask2")
+        pythonTask2.setTaskImplementation("""print("Hello world (2)!")""")
+        myJob.addTask(pythonTask2)
+
+        pythonTask3 = self.gateway.createPythonTask()
+        pythonTask3.setTaskName("SimplePythonTask3")
+        pythonTask3.setTaskImplementation("""print("Hello world (3)!")""")
+        pythonTask3.addDependency(pythonTask1)
+        pythonTask3.addDependency(pythonTask2)
+        myJob.addTask(pythonTask3)
+
+        jobId = self.gateway.submitJob(myJob)
+
+        self.assertIsNotNone(jobId)
+        self.assertTrue(isinstance(jobId, numbers.Number))
+        self.gateway.disconnect()
+
     def test_submit_python_script_from_file(self):
         self.gateway.connect(self.username, self.password)
 

@@ -17,7 +17,7 @@ class ProactiveTask:
     generic_information (map)
     input_files (list)
     output_files (list)
-    dependences (list[ProactiveTask])
+    dependencies (list[ProactiveTask])
     """
 
     def __init__(self, script_language=None):
@@ -29,7 +29,7 @@ class ProactiveTask:
         self.generic_information = {}
         self.input_files = []
         self.output_files = []
-        self.dependences = []
+        self.dependencies = []
         self.description = []
 
     def __str__(self):
@@ -131,17 +131,17 @@ class ProactiveTask:
     def getOutputFiles(self):
         return self.output_files
 
-    def addDependence(self, task):
-        self.dependences.append(task)
+    def addDependency(self, task):
+        self.dependencies.append(task)
 
-    def removeDependence(self, task):
-        self.dependences.remove(task)
+    def removeDependency(self, task):
+        self.dependencies.remove(task)
 
-    def clearDependencesList(self):
-        self.dependences = []
+    def clearDependencies(self):
+        self.dependencies.clear()
 
-    def getDependencesList(self):
-        return self.dependences
+    def getDependencies(self):
+        return self.dependencies
 
     def setDescription(self, description):
         self.description = description

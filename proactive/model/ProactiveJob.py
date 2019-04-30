@@ -16,7 +16,6 @@ class ProactiveJob:
         self.input_folder = '.'
         self.output_folder = '.'
 
-
     def __str__(self):
         return self.getJobName()
 
@@ -36,7 +35,7 @@ class ProactiveJob:
         self.job_tasks.remove(task)
 
     def clearTasks(self):
-        self.job_tasks = []
+        self.job_tasks.clear()
 
     def getTasks(self):
         return self.job_tasks

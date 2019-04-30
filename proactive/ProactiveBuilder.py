@@ -161,7 +161,7 @@ class ProactiveJobBuilder:
         for task_name in proactive_task_map:
             proactive_task_model, proactive_task = proactive_task_map[task_name]
             #task = proactive_task.getProactiveTaskModel()
-            for dependency_task_model in proactive_task_model.getDependencesList():
+            for dependency_task_model in proactive_task_model.getDependencies():
                 print("Adding task ", dependency_task_model.getTaskName(), " as a dependency of ", proactive_task_model.getTaskName())
                 _, proactive_dependency_task = proactive_task_map[dependency_task_model.getTaskName()]
                 proactive_task.addDependence(proactive_dependency_task)
