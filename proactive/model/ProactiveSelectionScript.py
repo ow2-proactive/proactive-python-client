@@ -1,39 +1,24 @@
 import os
 
+from .ProactiveScript import *
 
-class ProactiveSelectionScript:
+
+class ProactiveSelectionScript(ProactiveScript):
     """
-    Represent a proactive selection script
+    Represents a proactive selection script
 
     script_language (ProactiveScriptLanguage)
-    script_code (string)
+    implementation (string)
+    is_dynamic (boolean
     """
 
     def __init__(self, script_language):
-        self.script_language = script_language
-        self.implementation = ''
+        super(ProactiveSelectionScript, self).__init__(script_language)
         self.is_dynamic = True
-
-    def setScriptLanguage(self, script_language):
-        self.script_language = script_language
-
-    def getScriptLanguage(self):
-        return self.script_language
 
     def setIsDynamic(self, is_dynamic):
         self.is_dynamic = is_dynamic
 
     def isDynamic(self):
         return self.is_dynamic
-
-    def setImplementation(self, implementation):
-        self.implementation = implementation
-
-    def getImplementation(self):
-        return self.implementation
-
-    def setImplementationFromFile(self, task_file):
-        if os.path.exists(task_file):
-            with open(task_file, 'r') as content_file:
-                self.implementation = content_file.read()
 

@@ -7,6 +7,7 @@ from py4j.java_collections import MapConverter
 from .ProactiveFactory import *
 from .ProactiveBuilder import *
 
+from .model.ProactiveScript import *
 from .model.ProactiveScriptLanguage import *
 from .model.ProactiveSelectionScript import *
 from .model.ProactiveForkEnv import *
@@ -42,6 +43,7 @@ class ProActiveGateway:
             redirect_stderr=self.redirect_stderr,
         )
         self.proactive_factory = ProactiveFactory(self.runtime_gateway)
+        self.proactive_script_language = ProactiveScriptLanguage()
 
     def connect(self, username, password, credentials_path=None, insecure=True):
         credentials_file = None
@@ -82,10 +84,16 @@ class ProActiveGateway:
                                                       workflow_variables_java_map).longValue()
 
     def createTask(self, language=None):
-        return ProactiveTask(language)
+        return ProactiveTask(language) if self.proactive_script_language.is_language_supported(language) else None
 
     def createPythonTask(self):
-        return ProactiveTask(self.getProactiveScriptLanguage().python())
+        return ProactivePythonTask()
+
+    def createPreScript(self, language=None):
+        return ProactivePreScript(language) if self.proactive_script_language.is_language_supported(language) else None
+
+    def createPostScript(self, language=None):
+        return ProactivePostScript(language) if self.proactive_script_language.is_language_supported(language) else None
 
     def createJob(self):
         return ProactiveJob()
@@ -104,28 +112,28 @@ class ProActiveGateway:
         ).longValue()
 
     def createForkEnvironment(self, language=None):
-        return ProactiveForkEnv(language)
+        return ProactiveForkEnv(language) if self.proactive_script_language.is_language_supported(language) else None
 
     def createDefaultForkEnvironment(self):
-        return ProactiveForkEnv(self.getProactiveScriptLanguage().jython())
+        return ProactiveForkEnv(self.proactive_script_language.jython())
 
     def createPythonForkEnvironment(self):
-        return ProactiveForkEnv(self.getProactiveScriptLanguage().python())
+        return ProactiveForkEnv(self.proactive_script_language.python())
 
     def createSelectionScript(self, language=None):
-        return ProactiveSelectionScript(language)
+        return ProactiveSelectionScript(language) if self.proactive_script_language.is_language_supported(language) else None
 
     def createDefaultSelectionScript(self):
-        return ProactiveSelectionScript(self.getProactiveScriptLanguage().jython())
+        return ProactiveSelectionScript(self.proactive_script_language.jython())
 
     def createPythonSelectionScript(self):
-        return ProactiveSelectionScript(self.getProactiveScriptLanguage().python())
+        return ProactiveSelectionScript(self.proactive_script_language.python())
 
     def getProactiveClient(self):
         return self.proactive_scheduler_client
 
     def getProactiveScriptLanguage(self):
-        return ProactiveScriptLanguage()
+        return self.proactive_script_language
 
     def getJobState(self, job_id):
         return self.proactive_scheduler_client.getJobState(job_id).getName()

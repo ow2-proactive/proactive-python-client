@@ -2,7 +2,7 @@
 
 class ProactiveJob:
     """
-      Represent a generic proactive job
+      Represents a generic proactive job
 
       job_name (string)
       job_tasks (list)

@@ -65,7 +65,8 @@ class GatewayTestSuite(unittest.TestCase):
 
         pythonTask = self.gateway.createPythonTask()
         pythonTask.setTaskName("SimplePythonLambdaTask")
-        pythonTask.setTaskImplementationFromLambdaFunction(lambda: 88 - 20 * 10)
+        pythonTask.setTaskExecutionFromLambdaFunction(lambda: 88 - 20 * 10)
+        #pythonTask.setTaskImplementationFromLambdaFunction(lambda: 88 - 20 * 10)
         #pythonTask.addGenericInformation("PYTHON_COMMAND", "/usr/local/bin/python3")
         script_forkenv = os.getcwd() + '/scripts/fork_env.py'
         forkEnv = self.gateway.createDefaultForkEnvironment()
@@ -131,12 +132,35 @@ class GatewayTestSuite(unittest.TestCase):
 
         pythonTask = self.gateway.createPythonTask()
         pythonTask.setTaskName("SimplePythonTaskFromFile")
-        pythonTask.setTaskImplementationFromFile('main.py', ['param1', 'param2'])
+        pythonTask.setTaskImplementationFromFile('scripts/hello.py')
+
+        myJob = self.gateway.createJob()
+        myJob.setJobName("SimplePythonJobFromFile")
+        myJob.addTask(pythonTask)
+        myJob.setInputFolder(os.getcwd())
+        myJob.setOutputFolder(os.getcwd())
+
+        jobId = self.gateway.submitJob(myJob)
+
+        self.assertIsNotNone(jobId)
+        self.assertTrue(isinstance(jobId, numbers.Number))
+
+        job_result = self.gateway.getJobResult(jobId)
+        self.assertIsNotNone(job_result)
+
+        self.gateway.disconnect()
+
+    def test_submit_python_script_from_file_execution(self):
+        self.gateway.connect(self.username, self.password)
+
+        pythonTask = self.gateway.createPythonTask()
+        pythonTask.setTaskName("SimplePythonTaskFromFileExecution")
+        pythonTask.setTaskExecutionFromFile('main.py', ['param1', 'param2'])
         pythonTask.addInputFile('scripts/__init__.py')
         pythonTask.addInputFile('scripts/hello.py')
 
         myJob = self.gateway.createJob()
-        myJob.setJobName("SimplePythonJobFromFile")
+        myJob.setJobName("SimplePythonJobFromFileExecution")
         myJob.addTask(pythonTask)
         myJob.setInputFolder(os.getcwd())
         myJob.setOutputFolder(os.getcwd())
@@ -225,6 +249,62 @@ class GatewayTestSuite(unittest.TestCase):
 
         myJob = self.gateway.createJob()
         myJob.setJobName("SimplePythonJobWithGroovySelection")
+        myJob.addTask(pythonTask)
+        jobId = self.gateway.submitJob(myJob)
+
+        self.assertIsNotNone(jobId)
+        self.assertTrue(isinstance(jobId, numbers.Number))
+        self.gateway.disconnect()
+
+    def test_submit_with_bash_script(self):
+        self.gateway.connect(self.username, self.password)
+
+        bashTask = self.gateway.createTask(self.gateway.getProactiveScriptLanguage().linux_bash())
+        bashTask.setTaskName("BashTask")
+        bashTask.setTaskImplementation("""pwd; ls -l; echo "This is a linux bash task";""")
+
+        myJob = self.gateway.createJob()
+        myJob.setJobName("SimpleBashJob")
+        myJob.addTask(bashTask)
+        jobId = self.gateway.submitJob(myJob)
+
+        self.assertIsNotNone(jobId)
+        self.assertTrue(isinstance(jobId, numbers.Number))
+        self.gateway.disconnect()
+
+    def test_submit_python_script_with_pre_script(self):
+        self.gateway.connect(self.username, self.password)
+
+        pythonTask = self.gateway.createPythonTask()
+        pythonTask.setTaskName("PythonTaskWithPreScript")
+        pythonTask.setTaskImplementation("""print("Hello world from Python!")""")
+
+        pre_script = self.gateway.createPreScript(self.gateway.getProactiveScriptLanguage().linux_bash())
+        pre_script.setImplementation("""echo "This is a pre-script";""")
+        pythonTask.setPreScript(pre_script)
+
+        myJob = self.gateway.createJob()
+        myJob.setJobName("SimplePythonJobWithPreScript")
+        myJob.addTask(pythonTask)
+        jobId = self.gateway.submitJob(myJob)
+
+        self.assertIsNotNone(jobId)
+        self.assertTrue(isinstance(jobId, numbers.Number))
+        self.gateway.disconnect()
+
+    def test_submit_python_script_with_post_script(self):
+        self.gateway.connect(self.username, self.password)
+
+        pythonTask = self.gateway.createPythonTask()
+        pythonTask.setTaskName("PythonTaskWithPostScript")
+        pythonTask.setTaskImplementation("""print("Hello world from Python!")""")
+
+        post_script = self.gateway.createPostScript(self.gateway.getProactiveScriptLanguage().linux_bash())
+        post_script.setImplementation("""echo "This is a post-script";""")
+        pythonTask.setPostScript(post_script)
+
+        myJob = self.gateway.createJob()
+        myJob.setJobName("SimplePythonJobWithPostScript")
         myJob.addTask(pythonTask)
         jobId = self.gateway.submitJob(myJob)
 

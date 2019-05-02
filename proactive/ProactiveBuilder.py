@@ -71,6 +71,18 @@ class ProactiveTaskBuilder(ProactiveBuilder):
             selection_script.isDynamic()
         )
 
+    def __create_pre_script__(self, pre_script):
+        return self.proactive_factory.create_simple_script(
+                    pre_script.getImplementation(),
+                    pre_script.getScriptLanguage()
+                )
+
+    def __create_post_script__(self, post_script):
+        return self.proactive_factory.create_simple_script(
+                    post_script.getImplementation(),
+                    post_script.getScriptLanguage()
+                )
+
     def __create_script_task__(self, task_script):
         self.script_task = self.proactive_factory.create_script_task()
         self.script_task.setName(self.proactive_task_model.getTaskName())
@@ -88,6 +100,16 @@ class ProactiveTaskBuilder(ProactiveBuilder):
                 self.__create_selection_script__(
                     self.proactive_task_model.getSelectionScript()
                 )
+            )
+
+        if self.proactive_task_model.hasPreScript():
+            self.script_task.setPreScript(
+                self.__create_pre_script__(self.proactive_task_model.getPreScript())
+            )
+
+        if self.proactive_task_model.hasPostScript():
+            self.script_task.setPostScript(
+                self.__create_post_script__(self.proactive_task_model.getPostScript())
             )
 
         for key, value in self.proactive_task_model.getGenericInformation().items():
@@ -122,7 +144,7 @@ class ProactiveJobBuilder:
 
       proactive_factory (ProactiveFactory)
       proactive_job (ProactiveJob)
-      job (jvm.org.ow2.proactive.scheduler.common.job.TaskFlowJob)
+      job (org.ow2.proactive.scheduler.common.job.TaskFlowJob)
     """
 
     def __init__(self, proactive_factory, proactive_job_model=None):

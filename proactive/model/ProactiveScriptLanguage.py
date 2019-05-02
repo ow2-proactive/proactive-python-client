@@ -1,7 +1,13 @@
 
 
 class ProactiveScriptLanguage:
-    language = {
+    """
+      Represents the programming languages supported by Proactive
+
+      supported_languages (dict)
+    """
+
+    supported_languages = {
         'Linux_Bash': 'bash',
         'Windows_Cmd': 'cmd',
         'DockerCompose': 'docker-compose',
@@ -17,41 +23,44 @@ class ProactiveScriptLanguage:
     }
 
     def get_supported_languages(self):
-        return self.language
+        return self.supported_languages
+
+    def is_language_supported(self, language):
+        return True if language in self.supported_languages.values() else False
 
     def linux_bash(self):
-        return self.language["Linux_Bash"]
+        return self.supported_languages["Linux_Bash"]
 
     def windows_cmd(self):
-        return self.language["Windows_Cmd"]
+        return self.supported_languages["Windows_Cmd"]
 
     def docker_compose(self):
-        return self.language["DockerCompose"]
+        return self.supported_languages["DockerCompose"]
 
     def scalaw(self):
-        return self.language["Scalaw"]
+        return self.supported_languages["Scalaw"]
 
     def groovy(self):
-        return self.language["Groovy"]
+        return self.supported_languages["Groovy"]
 
     def javascript(self):
-        return self.language["Javascript"]
+        return self.supported_languages["Javascript"]
 
     def jython(self):
-        return self.language["Jython"]
+        return self.supported_languages["Jython"]
 
     def python(self):
-        return self.language["Python"]
+        return self.supported_languages["Python"]
 
     def ruby(self):
-        return self.language["Ruby"]
+        return self.supported_languages["Ruby"]
 
     def perl(self):
-        return self.language["Perl"]
+        return self.supported_languages["Perl"]
 
     def powershell(self):
-        return self.language["PowerShell"]
+        return self.supported_languages["PowerShell"]
 
     def r(self):
-        return self.language["R"]
+        return self.supported_languages["R"]
 
