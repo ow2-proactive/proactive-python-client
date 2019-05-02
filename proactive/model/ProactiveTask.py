@@ -6,7 +6,7 @@ from .ProactiveScriptLanguage import *
 from .ProactiveSelectionScript import *
 
 
-class ProactiveTask:
+class ProactiveTask(object):
     """
     Represents a generic proactive task
 

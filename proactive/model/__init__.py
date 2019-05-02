@@ -1,3 +1,4 @@
+from .ProactiveScript import *
 from .ProactiveForkEnv import *
 from .ProactiveSelectionScript import *
 from .ProactiveScriptLanguage import *

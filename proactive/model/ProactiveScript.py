@@ -1,7 +1,7 @@
 import os
 
 
-class ProactiveScript:
+class ProactiveScript(object):
     """
     Represents a generic proactive script
 

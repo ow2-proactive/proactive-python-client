@@ -1,8 +1,8 @@
 from .model.ProactiveTask import *
 from .model.ProactiveJob import *
 
-__metaclass__ = type
-class ProactiveBuilder:
+#__metaclass__ = type
+class ProactiveBuilder(object):
     """
       Represent a generic builder
 
@@ -138,7 +138,7 @@ class ProactiveTaskBuilder(ProactiveBuilder):
         )
 
 
-class ProactiveJobBuilder:
+class ProactiveJobBuilder(ProactiveBuilder):
     """
       Represent a proactive job builder
 
@@ -148,7 +148,7 @@ class ProactiveJobBuilder:
     """
 
     def __init__(self, proactive_factory, proactive_job_model=None):
-        self.setProactiveFactory(proactive_factory)
+        super(ProactiveJobBuilder, self).__init__(proactive_factory)
         self.setProactiveJobModel(proactive_job_model)
 
     def setProactiveFactory(self, proactive_factory):
