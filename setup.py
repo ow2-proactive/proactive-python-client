@@ -17,8 +17,8 @@ with open('gradle.properties') as fp:
         if '=' in line:
             name, value = line.replace('\n','').split('=', 1)
             if "SNAPSHOT" in value:
-                #dev_version = ".dev" + str(int(time.time()))
-                dev_version = "." + now.strftime("%Y.%m.%d.%H.%M")
+                dev_version = "." + now.strftime("%y%m%d%H%M") + "dev"
+                # dev_version = "." + now.strftime("%y%m%d%H%M")
                 value = value.replace("-SNAPSHOT", dev_version)
             gradle_properties[name] = value
 
