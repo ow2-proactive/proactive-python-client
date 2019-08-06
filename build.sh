@@ -12,6 +12,8 @@ virtualenv -p python3 env
 #virtualenv -p python2 env
 source env/bin/activate
 
+pip install -U pip
+
 pip install jprops
 
 python setup.py sdist --formats=zip
