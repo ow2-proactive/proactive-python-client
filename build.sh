@@ -5,14 +5,14 @@ command -v source >/dev/null 2>&1 || {
 
 #pip list
 
-#pip install virtualenv
+pip install virtualenv
 #which virtualenv
 
 virtualenv -p python3 env
 #virtualenv -p python2 env
 source env/bin/activate
 
-pip install -U pip
+#pip install -U pip
 
 pip install jprops
 
