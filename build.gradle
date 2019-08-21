@@ -1,5 +1,8 @@
+import com.github.jk1.license.render.*
+
 apply plugin: 'java'
 apply plugin: 'maven'
+apply plugin: 'com.github.jk1.dependency-license-report'
 
 repositories {
     if (project.hasProperty('local')) {
@@ -22,6 +25,7 @@ buildscript {
         }
     }
     dependencies {
+        classpath 'com.github.jk1:gradle-license-report:1.7'
     }
 }
 
@@ -45,6 +49,12 @@ clean.doFirst {
     delete "${rootDir}/proactive.egg-info"
     delete "${rootDir}/__pycache__"
 }
+
+licenseReport {
+    configurations = ['runtime']
+    renderers = [new InventoryHtmlReportRenderer()]
+}
+
 
 task copyDependenciesToLib(type: Copy) {
     from configurations.localDeps
