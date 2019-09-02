@@ -14,7 +14,6 @@ from .model.ProactiveForkEnv import *
 from .model.ProactiveTask import *
 from .model.ProactiveJob import *
 
-
 class ProActiveGateway:
     """
     Simple client for the ProActive scheduler REST API
@@ -151,20 +150,24 @@ class ProActiveGateway:
         jobs_page = self.proactive_scheduler_client.getJobs(0, max_number_of_jobs, job_filter_criteria, None)
         return jobs_page.getList()
 
+    @staticmethod
+    def __decode__(value):
+        return value.decode('ascii')
+
     def getJobResult(self, job_id, timeout=60000):
         job_result = self.proactive_scheduler_client.waitForJob(str(job_id), timeout)
         all_results = []
         for result in job_result.getAllResults().values():
             if type(result.getValue()) is bytes:
-                all_results.append(result.getValue().decode('ascii'))
+                all_results.append(self.__decode__(result.getValue()))
             else:
                 all_results.append(str(result.getValue()))
-        return '\n'.join(v for v in all_results)
+        return os.linesep.join(v for v in all_results)
 
     def getTaskResult(self, job_id, task_name, timeout=60000):
         task_result = self.proactive_scheduler_client.waitForTask(str(job_id), task_name, timeout)
         if type(task_result.getValue()) is bytes:
-            task_result = task_result.getValue().decode('ascii')
+            task_result = self.__decode__(task_result.getValue())
         return task_result.getValue()
 
     def printJobOutput(self, job_id, timeout=60000):
@@ -172,7 +175,7 @@ class ProActiveGateway:
         all_outputs = []
         for result in job_result.getAllResults().values():
             all_outputs.append(result.getOutput().getStdoutLogs().strip(' \n'))
-        return '\n'.join(v for v in all_outputs)
+        return os.linesep.join(v for v in all_outputs)
 
     def printTaskOutput(self, job_id, task_name, timeout=60000):
         task_output = self.proactive_scheduler_client.waitForTask(str(job_id), task_name, timeout).getOutput()
