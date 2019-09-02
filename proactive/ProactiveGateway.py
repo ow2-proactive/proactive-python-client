@@ -162,8 +162,21 @@ class ProActiveGateway:
         return '\n'.join(v for v in all_results)
 
     def getTaskResult(self, job_id, task_name, timeout=60000):
+        task_result = self.proactive_scheduler_client.waitForTask(str(job_id), task_name, timeout)
+        if type(task_result.getValue()) is bytes:
+            task_result = task_result.getValue().decode('ascii')
+        return task_result.getValue()
+
+    def printJobOutput(self, job_id, timeout=60000):
         job_result = self.proactive_scheduler_client.waitForJob(str(job_id), timeout)
-        return job_result.getAllResults().get(task_name).getValue()
+        all_outputs = []
+        for result in job_result.getAllResults().values():
+            all_outputs.append(result.getOutput().getStdoutLogs().strip(' \n'))
+        return '\n'.join(v for v in all_outputs)
+
+    def printTaskOutput(self, job_id, task_name, timeout=60000):
+        task_output = self.proactive_scheduler_client.waitForTask(str(job_id), task_name, timeout).getOutput()
+        return task_output.getStdoutLogs().strip(' \n')
 
     def exportJob2XML(self, job_model, debug=False):
         proactive_job = self.buildJob(job_model, debug)
