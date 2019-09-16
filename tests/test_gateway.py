@@ -120,7 +120,7 @@ class GatewayTestSuite(unittest.TestCase):
 
         # Creating the merging task
         pythonTaskMerge = self.gateway.createPythonTask()
-        pythonTaskMerge.setTaskName("ReplicatedPythonTask")
+        pythonTaskMerge.setTaskName("MergePythonTask")
         pythonTaskMerge.setTaskImplementation("""print("Hello world!")""")
 
         pythonTaskMerge.setFlowBlock(self.gateway.getProactiveFlowBlockType().end())
