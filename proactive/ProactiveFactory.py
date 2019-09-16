@@ -34,6 +34,24 @@ class ProactiveFactory:
         """
         return self.runtime_gateway.jvm.org.ow2.proactive.scripting.SimpleScript(script_code, script_language)
 
+    def create_flow_script(self, script):
+        """
+          https://www.activeeon.com/public_content/documentation/javadoc/latest/org/ow2/proactive/scheduler/common/task/flow/FlowScript.html
+        """
+        return self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.task.flow.FlowScript(script)
+
+    def get_flow_script(self):
+        """
+          https://www.activeeon.com/public_content/documentation/javadoc/latest/org/ow2/proactive/scheduler/common/task/flow/FlowScript.html
+        """
+        return self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.task.flow.FlowScript
+
+    def get_flow_block(self):
+        """
+          https://www.activeeon.com/public_content/documentation/javadoc/latest/org/ow2/proactive/scheduler/common/task/flow/FlowBlock.html
+        """
+        return self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.task.flow.FlowBlock
+
     def create_task_script(self, simple_script):
         """
           https://www.activeeon.com/public_content/documentation/javadoc/latest/org/ow2/proactive/scripting/TaskScript.html
