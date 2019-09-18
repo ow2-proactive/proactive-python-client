@@ -98,6 +98,47 @@ class GatewayTestSuite(unittest.TestCase):
         self.assertTrue(isinstance(jobId, numbers.Number))
         self.gateway.disconnect()
 
+    def test_submit_python_script_with_replicate(self):
+        self.gateway.connect(self.username, self.password)
+
+        # Creating the split task
+        pythonTaskSplit = self.gateway.createPythonTask()
+        pythonTaskSplit.setTaskName("SimplePythonTask")
+        pythonTaskSplit.setTaskImplementation("""print("Hello world!")""")
+
+        pythonTaskSplit.setFlowBlock(self.gateway.getProactiveFlowBlockType().start())
+
+        replicateScript = "runs = 3"
+        flow_script = self.gateway.createReplicateFlowScript(replicateScript)
+        pythonTaskSplit.setFlowScript(flow_script)
+
+        # Creating the replicated task
+        pythonTaskProcess = self.gateway.createPythonTask()
+        pythonTaskProcess.setTaskName("ReplicatedPythonTask")
+        pythonTaskProcess.setTaskImplementation("""print("Hello world!")""")
+        pythonTaskProcess.addDependency(pythonTaskSplit)
+
+        # Creating the merging task
+        pythonTaskMerge = self.gateway.createPythonTask()
+        pythonTaskMerge.setTaskName("MergePythonTask")
+        pythonTaskMerge.setTaskImplementation("""print("Hello world!")""")
+
+        pythonTaskMerge.setFlowBlock(self.gateway.getProactiveFlowBlockType().end())
+        pythonTaskMerge.addDependency(pythonTaskProcess)
+
+        myJob = self.gateway.createJob()
+        myJob.setJobName("SimplePythonJob")
+
+        myJob.addTask(pythonTaskSplit)
+        myJob.addTask(pythonTaskProcess)
+        myJob.addTask(pythonTaskMerge)
+
+        jobId = self.gateway.submitJob(myJob)
+
+        self.assertIsNotNone(jobId)
+        self.assertTrue(isinstance(jobId, numbers.Number))
+        self.gateway.disconnect()
+
     def test_submit_python_script_with_dependencies(self):
         self.gateway.connect(self.username, self.password)
 

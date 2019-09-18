@@ -20,6 +20,8 @@ class ProactiveTask(object):
     dependencies (list[ProactiveTask])
     pre_script (ProactivePreScript)
     post_script (ProactivePostScript)
+    flow_script (ProactiveFlowScript)
+    flow_block (ProactiveFlowBlock)
     """
 
     def __init__(self, script_language=None):
@@ -35,6 +37,8 @@ class ProactiveTask(object):
         self.description = []
         self.pre_script = None
         self.post_script = None
+        self.flow_script = None
+        self.flow_block = None
 
     def __str__(self):
         return self.getTaskName()
@@ -154,6 +158,24 @@ class ProactiveTask(object):
 
     def hasPostScript(self):
         return True if self.post_script is not None else False
+
+    def setFlowScript(self, flow_script):
+        self.flow_script = flow_script
+
+    def getFlowScript(self):
+        return self.flow_script
+
+    def hasFlowScript(self):
+        return True if self.flow_script is not None else False
+
+    def setFlowBlock(self, flow_block):
+        self.flow_block = flow_block
+
+    def getFlowBlock(self):
+        return self.flow_block
+
+    def hasFlowBlock(self):
+        return True if self.flow_block is not None else False
 
 
 class ProactivePythonTask(ProactiveTask):

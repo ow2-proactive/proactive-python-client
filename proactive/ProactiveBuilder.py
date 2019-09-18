@@ -48,6 +48,26 @@ class ProactiveTaskBuilder(ProactiveBuilder):
         )
         return self.script
 
+    def __create_flow_script__(self, _flow_script):
+        if _flow_script.isReplicateFlowScript():
+            flow_script = self.__create_replicate_flow_script_(_flow_script)
+        else:
+            flow_script = None
+        return flow_script
+
+    def __create_replicate_flow_script_(self, _flow_script):
+        flow_script = self.__get_flow_script__().createReplicateFlowScript(_flow_script.getImplementation(), _flow_script.getScriptLanguage())
+        return flow_script
+
+    def __get_flow_script__(self):
+        return self.proactive_factory.get_flow_script()
+
+    def __get_flow_block__(self):
+        return self.proactive_factory.get_flow_block()
+
+    def __create_flow_block__(self, _flow_block):
+        return self.__get_flow_block__().parse(_flow_block)
+
     def __create_task_script__(self, script):
         self.task_script = self.proactive_factory.create_task_script(script)
         return self.task_script
@@ -99,6 +119,20 @@ class ProactiveTaskBuilder(ProactiveBuilder):
             self.script_task.setSelectionScript(
                 self.__create_selection_script__(
                     self.proactive_task_model.getSelectionScript()
+                )
+            )
+
+        if self.proactive_task_model.hasFlowScript():
+            self.script_task.setFlowScript(
+                self.__create_flow_script__(
+                    self.proactive_task_model.getFlowScript()
+                )
+            )
+
+        if self.proactive_task_model.hasFlowBlock():
+            self.script_task.setFlowBlock(
+                self.__create_flow_block__(
+                    self.proactive_task_model.getFlowBlock()
                 )
             )
 

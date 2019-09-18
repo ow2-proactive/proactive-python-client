@@ -11,6 +11,9 @@ from .model.ProactiveScript import *
 from .model.ProactiveScriptLanguage import *
 from .model.ProactiveSelectionScript import *
 from .model.ProactiveForkEnv import *
+from .model.ProactiveFlowScript import *
+from .model.ProactiveFlowBlock import *
+from .model.ProactiveFlowActionType import *
 from .model.ProactiveTask import *
 from .model.ProactiveJob import *
 
@@ -43,6 +46,8 @@ class ProActiveGateway:
         )
         self.proactive_factory = ProactiveFactory(self.runtime_gateway)
         self.proactive_script_language = ProactiveScriptLanguage()
+        self.proactive_flow_block = ProactiveFlowBlock()
+        self.proactive_flow_action_type = ProactiveFlowActionType()
 
         self.proactive_scheduler_client = self.proactive_factory.create_smart_proxy()
 
@@ -88,6 +93,20 @@ class ProActiveGateway:
 
     def createPythonTask(self):
         return ProactivePythonTask()
+
+    def createFlowScript(self, script_language=None):
+        if script_language is None:
+            script_language = self.proactive_script_language.javascript()
+        return ProactiveFlowScript(script_language)
+
+    def createReplicateFlowScript(self, script_implementation, script_language="javascript"):
+        flow_script = ProactiveFlowScript(script_language)
+        flow_script.setActionType(self.proactive_flow_action_type.replicate())
+        flow_script.setImplementation(script_implementation)
+        return flow_script
+
+    def getProactiveFlowBlockType(self):
+        return self.proactive_flow_block
 
     def createPreScript(self, language=None):
         return ProactivePreScript(language) if self.proactive_script_language.is_language_supported(language) else None
