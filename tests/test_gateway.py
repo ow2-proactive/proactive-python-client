@@ -103,7 +103,7 @@ class GatewayTestSuite(unittest.TestCase):
 
         # Creating the split task
         pythonTaskSplit = self.gateway.createPythonTask()
-        pythonTaskSplit.setTaskName("SimplePythonTask")
+        pythonTaskSplit.setTaskName("SplitPythonTask")
         pythonTaskSplit.setTaskImplementation("""print("Hello world!")""")
 
         pythonTaskSplit.setFlowBlock(self.gateway.getProactiveFlowBlockType().start())
@@ -127,7 +127,7 @@ class GatewayTestSuite(unittest.TestCase):
         pythonTaskMerge.addDependency(pythonTaskProcess)
 
         myJob = self.gateway.createJob()
-        myJob.setJobName("SimplePythonJob")
+        myJob.setJobName("SimplePythonJobWithReplicatedTask")
 
         myJob.addTask(pythonTaskSplit)
         myJob.addTask(pythonTaskProcess)
