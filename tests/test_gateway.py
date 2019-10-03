@@ -68,10 +68,10 @@ class GatewayTestSuite(unittest.TestCase):
         pythonTask.setTaskExecutionFromLambdaFunction(lambda: 88 - 20 * 10)
         #pythonTask.setTaskImplementationFromLambdaFunction(lambda: 88 - 20 * 10)
         pythonTask.addGenericInformation("PYTHON_COMMAND", "/usr/bin/python3")
-        script_forkenv = os.getcwd() + '/scripts/fork_env.py'
-        forkEnv = self.gateway.createDefaultForkEnvironment()
-        forkEnv.setImplementationFromFile(script_forkenv)
-        pythonTask.setForkEnvironment(forkEnv)
+        #script_forkenv = os.getcwd() + '/scripts/fork_env.py'
+        #forkEnv = self.gateway.createDefaultForkEnvironment()
+        #forkEnv.setImplementationFromFile(script_forkenv)
+        #pythonTask.setForkEnvironment(forkEnv)
 
         myJob = self.gateway.createJob()
         myJob.setJobName("SimplePythonLambdaJob")
