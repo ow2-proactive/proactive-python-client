@@ -155,12 +155,7 @@ class GatewayTestSuite(unittest.TestCase):
         pythonTaskLoop.setTaskImplementation("""print("Hello world!")""")
         pythonTaskLoop.addDependency(pythonTaskStart)
 
-        loopScript = """
-if(variables.get('PA_TASK_ITERATION') < 5) {
-    loop = true;
-} else {
-    loop = false;
-}"""
+        loopScript = """if(variables.get('PA_TASK_ITERATION') < 5) { loop = true; } else { loop = false; }"""
         flow_script = self.gateway.createLoopFlowScript(loopScript, pythonTaskStart.getTaskName())
         pythonTaskLoop.setFlowScript(flow_script)
         pythonTaskLoop.setFlowBlock(self.gateway.getProactiveFlowBlockType().end())
@@ -200,12 +195,8 @@ if(variables.get('PA_TASK_ITERATION') < 5) {
         pythonTaskContinuation.setTaskName("ContinuationPythonTask")
         pythonTaskContinuation.setTaskImplementation("""print("Continuation task.")""")
 
-        branchScript = """
-if(1==1){
-    branch = "if";
-} else {
-    branch = "else";
-}"""
+        branchScript = """if(true){ branch = "if"; } else { branch = "else"; }"""
+
         flow_script = self.gateway.createBranchFlowScript(branchScript,
                                                           pythonTaskIf.getTaskName(),
                                                           pythonTaskElse.getTaskName(),
