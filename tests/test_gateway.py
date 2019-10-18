@@ -139,6 +139,93 @@ class GatewayTestSuite(unittest.TestCase):
         self.assertTrue(isinstance(jobId, numbers.Number))
         self.gateway.disconnect()
 
+    def test_submit_python_script_with_loop(self):
+        self.gateway.connect(self.username, self.password)
+
+        # Creating the split task
+        pythonTaskStart = self.gateway.createPythonTask()
+        pythonTaskStart.setTaskName("StartPythonTask")
+        pythonTaskStart.setTaskImplementation("""print("Hello world!")""")
+
+        pythonTaskStart.setFlowBlock(self.gateway.getProactiveFlowBlockType().start())
+
+        # Creating the replicated task
+        pythonTaskLoop = self.gateway.createPythonTask()
+        pythonTaskLoop.setTaskName("LoopPythonTask")
+        pythonTaskLoop.setTaskImplementation("""print("Hello world!")""")
+        pythonTaskLoop.addDependency(pythonTaskStart)
+
+        loopScript = """
+if(variables.get('PA_TASK_ITERATION') < 5) {
+    loop = true;
+} else {
+    loop = false;
+}"""
+        flow_script = self.gateway.createLoopFlowScript(loopScript, pythonTaskStart.getTaskName())
+        pythonTaskLoop.setFlowScript(flow_script)
+        pythonTaskLoop.setFlowBlock(self.gateway.getProactiveFlowBlockType().end())
+
+        myJob = self.gateway.createJob()
+        myJob.setJobName("SimplePythonJobWithLoopTask")
+
+        myJob.addTask(pythonTaskStart)
+        myJob.addTask(pythonTaskLoop)
+
+        jobId = self.gateway.submitJob(myJob)
+
+        self.assertIsNotNone(jobId)
+        self.assertTrue(isinstance(jobId, numbers.Number))
+        self.gateway.disconnect()
+
+    def test_submit_python_script_with_branch(self):
+        self.gateway.connect(self.username, self.password)
+
+        # Creating the split task
+        pythonTaskCondition = self.gateway.createPythonTask()
+        pythonTaskCondition.setTaskName("ConditionPythonTask")
+        pythonTaskCondition.setTaskImplementation("""print("Hello condition world!")""")
+
+        # Creating the If task
+        pythonTaskIf = self.gateway.createPythonTask()
+        pythonTaskIf.setTaskName("IfPythonTask")
+        pythonTaskIf.setTaskImplementation("""print("If task.")""")
+
+        # Creating the Else task
+        pythonTaskElse = self.gateway.createPythonTask()
+        pythonTaskElse.setTaskName("ElsePythonTask")
+        pythonTaskElse.setTaskImplementation("""print("Else task should be skipped.")""")
+
+        # Creating the Continuation task
+        pythonTaskContinuation = self.gateway.createPythonTask()
+        pythonTaskContinuation.setTaskName("ContinuationPythonTask")
+        pythonTaskContinuation.setTaskImplementation("""print("Continuation task.")""")
+
+        branchScript = """
+if(1==1){
+    branch = "if";
+} else {
+    branch = "else";
+}"""
+        flow_script = self.gateway.createBranchFlowScript(branchScript,
+                                                          pythonTaskIf.getTaskName(),
+                                                          pythonTaskElse.getTaskName(),
+                                                          pythonTaskContinuation.getTaskName())
+        pythonTaskCondition.setFlowScript(flow_script)
+
+        myJob = self.gateway.createJob()
+        myJob.setJobName("SimplePythonJobWithBranchTask")
+
+        myJob.addTask(pythonTaskCondition)
+        myJob.addTask(pythonTaskIf)
+        myJob.addTask(pythonTaskElse)
+        myJob.addTask(pythonTaskContinuation)
+
+        jobId = self.gateway.submitJob(myJob)
+
+        self.assertIsNotNone(jobId)
+        self.assertTrue(isinstance(jobId, numbers.Number))
+        self.gateway.disconnect()
+
     def test_submit_python_script_with_dependencies(self):
         self.gateway.connect(self.username, self.password)
 

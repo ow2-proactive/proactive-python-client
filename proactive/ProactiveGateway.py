@@ -105,6 +105,23 @@ class ProActiveGateway:
         flow_script.setImplementation(script_implementation)
         return flow_script
 
+    def createLoopFlowScript(self, script_implementation, target, script_language="javascript"):
+        flow_script = ProactiveFlowScript(script_language)
+        flow_script.setActionType(self.proactive_flow_action_type.loop())
+        flow_script.setImplementation(script_implementation)
+        flow_script.setActionTarget(target)
+        return flow_script
+
+    def createBranchFlowScript(self, script_implementation, target_if, target_else, target_continuation,
+                               script_language="javascript"):
+        flow_script = ProactiveFlowScript(script_language)
+        flow_script.setActionType(self.proactive_flow_action_type.branch())
+        flow_script.setImplementation(script_implementation)
+        flow_script.setActionTarget(target_if)
+        flow_script.setActionTargetElse(target_else)
+        flow_script.setActionTargetContinuation(target_continuation)
+        return flow_script
+
     def getProactiveFlowBlockType(self):
         return self.proactive_flow_block
 

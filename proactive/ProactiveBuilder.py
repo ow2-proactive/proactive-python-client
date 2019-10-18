@@ -51,12 +51,31 @@ class ProactiveTaskBuilder(ProactiveBuilder):
     def __create_flow_script__(self, _flow_script):
         if _flow_script.isReplicateFlowScript():
             flow_script = self.__create_replicate_flow_script_(_flow_script)
+        elif _flow_script.isLoopFlowScript():
+            flow_script = self.__create_loop_flow_script_(_flow_script)
+        elif _flow_script.isBranchFlowScript():
+            flow_script = self.__create_branch_flow_script_(_flow_script)
         else:
             flow_script = None
         return flow_script
 
     def __create_replicate_flow_script_(self, _flow_script):
-        flow_script = self.__get_flow_script__().createReplicateFlowScript(_flow_script.getImplementation(), _flow_script.getScriptLanguage())
+        flow_script = self.__get_flow_script__().createReplicateFlowScript(_flow_script.getImplementation(),
+                                                                           _flow_script.getScriptLanguage())
+        return flow_script
+
+    def __create_loop_flow_script_(self, _flow_script):
+        flow_script = self.__get_flow_script__().createLoopFlowScript(_flow_script.getImplementation(),
+                                                                      _flow_script.getScriptLanguage(),
+                                                                      _flow_script.getActionTarget())
+        return flow_script
+
+    def __create_branch_flow_script_(self, _flow_script):
+        flow_script = self.__get_flow_script__().createIfFlowScript(_flow_script.getImplementation(),
+                                                                    _flow_script.getScriptLanguage(),
+                                                                    _flow_script.getActionTarget(),
+                                                                    _flow_script.getActionTargetElse(),
+                                                                    _flow_script.getActionTargetContinuation())
         return flow_script
 
     def __get_flow_script__(self):

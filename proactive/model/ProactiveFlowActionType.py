@@ -14,3 +14,9 @@ class ProactiveFlowActionType:
     def replicate(self):
         return self.flow_action_types['REPLICATE']
 
+    def loop(self):
+        return self.flow_action_types['LOOP']
+
+    def branch(self):
+        return self.flow_action_types['IF']
+
