@@ -108,7 +108,7 @@ class GatewayTestSuite(unittest.TestCase):
 
         pythonTaskSplit.setFlowBlock(self.gateway.getProactiveFlowBlockType().start())
 
-        replicateScript = "runs = 3"
+        replicateScript = "runs = 1"
         flow_script = self.gateway.createReplicateFlowScript(replicateScript)
         pythonTaskSplit.setFlowScript(flow_script)
 
@@ -155,7 +155,7 @@ class GatewayTestSuite(unittest.TestCase):
         pythonTaskLoop.setTaskImplementation("""print("Hello world!")""")
         pythonTaskLoop.addDependency(pythonTaskStart)
 
-        loopScript = """if(variables.get('PA_TASK_ITERATION') < 5) { loop = true; } else { loop = false; }"""
+        loopScript = """if(variables.get('PA_TASK_ITERATION') < 1) { loop = true; } else { loop = false; }"""
         flow_script = self.gateway.createLoopFlowScript(loopScript, pythonTaskStart.getTaskName())
         pythonTaskLoop.setFlowScript(flow_script)
         pythonTaskLoop.setFlowBlock(self.gateway.getProactiveFlowBlockType().end())
