@@ -139,10 +139,14 @@ class ProActiveGateway:
 
     def submitJob(self, job_model, debug=False):
         proactive_job = self.buildJob(job_model, debug)
+        return self.proactive_scheduler_client.submit(proactive_job).longValue()
+
+    def submitJobWithInputsAndOutputsPaths(self, job_model, input_folder_path='.', output_folder_path='.', debug=False):
+        proactive_job = self.buildJob(job_model, debug)
         return self.proactive_scheduler_client.submit(
             proactive_job,
-            job_model.getInputFolder(),
-            job_model.getOutputFolder(),
+            input_folder_path,
+            output_folder_path,
             False,
             True
         ).longValue()
