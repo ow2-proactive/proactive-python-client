@@ -55,19 +55,34 @@ licenseReport {
     renderers = [new InventoryHtmlReportRenderer()]
 }
 
-
-task copyDependenciesToLib(type: Copy) {
+task setup(type: Copy) {
     from configurations.localDeps
     into "./proactive/java/lib"
 }
 
-task setup(type:Exec) {
+task buildfinal(type:Exec) {
    if ( project.hasProperty("proactive_url") && project.hasProperty("username") && project.hasProperty("password") ) {
        commandLine "./build.sh", "${proactive_url}", "${username}", "${password}"   
    }else{
        commandLine "./build.sh", "", "", ""   
    }
-} 
+}
+
+task buildlocal(type:Exec) {
+   commandLine "./buildlocal.sh"
+}
+
+task installlocal(type:Exec) {
+   commandLine "./installlocal.sh"
+}
+
+task testlocal(type:Exec) {
+   if ( project.hasProperty("proactive_url") && project.hasProperty("username") && project.hasProperty("password") ) {
+       commandLine "./testlocal.sh", "${proactive_url}", "${username}", "${password}"
+   }else{
+       commandLine "./testlocal.sh", "", "", ""
+   }
+}
 
 task publish(type:Exec) {
    ignoreExitValue true
@@ -78,12 +93,11 @@ task publish(type:Exec) {
    }
 } 
 
-
 task install(overwrite: true) {
 }
 
-copyDependenciesToLib.dependsOn clean
-setup.dependsOn copyDependenciesToLib
-build.dependsOn setup
+setup.dependsOn clean
+buildfinal.dependsOn setup
+build.dependsOn buildfinal
 publish.dependsOn build
 install.dependsOn publish
