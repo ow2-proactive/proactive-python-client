@@ -105,3 +105,4 @@ build/
 .pytest_cache/
 .DS_Store
 .pypirc
+debug
