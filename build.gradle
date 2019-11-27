@@ -48,6 +48,7 @@ clean.doFirst {
     delete "${rootDir}/env/"
     delete "${rootDir}/proactive.egg-info"
     delete "${rootDir}/__pycache__"
+    delete "${rootDir}/proactive/java/lib/"
 }
 
 licenseReport {
