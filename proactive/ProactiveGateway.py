@@ -7,9 +7,6 @@ from py4j.java_collections import MapConverter
 from .ProactiveFactory import *
 from .ProactiveBuilder import *
 
-from .model.ProactiveScript import *
-from .model.ProactiveScriptLanguage import *
-from .model.ProactiveSelectionScript import *
 from .model.ProactiveForkEnv import *
 from .model.ProactiveFlowScript import *
 from .model.ProactiveFlowBlock import *
@@ -17,23 +14,28 @@ from .model.ProactiveFlowActionType import *
 from .model.ProactiveTask import *
 from .model.ProactiveJob import *
 
+
 class ProActiveGateway:
     """
     Simple client for the ProActive scheduler REST API
     See also https://try.activeeon.com/rest/doc/jaxrsdocs/overview-summary.html
     """
 
-    def __init__(self, base_url, javaopts=[], redirectJVMOutput=False):
+    def __init__(self, base_url, debug=False, javaopts=[], log4j_props_file=None):
         self.root_dir = os.path.dirname(os.path.abspath(__file__))
         self.current_path = self.root_dir + "/java/lib/*"
         self.base_url = base_url
         self.gateway = JavaGateway()
         self.javaopts = javaopts
-        #self.javaopts.append('-Dlog4j.configuration=file:'+os.path.join(os.getcwd(),'log4j.properties'))
         self.redirect_stdout = None
         self.redirect_stderr = None
 
-        if redirectJVMOutput:
+        if debug:
+            if log4j_props_file:
+                self.log4j_props_file = log4j_props_file
+            else:
+                self.log4j_props_file = os.path.join(self.root_dir + "/java", 'log4j.properties')
+            self.javaopts.append('-Dlog4j.configuration=file:' + self.log4j_props_file)
             self.redirect_stdout = sys.stdout
             self.redirect_stderr = sys.stderr
 
