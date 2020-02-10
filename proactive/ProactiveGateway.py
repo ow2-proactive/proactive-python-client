@@ -50,13 +50,23 @@ class ProActiveGateway:
         self.logger = logging.getLogger('ProactiveGateway')
 
         self.logger.debug('Launching JVM gateway with javaopts = ' + str(self.javaopts))
-        self.runtime_gateway = self.gateway.launch_gateway(
-            classpath=os.path.normpath(self.current_path),
-            die_on_exit=True,
-            javaopts=self.javaopts,
-            redirect_stdout=self.redirect_stdout,
-            redirect_stderr=self.redirect_stderr,
-        )
+        try:
+            self.runtime_gateway = self.gateway.launch_gateway(
+                classpath=os.path.normpath(self.current_path),
+                die_on_exit=True,
+                javaopts=self.javaopts,
+                redirect_stdout=self.redirect_stdout,
+                redirect_stderr=self.redirect_stderr,
+            )
+        except Exception:
+            self.runtime_gateway = self.gateway.launch_gateway(
+                classpath=os.path.normpath(self.current_path),
+                die_on_exit=True,
+                javaopts=self.javaopts,
+                redirect_stdout=None,
+                redirect_stderr=None,
+            )
+
         self.logger.debug('JVM gateway launched with success')
         self.proactive_factory = ProactiveFactory(self.runtime_gateway)
         self.proactive_script_language = ProactiveScriptLanguage()

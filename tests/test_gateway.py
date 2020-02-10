@@ -17,7 +17,7 @@ class GatewayTestSuite(unittest.TestCase):
 
     @pytest.fixture(autouse=True)
     def setup_gateway(self, metadata):
-        self.gateway = proactive.ProActiveGateway(metadata['proactive_url'])
+        self.gateway = proactive.ProActiveGateway(metadata['proactive_url'], debug=True)
         self.username = metadata['username']
         self.password = metadata['password']
 
