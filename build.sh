@@ -19,7 +19,7 @@ pip install jprops
 python setup.py sdist --formats=zip
 pip install dist/proactive*.zip
 
-pip install pytest-html requests py4j cloudpickle
+pip install requests py4j cloudpickle
 
 #pip list
 
