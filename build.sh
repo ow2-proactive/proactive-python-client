@@ -19,7 +19,7 @@ pip install jprops
 python setup.py sdist --formats=zip
 pip install dist/proactive*.zip
 
-pip install py4j=0.10.8.1
+pip install py4j==0.10.8.1
 pip install pytest-html requests cloudpickle
 
 if [ -z "$1" ]
