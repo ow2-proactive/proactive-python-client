@@ -19,13 +19,12 @@ pip install jprops
 python setup.py sdist --formats=zip
 pip install dist/proactive*.zip
 
-pip install pytest pytest-metadata
-pip install requests py4j cloudpickle
-
+pip install py4j=0.10.8.1
+pip install pytest-html requests cloudpickle
 
 if [ -z "$1" ]
   then
     echo "No Tests will run"
   else
-    pytest --metadata proactive_url $1 --metadata username $2 --metadata password $3
+    pytest --metadata proactive_url $1 --metadata username $2 --metadata password $3 --junit-xml=build/reports/TEST-report.xml
 fi
