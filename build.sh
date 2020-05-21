@@ -3,7 +3,8 @@ command -v source >/dev/null 2>&1 || {
   echo "I require source but it's not installed.  Aborting." >&2; exit 1;
 }
 
-#pip list
+echo "HOME: $HOME"
+echo "PWD: $PWD"
 
 pip install virtualenv
 #which virtualenv
@@ -12,19 +13,18 @@ virtualenv -p python3 env
 #virtualenv -p python2 env
 source env/bin/activate
 
-#pip install -U pip
-
+pip list
+pip install -U pip
 pip install jprops
+pip install py4j==0.10.8.1
+pip install pytest-html requests cloudpickle
 
 python setup.py sdist --formats=zip
 pip install dist/proactive*.zip
-
-pip install py4j==0.10.8.1
-pip install pytest-html requests cloudpickle
 
 if [ -z "$1" ]
   then
     echo "No Tests will run"
   else
-    pytest --metadata proactive_url $1 --metadata username $2 --metadata password $3 --junit-xml=build/reports/TEST-report.xml
+    pytest --metadata proactive_url "$1" --metadata username "$2" --metadata password "$3" --junit-xml=build/reports/TEST-report.xml
 fi
