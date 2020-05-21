@@ -21,6 +21,7 @@ pip install pytest-html requests cloudpickle
 
 python setup.py sdist --formats=zip
 pip install dist/proactive*.zip
+pip list
 
 if [ -z "$1" ]
   then

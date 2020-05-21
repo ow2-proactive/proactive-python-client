@@ -8,10 +8,15 @@ source env/bin/activate
 
 pip list
 pip install twine
+pip list
 
-if [[ $JENKINS_JNLP_URL ]]
-then
-   twine upload -r pypi dist/* --config-file /home/activeeon/.pypirc
+# find / -name .pypirc
+PYPIRC_FILE=/home/activeeon/.pypirc
+if [ -f "$PYPIRC_FILE" ]; then
+  echo "$PYPIRC_FILE exist"
+  twine upload -r pypi dist/* --config-file $PYPIRC_FILE
+  echo "Done"
 else
-   twine upload -r pypi dist/*
+  echo "$PYPIRC_FILE does not exist"
+  echo "The upload to pypi was aborted!"
 fi
