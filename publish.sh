@@ -6,6 +6,7 @@ command -v source >/dev/null 2>&1 || {
 virtualenv -p python3 env
 source env/bin/activate
 
+pip list
 pip install twine
 
 if [[ $JENKINS_JNLP_URL ]]
