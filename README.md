@@ -27,6 +27,7 @@ Replace `XXX` with the respective information.
 
 ```
 import os
+import getpass
 import proactive
 
 print("Logging on proactive-server...")
@@ -40,6 +41,8 @@ javaopts=[]
 gateway = proactive.ProActiveGateway(proactive_url, javaopts)
 
 gateway.connect(username="", password="")  # put your login here!
+# Or uncomment the following line to protect your password
+# gateway.connect(username="", password=getpass.getpass(prompt='Password: '))
 assert gateway.isConnected() is True
 print("Connected")
 
