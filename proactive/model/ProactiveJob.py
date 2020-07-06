@@ -13,6 +13,8 @@ class ProactiveJob:
     def __init__(self):
         self.job_name = ''
         self.job_tasks = []
+        self.generic_information = {}
+        self.variables = {}
         self.input_folder = '.'
         self.output_folder = '.'
 
@@ -39,6 +41,33 @@ class ProactiveJob:
 
     def getTasks(self):
         return self.job_tasks
+
+    def addVariable(self, key, value):
+        self.variables[key] = value
+
+    def getVariables(self):
+        return self.variables
+
+    def hasVariables(self):
+        return True if self.variables else False
+
+    def removeVariable(self, key):
+        del self.variables[key]
+
+    def clearVariables(self):
+        self.variables.clear()
+
+    def addGenericInformation(self, key, value):
+        self.generic_information[key] = value
+
+    def getGenericInformation(self):
+        return self.generic_information
+
+    def removeGenericInformation(self, key):
+        del self.generic_information[key]
+
+    def clearGenericInformation(self):
+        self.generic_information.clear()
 
     def setInputFolder(self, input_folder):
         self.input_folder = input_folder

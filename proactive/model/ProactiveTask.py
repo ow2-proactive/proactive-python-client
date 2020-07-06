@@ -30,6 +30,7 @@ class ProactiveTask(object):
         self.selection_script = None
         self.task_name = ''
         self.task_implementation = ''
+        self.variables = {}
         self.generic_information = {}
         self.input_files = []
         self.output_files = []
@@ -87,14 +88,29 @@ class ProactiveTask(object):
     def getTaskImplementation(self):
         return self.task_implementation
 
+    def addVariable(self, key, value):
+        self.variables[key] = value
+
+    def getVariables(self):
+        return self.variables
+
+    def hasVariables(self):
+        return True if self.variables else False
+
+    def removeVariable(self, key):
+        del self.variables[key]
+
+    def clearVariables(self):
+        self.variables.clear()
+
     def addGenericInformation(self, key, value):
         self.generic_information[key] = value
 
     def getGenericInformation(self):
         return self.generic_information
 
-    def removeGenericInformation(self, task):
-        del self.generic_information[task]
+    def removeGenericInformation(self, key):
+        del self.generic_information[key]
 
     def clearGenericInformation(self):
         self.generic_information.clear()
