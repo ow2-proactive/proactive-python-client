@@ -1,3 +1,5 @@
+from py4j.java_collections import MapConverter
+
 from .model.ProactiveTask import *
 from .model.ProactiveJob import *
 import logging
@@ -186,6 +188,17 @@ class ProactiveTaskBuilder(ProactiveBuilder):
                 self.__create_post_script__(self.proactive_task_model.getPostScript())
             )
 
+        if self.proactive_task_model.hasVariables():
+            self.logger.debug('Adding variables')
+            variables = {}
+            for key, value in self.proactive_task_model.getVariables().items():
+                task_var = self.proactive_factory.create_task_variable()
+                task_var.setName(key)
+                task_var.setValue(value)
+                variables[key] = task_var
+            javamap = MapConverter().convert(variables, self.proactive_factory.getRuntimeGateway()._gateway_client)
+            self.script_task.setVariables(javamap)
+
         self.logger.debug('Adding the generic information')
         for key, value in self.proactive_task_model.getGenericInformation().items():
             self.script_task.addGenericInformation(key, value)
@@ -263,6 +276,21 @@ class ProactiveJobBuilder(ProactiveBuilder):
             self.proactive_job.addTask(proactive_task)
             #proactive_task_list.append(proactive_task)
             proactive_task_map[proactive_task_model.getTaskName()] = [proactive_task_model, proactive_task]
+
+        if self.proactive_job_model.hasVariables():
+            self.logger.debug('Adding variables')
+            variables = {}
+            for key, value in self.proactive_job_model.getVariables().items():
+                task_var = self.proactive_factory.create_job_variable()
+                task_var.setName(key)
+                task_var.setValue(value)
+                variables[key] = task_var
+            javamap = MapConverter().convert(variables, self.proactive_factory.getRuntimeGateway()._gateway_client)
+            self.proactive_job.setVariables(javamap)
+
+        self.logger.debug('Adding the generic information')
+        for key, value in self.proactive_job_model.getGenericInformation().items():
+            self.proactive_job.addGenericInformation(key, value)
 
         self.logger.debug('Adding dependencies to the tasks')
         #for proactive_task in proactive_task_list:

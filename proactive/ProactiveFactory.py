@@ -82,6 +82,18 @@ class ProactiveFactory:
         """
         return self.runtime_gateway.jvm.org.ow2.proactive.scripting.SelectionScript(script_code, script_language, is_dynamic)
 
+    def create_job_variable(self):
+        """
+          https://www.activeeon.com/public_content/documentation/javadoc/latest/org/ow2/proactive/scheduler/common/job/JobVariable.html
+        """
+        return self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.job.JobVariable()
+
+    def create_task_variable(self):
+        """
+          https://www.activeeon.com/public_content/documentation/javadoc/latest/org/ow2/proactive/scheduler/common/task/TaskVariable.html
+        """
+        return self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.task.TaskVariable()
+
     def get_input_access_mode(self):
         """
           https://www.activeeon.com/public_content/documentation/javadoc/latest/org/ow2/proactive/scheduler/common/task/dataspaces/InputAccessMode.html
