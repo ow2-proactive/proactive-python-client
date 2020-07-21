@@ -1,5 +1,6 @@
 import os
 import sys
+import getpass
 
 from py4j.java_gateway import JavaGateway
 from py4j.java_collections import MapConverter
@@ -75,10 +76,16 @@ class ProActiveGateway:
 
         self.proactive_scheduler_client = self.proactive_factory.create_smart_proxy()
 
-    def connect(self, username, password, credentials_path=None, insecure=True):
+    def connect(self, username=None, password=None, credentials_path=None, insecure=True):
         credentials_file = None
         if credentials_path is not None:
             credentials_file = self.runtime_gateway.jvm.java.io.File(credentials_path)
+
+        if username is None:
+            username = input('Login:')
+
+        if password is None:
+            password = getpass.getpass(prompt='Password: ')
 
         connection_info = self.proactive_factory.create_connection_info(
             self.base_url + "/rest", username, password, credentials_file, insecure
