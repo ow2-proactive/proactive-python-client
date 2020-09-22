@@ -4,3 +4,4 @@ sphinx
 requests
 pytest-html
 jprops
+docutils
