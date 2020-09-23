@@ -1,6 +1,6 @@
 py4j
 pytest
-sphinx
+sphinx == 3.2.1
 requests
 pytest-html
 jprops
