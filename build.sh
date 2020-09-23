@@ -28,6 +28,13 @@ python setup.py sdist --formats=zip
 pip3 install dist/proactive*.zip
 pip3 list
 
+pip3 install sphinx
+pip3 install sphinx-rtd-theme
+
+cd docs
+make html
+cd ..
+
 if [ -z "$1" ]
   then
     echo "No Tests will run"

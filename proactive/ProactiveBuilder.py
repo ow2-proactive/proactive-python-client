@@ -11,16 +11,31 @@ class ProactiveBuilder(object):
     """
       Represent a generic builder
 
-      proactive_factory (ProactiveFactory)
+      - proactive_factory (ProactiveFactory)
     """
 
     def __init__(self, proactive_factory=None):
+        """
+        Create a ProActive generic builder
+
+        :param proactive_factory: A valid ProactiveFactory object
+        """
         self.setProactiveFactory(proactive_factory)
 
     def setProactiveFactory(self, proactive_factory):
+        """
+        Set the Proactive factory
+
+        :param proactive_factory: A valid ProactiveFactory object
+        """
         self.proactive_factory = proactive_factory
 
     def getProactiveFactory(self):
+        """
+        Get the used Proactive factory
+
+        :return: A ProactiveFactory object
+        """
         return self.proactive_factory
 
 
@@ -28,13 +43,21 @@ class ProactiveTaskBuilder(ProactiveBuilder):
     """
       Represent a proactive task builder
 
-      proactive_task (ProactiveTask)
-      script (jvm.org.ow2.proactive.scripting.SimpleScript)
-      task_script (jvm.org.ow2.proactive.scripting.TaskScript)
-      script_task (jvm.org.ow2.proactive.scheduler.common.task.ScriptTask)
+      - proactive_task (ProactiveTask)
+      - script (jvm.org.ow2.proactive.scripting.SimpleScript)
+      - task_script (jvm.org.ow2.proactive.scripting.TaskScript)
+      - script_task (jvm.org.ow2.proactive.scheduler.common.task.ScriptTask)
     """
 
     def __init__(self, proactive_factory, proactive_task_model=None, debug=False, log4py_props_file=None):
+        """
+        Create a Proactive task builder
+
+        :param proactive_factory: A valid ProactiveFactory object
+        :param proactive_task_model: A valid task model
+        :param debug: If set True, the debug mode will be activated
+        :param log4py_props_file: The log4py properties file path
+        """
         self.root_dir = os.path.dirname(os.path.abspath(__file__))
         super(ProactiveTaskBuilder, self).__init__(proactive_factory)
         self.setProactiveTaskModel(proactive_task_model)
@@ -47,9 +70,19 @@ class ProactiveTaskBuilder(ProactiveBuilder):
         self.logger = logging.getLogger('ProactiveBuilder')
 
     def setProactiveTaskModel(self, proactive_task_model):
+        """
+        Set the Proactive Python task model
+
+        :param proactive_job: A valid task model
+        """
         self.proactive_task_model = proactive_task_model
 
     def getProactiveTaskModel(self):
+        """
+        Get the Proactive task model
+
+        :return: The Proactive Python task model
+        """
         return self.proactive_task_model
 
     def __create_script__(self):
@@ -219,6 +252,11 @@ class ProactiveTaskBuilder(ProactiveBuilder):
         return self.script_task
 
     def create(self):
+        """
+        Create a Proactive java task
+
+        :return: The Proactive java task object
+        """
         return self.__create_script_task__(
             self.__create_task_script__(
                 self.__create_script__()
@@ -230,12 +268,20 @@ class ProactiveJobBuilder(ProactiveBuilder):
     """
       Represent a proactive job builder
 
-      proactive_factory (ProactiveFactory)
-      proactive_job (ProactiveJob)
-      job (org.ow2.proactive.scheduler.common.job.TaskFlowJob)
+      - proactive_factory (ProactiveFactory)
+      - proactive_job (ProactiveJob)
+      - job (org.ow2.proactive.scheduler.common.job.TaskFlowJob)
     """
 
     def __init__(self, proactive_factory, proactive_job_model=None, debug=False, log4py_props_file=None):
+        """
+        Create a Proactive job builder
+
+        :param proactive_factory: A valid ProactiveFactory object
+        :param proactive_job_model: A valid job model
+        :param debug: If set True, the debug mode will be activated
+        :param log4py_props_file: The log4py properties file path
+        """
         self.root_dir = os.path.dirname(os.path.abspath(__file__))
         super(ProactiveJobBuilder, self).__init__(proactive_factory)
         self.setProactiveJobModel(proactive_job_model)
@@ -248,21 +294,51 @@ class ProactiveJobBuilder(ProactiveBuilder):
         self.logger = logging.getLogger('ProactiveBuilder')
 
     def setProactiveFactory(self, proactive_factory):
+        """
+        Set the Proactive factory
+
+        :param proactive_factory: A valid ProactiveFactory object
+        """
         self.proactive_factory = proactive_factory
 
     def getProactiveFactory(self):
+        """
+        Get the used Proactive factory
+
+        :return: A ProactiveFactory object
+        """
         return self.proactive_factory
 
     def setProactiveJobModel(self, proactive_job):
+        """
+        Set the Proactive Python job model
+
+        :param proactive_job: A valid job model
+        """
         self.proactive_job_model = proactive_job
 
     def getProactiveJobModel(self):
+        """
+        Get the Proactive job model
+
+        :return: The Proactive Python job model
+        """
         return self.proactive_job_model
 
     def getProactiveJob(self):
+        """
+        Get the Proactive java job
+
+        :return: The Proactive java job object
+        """
         return self.proactive_job
 
     def create(self):
+        """
+        Create the Proactive java job
+
+        :return: self
+        """
         self.logger.debug('Building the job')
         self.proactive_job = self.proactive_factory.create_job()
         self.proactive_job.setName(self.proactive_job_model.getJobName())
