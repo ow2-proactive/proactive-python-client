@@ -22,11 +22,18 @@ with open('gradle.properties') as fp:
                 value = value.replace("-SNAPSHOT", dev_version)
             gradle_properties[name] = value
 
+with open("README.md", "r") as fh:
+    try:
+        long_description = fh.read()
+    except (OSError, IOError):
+        long_description = "Not available"
 
 setup(
     name='proactive',
     version=gradle_properties["version"],
     description='ProActive scheduler client module',
+    long_description=long_description,
+    long_description_content_type="text/markdown",
     author='Activeeon',
     author_email='contact@activeeon.com',
     url='https://github.com/ow2-proactive/proactive-python-client',
