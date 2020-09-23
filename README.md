@@ -1,9 +1,13 @@
 ![License BSD](https://img.shields.io/badge/License-BSD-blue.svg "License BSD")
 ![Python 3](https://img.shields.io/badge/Python-3-brightgreen.svg "Python 3")
+![Proactive](https://img.shields.io/pypi/v/proactive.svg "Proactive")
+[![Documentation Status](https://readthedocs.org/projects/proactive-python-client/badge/?version=latest)](https://proactive-python-client.readthedocs.io/en/latest/?badge=latest)
 
-# ProActive Scheduler Client
+# ProActive Python Client
 
 This module allows users to interact with a running ProActive Scheduler and Resource Manager.
+
+NOTE: To know how to use the Proactive Python Client in a more advanced way, please follow the link to see our [documentation](https://proactive-python-client.readthedocs.io/en/latest/).
 
 ### 1. Requirements
 * Python 2 and 3

@@ -1,2 +1,3 @@
 include LICENSE
 include gradle.properties
+include README.md
