@@ -1,12 +1,11 @@
 from py4j.java_collections import MapConverter
 
 from .model.ProactiveTask import *
-from .model.ProactiveJob import *
 import logging
 import logging.config
 
 
-#__metaclass__ = type
+# __metaclass__ = type
 class ProactiveBuilder(object):
     """
       Represent a generic builder
@@ -242,7 +241,6 @@ class ProactiveTaskBuilder(ProactiveBuilder):
         for file in self.proactive_task_model.getInputFiles():
             self.script_task.addInputFiles(file, transferFromInputSpace)
 
-
         OutputAccessMode = self.proactive_factory.get_output_access_mode()
         transferToOutputSpace = OutputAccessMode.getAccessMode("transferToOutputSpace")
         self.logger.info("Output Files to transfer: " + str(len(self.proactive_task_model.getOutputFiles())))
@@ -343,14 +341,14 @@ class ProactiveJobBuilder(ProactiveBuilder):
         self.proactive_job = self.proactive_factory.create_job()
         self.proactive_job.setName(self.proactive_job_model.getJobName())
 
-        #proactive_task_list = []
+        # proactive_task_list = []
         proactive_task_map = {}
         self.logger.debug('Building tasks and adding them to the job')
         for proactive_task_model in self.proactive_job_model.getTasks():
             self.logger.info("Adding task " + proactive_task_model.getTaskName() + " to the job " + self.proactive_job.getName())
             proactive_task = ProactiveTaskBuilder(self.proactive_factory, proactive_task_model, self.debug, self.log4py_props_file).create()
             self.proactive_job.addTask(proactive_task)
-            #proactive_task_list.append(proactive_task)
+            # proactive_task_list.append(proactive_task)
             proactive_task_map[proactive_task_model.getTaskName()] = [proactive_task_model, proactive_task]
 
         if self.proactive_job_model.hasVariables():
@@ -369,17 +367,17 @@ class ProactiveJobBuilder(ProactiveBuilder):
             self.proactive_job.addGenericInformation(key, value)
 
         self.logger.debug('Adding dependencies to the tasks')
-        #for proactive_task in proactive_task_list:
+        # for proactive_task in proactive_task_list:
         for task_name in proactive_task_map:
             proactive_task_model, proactive_task = proactive_task_map[task_name]
-            #task = proactive_task.getProactiveTaskModel()
+            # task = proactive_task.getProactiveTaskModel()
             for dependency_task_model in proactive_task_model.getDependencies():
                 self.logger.info("Adding task " + dependency_task_model.getTaskName() + " as a dependency of " + proactive_task_model.getTaskName())
                 _, proactive_dependency_task = proactive_task_map[dependency_task_model.getTaskName()]
                 proactive_task.addDependence(proactive_dependency_task)
 
-        #self.proactive_job.setInputSpace(self.proactive_job_model.getInputFolder())
-        #self.proactive_job.setOutputSpace(self.proactive_job_model.getOutputFolder())
+        # self.proactive_job.setInputSpace(self.proactive_job_model.getInputFolder())
+        # self.proactive_job.setOutputSpace(self.proactive_job_model.getOutputFolder())
 
         return self
 

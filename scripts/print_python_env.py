@@ -1,6 +1,7 @@
-#import os
+# import os
 import socket
 import platform
+
 
 def print_python_env():
     print('-------------------------------------------------------------')
@@ -25,10 +26,10 @@ def print_python_env():
     print()
     print('Executable Architecture')
     print('platform.architecture:      ', platform.architecture())
-    #print()
-    #print('OS')
-    #print('os.uname:                   ', os.uname())
-    #print('os.getcwd:                  ', os.getcwd())
+    # print()
+    # print('OS')
+    # print('os.uname:                   ', os.uname())
+    # print('os.getcwd:                  ', os.getcwd())
     print()
     print('Network')
     print('socket.gethostname:         ', socket.gethostname())

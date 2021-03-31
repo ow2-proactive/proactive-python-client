@@ -4,9 +4,6 @@ import numbers
 import os
 import pytest
 
-#import requests
-#from unittest.case import skip
-
 
 class GatewayTestSuite(unittest.TestCase):
     """Advanced test cases."""
@@ -52,13 +49,13 @@ class GatewayTestSuite(unittest.TestCase):
         self.assertTrue(isinstance(jobId, numbers.Number))
         self.gateway.disconnect()
 
-    #def test_submit_workflow_from_URL(self):
-    #  self.gateway.connect(self.username, self.password)
-    #  workflow_url = 'https://raw.githubusercontent.com/ow2-proactive/proactive-python-client/master/tests/print_file_name.xml'
-    #  jobId = self.gateway.submitWorkflowFromURL(workflow_url, {'file': 'test_submit_URL'})
-    #  self.assertIsNotNone(jobId)
-    #  self.assertTrue(isinstance(jobId, numbers.Number))
-    #  self.gateway.disconnect()
+    # def test_submit_workflow_from_URL(self):
+    #     self.gateway.connect(self.username, self.password)
+    #     workflow_url = 'https://raw.githubusercontent.com/ow2-proactive/proactive-python-client/master/tests/print_file_name.xml'
+    #     jobId = self.gateway.submitWorkflowFromURL(workflow_url, {'file': 'test_submit_URL'})
+    #     self.assertIsNotNone(jobId)
+    #     self.assertTrue(isinstance(jobId, numbers.Number))
+    #     self.gateway.disconnect()
 
     # def test_submit_python_lambda(self):
     #     self.gateway.connect(self.username, self.password)

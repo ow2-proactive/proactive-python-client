@@ -1,5 +1,6 @@
 import sys
 
+
 def hello(name=None):
     if name is not None:
         return "Hello " + str(name) + "!"
