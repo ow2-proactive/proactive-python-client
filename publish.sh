@@ -23,6 +23,7 @@ pip3 list
 PYPIRC_FILE=/home/activeeon/.pypirc
 if [ -f "$PYPIRC_FILE" ]; then
   echo "$PYPIRC_FILE exist"
+  cat $PYPIRC_FILE
   twine upload -r pypi dist/* --config-file $PYPIRC_FILE
   echo "Done"
 else
