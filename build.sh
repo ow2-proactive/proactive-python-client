@@ -12,7 +12,7 @@ python3 -V
 pip3 -V
 
 pip3 list
-pip3 install -U pip
+pip3 install -U pip==20.3.4
 pip3 install virtualenv
 pip3 list
 
