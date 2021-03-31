@@ -1,5 +1,4 @@
 import os
-import getpass
 import proactive
 
 print("Logging on proactive-server...")
@@ -7,10 +6,10 @@ proactive_host = 'try.activeeon.com'
 proactive_port = '8080'
 proactive_url  = "http://"+proactive_host+":"+proactive_port
 print("Connecting on: " + proactive_url)
-javaopts=[]
+javaopts = []
 # uncomment for detailed logs
 # javaopts.append('-Dlog4j.configuration=file:'+os.path.join(os.getcwd(),'log4j.properties'))
-redirectJVMOutput=False
+redirectJVMOutput = False
 gateway = proactive.ProActiveGateway(proactive_url, javaopts, redirectJVMOutput)
 
 gateway.connect(username="", password="")  # put your login here!
@@ -40,7 +39,7 @@ try:
     print("Adding a selection script to the proactive task...")
     proactive_selection_script = gateway.createDefaultSelectionScript()
     proactive_selection_script.setImplementation("selected = True")
-    #proactive_selection_script.setImplementationFromFile("scripts/selection_script.py")
+    # proactive_selection_script.setImplementationFromFile("scripts/selection_script.py")
     proactive_task.setSelectionScript(proactive_selection_script)
 
     print("Creating a proactive job...")

@@ -1,11 +1,8 @@
-import os
 import sys
 import getpass
 
 from py4j.java_gateway import JavaGateway
-from py4j.java_collections import MapConverter
 
-import logging
 import logging.config
 
 from .ProactiveFactory import *
@@ -58,8 +55,8 @@ class ProActiveGateway:
             logging.config.fileConfig(self.log4py_props_file)
 
         self.logger = logging.getLogger('ProactiveGateway')
-
         self.logger.debug('Launching JVM gateway with javaopts = ' + str(self.javaopts))
+
         try:
             self.runtime_gateway = self.gateway.launch_gateway(
                 classpath=os.path.normpath(self.current_path),
@@ -87,7 +84,7 @@ class ProActiveGateway:
 
     def connect(self, username=None, password=None, credentials_path=None, insecure=True):
         """
-        Connect to a Proative server
+        Connect to a Proactive server
 
         :param username: A valid username
         :param password: A valid password
@@ -99,7 +96,7 @@ class ProActiveGateway:
             credentials_file = self.runtime_gateway.jvm.java.io.File(credentials_path)
 
         if username is None:
-            username = input('Login:')
+            username = input('Login: ')
 
         if password is None:
             password = getpass.getpass(prompt='Password: ')
