@@ -9,10 +9,13 @@ echo "PWD: $PWD"
 which python3
 which pip3
 python3 -V
+
+curl https://bootstrap.pypa.io/pip/3.5/get-pip.py -o get-pip.py
+python3 get-pip.py
 pip3 -V
 
-pip3 list
-pip3 install -U pip==20.3.4
+# pip3 list
+# pip3 install -U pip==20.3.4
 pip3 install virtualenv
 pip3 list
 
