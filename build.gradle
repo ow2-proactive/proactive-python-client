@@ -89,11 +89,7 @@ task testlocal(type:Exec) {
 task publish(type:Exec) {
    ignoreExitValue true
    try {
-        if (project.hasProperty("publish_on_pypi")) {
-            commandLine './publish.sh', "${publish_on_pypi}"
-        } else {
-            commandLine './publish.sh', ""
-        }
+        commandLine './publish.sh'
    } catch (all) {
         println 'the archive probably already exist so no need to publish twice'
    }

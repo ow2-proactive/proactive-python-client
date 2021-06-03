@@ -5,7 +5,6 @@ command -v source >/dev/null 2>&1 || {
 
 echo "HOME: $HOME"
 echo "PWD: $PWD"
-echo "publish_on_pypi: $1"
 
 which python3
 which pip3
