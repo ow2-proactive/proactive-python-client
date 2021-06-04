@@ -12,6 +12,7 @@ python3 -V
 
 curl https://bootstrap.pypa.io/pip/3.5/get-pip.py -o get-pip.py
 python3 get-pip.py
+hash -r
 pip3 -V
 
 # pip3 list
