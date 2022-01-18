@@ -448,7 +448,9 @@ class ProActiveGateway:
         """
         job_filter_criteria = self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.JobFilterCriteria(False, False,
                                                                                                             True, False,
-                                                                                                            True)
+                                                                                                            True, None,
+                                                                                                            None, None,
+                                                                                                            None)
         jobs_page = self.proactive_scheduler_client.getJobs(0, max_number_of_jobs, job_filter_criteria, None)
         return jobs_page.getList()
 
