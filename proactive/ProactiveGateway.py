@@ -137,6 +137,10 @@ class ProActiveGateway:
         Terminate the connection
         """
         self.proactive_scheduler_client.terminate()
+        self.runtime_gateway.close()
+        self.runtime_gateway.shutdown()
+        del self.proactive_scheduler_client
+        del self.runtime_gateway
 
     def submitWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables={}):
         """
@@ -446,11 +450,11 @@ class ProActiveGateway:
         :param max_number_of_jobs: The maximal number of retrieved jobs
         :return: A list of jobs
         """
-        job_filter_criteria = self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.JobFilterCriteria(False, False,
-                                                                                                            True, False,
+        job_filter_criteria = self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.JobFilterCriteria(False, True,
+                                                                                                            True, True,
                                                                                                             True, None,
                                                                                                             None, None,
-                                                                                                            None)
+                                                                                                            None, None)
         jobs_page = self.proactive_scheduler_client.getJobs(0, max_number_of_jobs, job_filter_criteria, None)
         return jobs_page.getList()
 
