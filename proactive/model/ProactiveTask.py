@@ -39,6 +39,7 @@ class ProactiveTask(object):
         self.post_script = None
         self.flow_script = None
         self.flow_block = None
+        self.precious_result = False
 
     def __str__(self):
         return self.getTaskName()
@@ -51,6 +52,12 @@ class ProactiveTask(object):
 
     def getScriptLanguage(self):
         return self.script_language
+
+    def setPreciousResult(self, precious_result):
+        self.precious_result = precious_result
+
+    def getPreciousResult(self):
+        return self.precious_result
 
     def setForkEnvironment(self, fork_environment):
         self.fork_environment = fork_environment

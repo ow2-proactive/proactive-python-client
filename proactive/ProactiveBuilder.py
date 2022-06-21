@@ -175,6 +175,7 @@ class ProactiveTaskBuilder(ProactiveBuilder):
         self.script_task = self.proactive_factory.create_script_task()
         self.script_task.setName(self.proactive_task_model.getTaskName())
         self.script_task.setScript(task_script)
+        self.script_task.setPreciousResult(self.proactive_task_model.getPreciousResult())
 
         if self.proactive_task_model.hasForkEnvironment():
             self.logger.debug('Building and setting the fork environment')
