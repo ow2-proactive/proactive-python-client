@@ -319,7 +319,8 @@ class GatewayTestSuite(unittest.TestCase):
     def test_get_all_jobs(self):
         self.gateway.connect(self.username, self.password)
         jobId = self.gateway.submitWorkflowFromCatalog("basic-examples", "Print_File_Name")
-        jobs = self.gateway.getAllJobs()
+        jobs = self.gateway.getAllJobs(my_jobs_only=True, pending=True, running=True, finished=True, child_jobs=True,
+                                       job_name=None, project_name=None, user_name=None, tenant=None, parent_id=None)
         self.assertTrue(jobs.size() > 0)
         for job_info in jobs:
             self.assertTrue(str(job_info.getJobOwner()) is not None)
