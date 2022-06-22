@@ -443,18 +443,29 @@ class ProActiveGateway:
         """
         return self.proactive_scheduler_client.getJobInfo(str(job_id))
 
-    def getAllJobs(self, max_number_of_jobs=1000):
+    def getAllJobs(self, max_number_of_jobs=1000, my_jobs_only=False, pending=False, running=True, finished=False,
+                   child_jobs=True, job_name=None, project_name=None, user_name=None, tenant=None, parent_id=None):
         """
         Get all jobs from the ProActive scheduler
 
+        :param my_jobs_only: Get only my jobs
+        :param pending: Include jobs in PENDING state
+        :param running: Include jobs in RUNNING state
+        :param finished: Include jobs in FINISHED state
+        :param child_jobs: Include child jobs
+        :param job_name: Get jobs with specific job name
+        :param project_name: Get jobs with specific project name
+        :param user_name: Get jobs of specific user
+        :param tenant: Get jobs having specific tenant
+        :param parent_id: Get jobs related to a specific parent job id
         :param max_number_of_jobs: The maximal number of retrieved jobs
         :return: A list of jobs
         """
-        job_filter_criteria = self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.JobFilterCriteria(False, True,
-                                                                                                            True, True,
-                                                                                                            True, None,
-                                                                                                            None, None,
-                                                                                                            None, None)
+        job_filter_criteria = self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.JobFilterCriteria(my_jobs_only, pending,
+                                                                                                            running, finished,
+                                                                                                            child_jobs, job_name,
+                                                                                                            project_name, user_name,
+                                                                                                            tenant, parent_id)
         jobs_page = self.proactive_scheduler_client.getJobs(0, max_number_of_jobs, job_filter_criteria, None)
         return jobs_page.getList()
 
