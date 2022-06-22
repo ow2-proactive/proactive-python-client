@@ -49,6 +49,23 @@ class GatewayTestSuite(unittest.TestCase):
         self.assertTrue(isinstance(jobId, numbers.Number))
         self.gateway.disconnect()
 
+    def test_submit_python_script_from_file_with_precious_result(self):
+        self.gateway.connect(self.username, self.password)
+
+        pythonTask = self.gateway.createPythonTask()
+        pythonTask.setTaskName("PythonTaskFromFileWithPreciousResult")
+        pythonTask.setTaskImplementation("""print("Hello world!")""")
+        pythonTask.setPreciousResult(True)
+
+        myJob = self.gateway.createJob()
+        myJob.setJobName("SimplePythonJobWithPreciousResult")
+        myJob.addTask(pythonTask)
+        jobId = self.gateway.submitJob(myJob)
+
+        self.assertIsNotNone(jobId)
+        self.assertTrue(isinstance(jobId, numbers.Number))
+        self.gateway.disconnect()
+
     # def test_submit_workflow_from_URL(self):
     #     self.gateway.connect(self.username, self.password)
     #     workflow_url = 'https://raw.githubusercontent.com/ow2-proactive/proactive-python-client/master/tests/print_file_name.xml'
