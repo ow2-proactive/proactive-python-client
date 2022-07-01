@@ -32,7 +32,6 @@ buildscript {
 group = 'org.ow2.proactive'
 version = version
 
-
 configurations {
     localDeps
 }
@@ -40,7 +39,6 @@ configurations {
 dependencies {
     localDeps "org.ow2.proactive_grid_cloud_portal:rest-smartproxy:$version"
     compile configurations.localDeps
-    
 }
 
 clean.doFirst {
@@ -65,7 +63,7 @@ task setup(type: Copy) {
 task buildfinal(type:Exec) {
    if ( project.hasProperty("proactive_url") && project.hasProperty("username") && project.hasProperty("password") ) {
        commandLine "./build.sh", "${proactive_url}", "${username}", "${password}"
-   }else{
+   } else {
        commandLine "./build.sh", "", "", ""
    }
 }
@@ -81,7 +79,7 @@ task installlocal(type:Exec) {
 task testlocal(type:Exec) {
    if ( project.hasProperty("proactive_url") && project.hasProperty("username") && project.hasProperty("password") ) {
        commandLine "./testlocal.sh", "${proactive_url}", "${username}", "${password}"
-   }else{
+   } else {
        commandLine "./testlocal.sh", "", "", ""
    }
 }
