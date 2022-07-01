@@ -106,3 +106,4 @@ build/
 .DS_Store
 .pypirc
 debug
+testslocal

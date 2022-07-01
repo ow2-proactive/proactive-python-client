@@ -377,8 +377,11 @@ class ProactiveJobBuilder(ProactiveBuilder):
                 _, proactive_dependency_task = proactive_task_map[dependency_task_model.getTaskName()]
                 proactive_task.addDependence(proactive_dependency_task)
 
-        # self.proactive_job.setInputSpace(self.proactive_job_model.getInputFolder())
-        # self.proactive_job.setOutputSpace(self.proactive_job_model.getOutputFolder())
+        # if self.proactive_job_model.getInputFolder() is not None:
+        #     self.proactive_job.setInputSpace(self.proactive_job_model.getInputFolder())
+        
+        # if self.proactive_job_model.getOutputFolder() is not None:
+        #     self.proactive_job.setOutputSpace(self.proactive_job_model.getOutputFolder())
 
         return self
 

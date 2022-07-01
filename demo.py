@@ -1,53 +1,52 @@
 import os
 import proactive
+import getpass
 
 print("Logging on proactive-server...")
 proactive_host = 'try.activeeon.com'
-proactive_port = '8080'
-proactive_url  = "http://"+proactive_host+":"+proactive_port
-print("Connecting on: " + proactive_url)
-javaopts = []
-# uncomment for detailed logs
-# javaopts.append('-Dlog4j.configuration=file:'+os.path.join(os.getcwd(),'log4j.properties'))
-redirectJVMOutput = False
-gateway = proactive.ProActiveGateway(proactive_url, javaopts, redirectJVMOutput)
+proactive_port = '8443'
+proactive_url  = "https://"+proactive_host+":"+proactive_port
 
-gateway.connect(username="", password="")  # put your login here!
-# Or uncomment the following line to protect your password
-# gateway.connect(username="", password=getpass.getpass(prompt='Password: '))
+print("Connecting on: " + proactive_url)
+gateway = proactive.ProActiveGateway(base_url=proactive_url, debug=False, javaopts=[], log4j_props_file=None, log4py_props_file=None)
+
+gateway.connect(username=input("Login: "), password=getpass.getpass(prompt="Password: "))
 assert gateway.isConnected() is True
 print("Connected")
 
 try:
-    print("Creating a proactive task...")
-    proactive_task = gateway.createPythonTask()
-    proactive_task.setTaskName("SimplePythonTask")
-    proactive_task.setTaskImplementation("""print("Hello world!")""")
-    # proactive_task.setTaskImplementationFromFile("scripts/print_python_env.py")
-    # proactive_task.setTaskImplementationFromFile("scripts/hello.py", ['param_a', 'param_b'])
-    # proactive_task.setTaskImplementationFromFile('main.py', ['param_1', 'param_2'])
-    # proactive_task.addInputFile('scripts/__init__.py')
-    # proactive_task.addInputFile('scripts/hello.py')
-    # proactive_task.setTaskImplementationFromLambdaFunction(lambda: 88 - 20 * 10)
-    # proactive_task.addGenericInformation("PYTHON_COMMAND", "/usr/local/bin/python3")
-
-    print("Adding a fork environment to the proactive task...")
-    proactive_fork_env = gateway.createDefaultForkEnvironment()
-    proactive_fork_env.setImplementationFromFile("scripts/fork_env.py")
-    proactive_task.setForkEnvironment(proactive_fork_env)
-
-    print("Adding a selection script to the proactive task...")
-    proactive_selection_script = gateway.createDefaultSelectionScript()
-    proactive_selection_script.setImplementation("selected = True")
-    # proactive_selection_script.setImplementationFromFile("scripts/selection_script.py")
-    proactive_task.setSelectionScript(proactive_selection_script)
-
     print("Creating a proactive job...")
     proactive_job = gateway.createJob()
     proactive_job.setJobName("SimpleJob")
-    proactive_job.addTask(proactive_task)
-    proactive_job.setInputFolder(os.getcwd())
-    proactive_job.setOutputFolder(os.getcwd())
+
+    print("Creating a proactive task #1...")
+    proactive_task_1 = gateway.createPythonTask()
+    proactive_task_1.setTaskName("SimplePythonTask1")
+    proactive_task_1.setTaskImplementation("""print("Hello from ", variables.get("PA_TASK_NAME"))""")
+    proactive_task_1.addGenericInformation("PYTHON_COMMAND", "python3")
+
+    print("Adding a fork environment to the proactive task #1...")
+    proactive_task_1_fork_env = gateway.createForkEnvironment(language="groovy")
+    proactive_task_1_fork_env.setImplementationFromFile("scripts/fork_env.groovy")
+    proactive_task_1.setForkEnvironment(proactive_task_1_fork_env)
+    proactive_job.addVariable("CONTAINER_PLATFORM", "docker")
+
+    print("Adding a selection script to the proactive task #1...")
+    proactive_task_1_selection_script = gateway.createSelectionScript(language="groovy")
+    proactive_task_1_selection_script.setImplementationFromFile("scripts/check_node_source_name.groovy")
+    proactive_task_1.setSelectionScript(proactive_task_1_selection_script)
+    proactive_job.addVariable("NODE_SOURCE_NAME", "local")
+
+    print("Creating a proactive task #2...")
+    proactive_task_2 = gateway.createPythonTask()
+    proactive_task_2.setTaskName("SimplePythonTask2")
+    proactive_task_2.setTaskImplementation("""print("Hello from ", variables.get("PA_TASK_NAME"))""")
+    proactive_task_2.addGenericInformation("PYTHON_COMMAND", "python3")
+    proactive_task_2.addDependency(proactive_task_1)
+
+    print("Adding proactive tasks to the proactive job...")
+    proactive_job.addTask(proactive_task_1)
+    proactive_job.addTask(proactive_task_2)
 
     print("Submitting the job to the proactive scheduler...")
     job_id = gateway.submitJob(proactive_job, debug=False)

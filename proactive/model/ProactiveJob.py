@@ -15,8 +15,8 @@ class ProactiveJob:
         self.job_tasks = []
         self.generic_information = {}
         self.variables = {}
-        self.input_folder = '.'
-        self.output_folder = '.'
+        self.input_folder = None
+        self.output_folder = None
 
     def __str__(self):
         return self.getJobName()

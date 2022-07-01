@@ -64,9 +64,9 @@ task setup(type: Copy) {
 
 task buildfinal(type:Exec) {
    if ( project.hasProperty("proactive_url") && project.hasProperty("username") && project.hasProperty("password") ) {
-       commandLine "./build.sh", "${proactive_url}", "${username}", "${password}"   
+       commandLine "./build.sh", "${proactive_url}", "${username}", "${password}"
    }else{
-       commandLine "./build.sh", "", "", ""   
+       commandLine "./build.sh", "", "", ""
    }
 }
 
@@ -100,6 +100,7 @@ task install(overwrite: true) {
 
 setup.dependsOn clean
 buildfinal.dependsOn setup
+buildlocal.dependsOn setup
 build.dependsOn buildfinal
 publish.dependsOn build
 install.dependsOn publish

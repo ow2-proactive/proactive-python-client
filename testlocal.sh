@@ -7,6 +7,8 @@ command -v source >/dev/null 2>&1 || {
 if [ -z "$1" ]
   then
     echo "No Tests will run"
+    echo "Usage:"
+    echo "pytest https://try.activeeon.com:8443 username password"
   else
     pytest --metadata proactive_url $1 --metadata username $2 --metadata password $3 --junit-xml=build/reports/TEST-report.xml  
 fi
