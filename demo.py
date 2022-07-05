@@ -3,9 +3,11 @@ import proactive
 import getpass
 
 print("Logging on proactive-server...")
-proactive_host = 'try.activeeon.com'
-proactive_port = '8443'
-proactive_url  = "https://"+proactive_host+":"+proactive_port
+proactive_url = input("Server (default: https://try.activeeon.com:8443): ")
+if proactive_url == "":
+    proactive_url  = "https://try.activeeon.com:8443"
+if not proactive_url.startswith("http"):
+    proactive_url  = "https://"+proactive_url+".activeeon.com:8443"
 
 print("Connecting on: " + proactive_url)
 gateway = proactive.ProActiveGateway(base_url=proactive_url, debug=False, javaopts=[], log4j_props_file=None, log4py_props_file=None)
