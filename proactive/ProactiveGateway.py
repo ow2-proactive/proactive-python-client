@@ -5,6 +5,7 @@ from py4j.java_gateway import JavaGateway
 
 import logging.config
 
+from .ProactiveRestApi import *
 from .ProactiveFactory import *
 from .ProactiveBuilder import *
 
@@ -36,6 +37,7 @@ class ProActiveGateway:
         self.current_path = self.root_dir + "/java/lib/*"
         self.base_url = base_url
         self.gateway = JavaGateway()
+        self.proactive_rest_api = ProactiveRestApi()
         self.javaopts = javaopts
         self.redirect_stdout = None
         self.redirect_stderr = None
@@ -106,6 +108,7 @@ class ProActiveGateway:
         )
         self.logger.debug('Connecting to the ProActive server')
         self.proactive_scheduler_client.init(connection_info)
+        self.proactive_rest_api.init(connection_info)
         self.logger.debug('Connected on ' + self.base_url)
 
     def isConnected(self):
@@ -122,6 +125,7 @@ class ProActiveGateway:
         """
         self.logger.debug('Disconnecting from the ProActive server')
         self.proactive_scheduler_client.disconnect()
+        self.proactive_rest_api.disconnect()
         self.logger.debug('Disconnected.')
 
     def reconnect(self):
@@ -130,17 +134,22 @@ class ProActiveGateway:
         """
         self.logger.debug('Reconnecting to the ProActive server')
         self.proactive_scheduler_client.reconnect()
+        self.proactive_rest_api.reconnect()
         self.logger.debug('Reconnected')
 
     def terminate(self):
         """
         Terminate the connection
         """
+        self.proactive_rest_api.disconnect()
         self.proactive_scheduler_client.terminate()
         self.runtime_gateway.close()
         self.runtime_gateway.shutdown()
         del self.proactive_scheduler_client
         del self.runtime_gateway
+
+    def getProactiveRestApi(self):
+        return self.proactive_rest_api
 
     def submitWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables={}):
         """
