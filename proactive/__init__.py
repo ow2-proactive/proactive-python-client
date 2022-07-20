@@ -1,4 +1,6 @@
 from .ProactiveGateway import *
+from .ProactiveRestApi import *
+from .ProactiveUtils import *
 from .ProactiveFactory import *
 from .ProactiveBuilder import *
 
