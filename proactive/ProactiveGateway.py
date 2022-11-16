@@ -151,19 +151,21 @@ class ProActiveGateway:
     def getProactiveRestApi(self):
         return self.proactive_rest_api
 
-    def submitWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables={}):
+    def submitWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables={}, workflow_generic_info={}):
         """
         Submit a job from the catalog to the scheduler
 
         :param bucket_name: The bucket in which the workflow is saved
         :param workflow_name: The workflow name
         :param workflow_variables: The workflow input variables
+        :param workflow_generic_info: The workflow generic information
         :return: The submitted job id
         """
         workflow_variables_java_map = MapConverter().convert(workflow_variables, self.runtime_gateway._gateway_client)
+        workflow_generic_info_java_map = MapConverter().convert(workflow_generic_info, self.runtime_gateway._gateway_client)
         self.logger.debug('Submitting from catalog the job \'' + bucket_name + '/' + workflow_name + '\'')
         return self.proactive_scheduler_client.submitFromCatalog(self.base_url + "/catalog", bucket_name, workflow_name,
-                                                                 workflow_variables_java_map).longValue()
+                                                                 workflow_variables_java_map, workflow_generic_info_java_map).longValue()
 
     def submitWorkflowFromFile(self, workflow_xml_file_path, workflow_variables={}):
         """
@@ -453,7 +455,7 @@ class ProActiveGateway:
         return self.proactive_scheduler_client.getJobInfo(str(job_id))
 
     def getAllJobs(self, max_number_of_jobs=1000, my_jobs_only=False, pending=False, running=True, finished=False,
-                   child_jobs=True, job_name=None, project_name=None, user_name=None, tenant=None, parent_id=None):
+                   withIssuesOnly=False, child_jobs=True, job_name=None, project_name=None, user_name=None, tenant=None, parent_id=None):
         """
         Get all jobs from the ProActive scheduler
 
@@ -461,6 +463,7 @@ class ProActiveGateway:
         :param pending: Include jobs in PENDING state
         :param running: Include jobs in RUNNING state
         :param finished: Include jobs in FINISHED state
+        :param withIssuesOnly: Include only jobs with issues
         :param child_jobs: Include child jobs
         :param job_name: Get jobs with specific job name
         :param project_name: Get jobs with specific project name
@@ -471,7 +474,7 @@ class ProActiveGateway:
         :return: A list of jobs
         """
         job_filter_criteria = self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.JobFilterCriteria(my_jobs_only, pending,
-                                                                                                            running, finished,
+                                                                                                            running, finished, withIssuesOnly,
                                                                                                             child_jobs, job_name,
                                                                                                             project_name, user_name,
                                                                                                             tenant, parent_id)

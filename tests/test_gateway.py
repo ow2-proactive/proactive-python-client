@@ -33,6 +33,14 @@ class GatewayTestSuite(unittest.TestCase):
         self.assertTrue(isinstance(jobId, numbers.Number))
         self.gateway.disconnect()
 
+    def test_submit_workflow_from_catalog_with_generic_info(self):
+        self.gateway.connect(self.username, self.password)
+        jobId = self.gateway.submitWorkflowFromCatalog("basic-examples", "Print_File_Name",
+                                                       {}, {'GI': 'test'})
+        self.assertIsNotNone(jobId)
+        self.assertTrue(isinstance(jobId, numbers.Number))
+        self.gateway.disconnect()
+
     def test_submit_workflow_from_file(self):
         self.gateway.connect(self.username, self.password)
         workflow_file_path = os.getcwd() + '/tests/print_file_name.xml'
@@ -317,7 +325,7 @@ class GatewayTestSuite(unittest.TestCase):
     def test_get_all_jobs(self):
         self.gateway.connect(self.username, self.password)
         jobId = self.gateway.submitWorkflowFromCatalog("basic-examples", "Print_File_Name")
-        jobs = self.gateway.getAllJobs(my_jobs_only=True, pending=True, running=True, finished=True, child_jobs=True,
+        jobs = self.gateway.getAllJobs(my_jobs_only=True, pending=True, running=True, finished=True, withIssuesOnly=False, child_jobs=True,
                                        job_name=None, project_name=None, user_name=None, tenant=None, parent_id=None)
         self.assertTrue(jobs.size() > 0)
         for job_info in jobs:
