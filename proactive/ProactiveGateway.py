@@ -151,19 +151,21 @@ class ProActiveGateway:
     def getProactiveRestApi(self):
         return self.proactive_rest_api
 
-    def submitWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables={}):
+    def submitWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables={}, workflow_generic_info={}):
         """
         Submit a job from the catalog to the scheduler
 
         :param bucket_name: The bucket in which the workflow is saved
         :param workflow_name: The workflow name
         :param workflow_variables: The workflow input variables
+        :param workflow_generic_info: The workflow generic information
         :return: The submitted job id
         """
         workflow_variables_java_map = MapConverter().convert(workflow_variables, self.runtime_gateway._gateway_client)
+        workflow_generic_info_java_map = MapConverter().convert(workflow_generic_info, self.runtime_gateway._gateway_client)
         self.logger.debug('Submitting from catalog the job \'' + bucket_name + '/' + workflow_name + '\'')
         return self.proactive_scheduler_client.submitFromCatalog(self.base_url + "/catalog", bucket_name, workflow_name,
-                                                                 workflow_variables_java_map).longValue()
+                                                                 workflow_variables_java_map, workflow_generic_info_java_map).longValue()
 
     def submitWorkflowFromFile(self, workflow_xml_file_path, workflow_variables={}):
         """

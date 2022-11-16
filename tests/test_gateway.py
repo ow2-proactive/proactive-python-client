@@ -33,6 +33,14 @@ class GatewayTestSuite(unittest.TestCase):
         self.assertTrue(isinstance(jobId, numbers.Number))
         self.gateway.disconnect()
 
+    def test_submit_workflow_from_catalog_with_generic_info(self):
+        self.gateway.connect(self.username, self.password)
+        jobId = self.gateway.submitWorkflowFromCatalog("basic-examples", "Print_File_Name",
+                                                       {}, {'GI': 'test'})
+        self.assertIsNotNone(jobId)
+        self.assertTrue(isinstance(jobId, numbers.Number))
+        self.gateway.disconnect()
+
     def test_submit_workflow_from_file(self):
         self.gateway.connect(self.username, self.password)
         workflow_file_path = os.getcwd() + '/tests/print_file_name.xml'
