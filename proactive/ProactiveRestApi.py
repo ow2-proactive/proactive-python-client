@@ -173,6 +173,24 @@ class ProactiveRestApi:
         else:
             return None
 
+    def get_service_instances(self, filterBy=None):
+        result = None
+        if self.connected():
+            api_url = self.base_url.replace("rest", "cloud-automation-service/serviceInstances")
+            if self.debug: print("api_url: ", api_url)
+            api_url_headers = {"sessionid": self.session_id}
+            with no_ssl_verification():
+                response = requests.get(api_url, headers=api_url_headers)
+                if self.debug: print(response.status_code, response.text)
+                if response.status_code == 200:
+                    result = json.loads(response.text)
+                    if filterBy is not None:
+                        for key, value in filterBy.items():
+                            result = [item for item in result if item[key] == value]
+        else:
+            if self.debug: print("[ERROR] You are not connected!")
+        return result
+
     def get_active_service_instances(self, filterBy=None):
         result = None
         if self.connected():
