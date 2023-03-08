@@ -479,11 +479,7 @@ class ProActiveGateway:
         :param max_number_of_jobs: The maximal number of retrieved jobs
         :return: A list of jobs
         """
-        job_filter_criteria = self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.JobFilterCriteria(my_jobs_only, pending,
-                                                                                                            running, finished, withIssuesOnly,
-                                                                                                            child_jobs, job_name,
-                                                                                                            project_name, user_name,
-                                                                                                            tenant, parent_id)
+        job_filter_criteria = self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.JobFilterCriteriaBuilder().myJobsOnly(my_jobs_only).pending(pending).running(running).finished(finished).withIssuesOnly(withIssuesOnly).childJobs(child_jobs).jobName(job_name).projectName(project_name).userName(user_name).tenant(tenant).parentId(parent_id).build()
         jobs_page = self.proactive_scheduler_client.getJobs(0, max_number_of_jobs, job_filter_criteria, None)
         return jobs_page.getList()
 
