@@ -145,11 +145,17 @@ class ProActiveGateway:
         self.proactive_scheduler_client.terminate()
         self.runtime_gateway.close()
         self.runtime_gateway.shutdown()
+        self.runtime_gateway.java_process.stdin.write("\n".encode("utf-8"))
+        self.runtime_gateway.java_process.stdin.flush()
+        self.runtime_gateway.java_process.wait(1)
         del self.proactive_scheduler_client
         del self.runtime_gateway
 
     def getProactiveRestApi(self):
         return self.proactive_rest_api
+
+    def getRuntimeGateway(self):
+        return self.runtime_gateway
 
     def submitWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables={}, workflow_generic_info={}):
         """
