@@ -26,7 +26,7 @@ source env/bin/activate
 
 pip3 list
 pip3 install jprops
-pip3 install py4j==0.10.8.1
+pip3 install py4j
 pip3 install pytest-html requests cloudpickle
 python setup.py sdist --formats=zip
 pip3 install dist/proactive*.zip

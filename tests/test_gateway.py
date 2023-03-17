@@ -273,7 +273,7 @@ class GatewayTestSuite(unittest.TestCase):
 
         pythonTask = self.gateway.createPythonTask()
         pythonTask.setTaskName("SimplePythonTaskFromFile")
-        pythonTask.setTaskImplementationFromFile('scripts/hello.py')
+        pythonTask.setTaskImplementationFromFile('scripts/print_python_env.py')
 
         myJob = self.gateway.createJob()
         myJob.setJobName("SimplePythonJobFromFile")
@@ -296,9 +296,9 @@ class GatewayTestSuite(unittest.TestCase):
 
         pythonTask = self.gateway.createPythonTask()
         pythonTask.setTaskName("SimplePythonTaskFromFileExecution")
-        pythonTask.setTaskExecutionFromFile('main.py', ['param1', 'param2'])
-        pythonTask.addInputFile('scripts/__init__.py')
-        pythonTask.addInputFile('scripts/hello.py')
+        pythonTask.setTaskExecutionFromFile('examples/demo_exec_file/main.py', ['param1', 'param2'])
+        pythonTask.addInputFile('examples/demo_exec_file/hellopkg/__init__.py')
+        pythonTask.addInputFile('examples/demo_exec_file/hellopkg/hello.py')
 
         myJob = self.gateway.createJob()
         myJob.setJobName("SimplePythonJobFromFileExecution")
@@ -391,7 +391,7 @@ class GatewayTestSuite(unittest.TestCase):
 
         myJob = self.gateway.createJob()
         myJob.setJobName("SimplePythonJobWithGroovySelectionFromFile")
-        myJob.addVariable("NODE_SOURCE_NAME", "local")
+        myJob.addVariable("NODE_SOURCE_NAME", "Server-Static-Nodes")
         myJob.addTask(pythonTask)
         jobId = self.gateway.submitJob(myJob)
 

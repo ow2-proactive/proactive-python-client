@@ -1,6 +1,6 @@
 import sys
 
-from scripts.hello import *
+from hellopkg.hello import *
 
 
 def main():
