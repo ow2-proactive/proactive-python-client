@@ -25,15 +25,11 @@ virtualenv -p python3 env
 source env/bin/activate
 
 pip3 list
-pip3 install jprops
-pip3 install py4j
-pip3 install pytest-html requests cloudpickle
+pip3 install -r requirements.txt
+
 python setup.py sdist --formats=zip
 pip3 install dist/proactive*.zip
 pip3 list
-
-pip3 install sphinx
-pip3 install sphinx-rtd-theme
 
 cd docs
 make html

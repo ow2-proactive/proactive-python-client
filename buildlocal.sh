@@ -11,9 +11,7 @@ source env/bin/activate
 python3 -m pip install --upgrade pip
 python3 -m pip -V
 
-python3 -m pip install jprops
-python3 -m pip install py4j
-python3 -m pip install pytest-html requests cloudpickle
+python3 -m pip install -r requirements.txt
 
 # generate ./build/proactive-XXX.zip
 python3 setup.py sdist --formats=zip
