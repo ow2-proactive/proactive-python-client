@@ -46,7 +46,8 @@ setup(
     install_requires=[
         'requests',
         'py4j',
-        'cloudpickle'
+        'cloudpickle',
+        'typer'
     ],
     package_dir={'proactive': 'proactive'},
     package_data={'proactive': ['java/lib/*.jar', 'java/log4j.properties', 'logging.conf']},

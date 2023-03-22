@@ -1,8 +1,10 @@
-py4j
+py4j>=0.10.9.7
 pytest
-sphinx == 3.2.1
-requests
 pytest-html
+sphinx
+sphinx-rtd-theme
+requests
 jprops
 docutils
 cloudpickle
+typer
