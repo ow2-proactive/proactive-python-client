@@ -29,6 +29,7 @@ class ProactiveTask(object):
         self.selection_script = None
         self.task_name = ''
         self.task_implementation = ''
+        self.task_implementation_url = None
         self.variables = {}
         self.generic_information = {}
         self.input_files = []
@@ -83,13 +84,21 @@ class ProactiveTask(object):
     def getTaskName(self):
         return self.task_name
 
+    def setTaskImplementationFromURL(self, task_url):
+        self.task_implementation_url = task_url
+        self.task_implementation = ''
+
+    def getTaskImplementationFromURL(self):
+        return self.task_implementation_url
+
     def setTaskImplementationFromFile(self, task_file):
         if os.path.exists(task_file):
             with open(task_file, 'r') as content_file:
-                self.task_implementation = content_file.read()
+                self.setTaskImplementation(content_file.read())
 
     def setTaskImplementation(self, task_implementation):
         self.task_implementation = task_implementation
+        self.task_implementation_url = None
 
     def getTaskImplementation(self):
         return self.task_implementation

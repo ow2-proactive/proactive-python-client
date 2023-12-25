@@ -12,6 +12,7 @@ class ProactiveScript(object):
     def __init__(self, script_language):
         self.script_language = script_language
         self.implementation = ''
+        self.implementation_url = None
 
     def setScriptLanguage(self, script_language):
         self.script_language = script_language
@@ -21,6 +22,7 @@ class ProactiveScript(object):
 
     def setImplementation(self, implementation):
         self.implementation = implementation
+        self.implementation_url = None
 
     def getImplementation(self):
         return self.implementation
@@ -28,7 +30,14 @@ class ProactiveScript(object):
     def setImplementationFromFile(self, script_file):
         if os.path.exists(script_file):
             with open(script_file, 'r') as content_file:
-                self.implementation = content_file.read()
+                self.setImplementation(content_file.read())
+
+    def setImplementationFromURL(self, implementation_url):
+        self.implementation_url = implementation_url
+        self.implementation = ''
+
+    def getImplementationFromURL(self):
+        return self.implementation_url
 
 
 class ProactivePreScript(ProactiveScript):

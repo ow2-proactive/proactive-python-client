@@ -86,9 +86,13 @@ class ProactiveTaskBuilder(ProactiveBuilder):
 
     def __create_script__(self):
         assert self.proactive_task_model.getScriptLanguage() is not None
-
+        task_implementation = ''
+        if self.proactive_task_model.getTaskImplementationFromURL() is not None:
+            task_implementation = self.proactive_factory.getRuntimeGateway().jvm.java.net.URL(self.proactive_task_model.getTaskImplementationFromURL())
+        else:
+            task_implementation = self.proactive_task_model.getTaskImplementation()
         self.script = self.proactive_factory.create_simple_script(
-            self.proactive_task_model.getTaskImplementation(),
+            task_implementation,
             self.proactive_task_model.getScriptLanguage()
         )
         return self.script
@@ -140,15 +144,18 @@ class ProactiveTaskBuilder(ProactiveBuilder):
         return self.task_script
 
     def __create_fork_environment__(self, fork_environment):
+        fork_implementation = ''
+        if fork_environment.getImplementationFromURL() is not None:
+            fork_implementation = self.proactive_factory.getRuntimeGateway().jvm.java.net.URL(fork_environment.getImplementationFromURL())
+        else:
+            fork_implementation = fork_environment.getImplementation()
         simple_script = self.proactive_factory.create_simple_script(
-            fork_environment.getImplementation(),
+            fork_implementation,
             fork_environment.getScriptLanguage()
         )
-
         fork_env = self.proactive_factory.create_fork_environment()
         fork_env.setEnvScript(simple_script)
         fork_env.setJavaHome(fork_environment.getJavaHome())
-
         return fork_env
 
     def __create_selection_script__(self, selection_script):
