@@ -26,12 +26,6 @@ gateway.connect(username, password)
 assert gateway.isConnected() is True
 print("Connected")
 
-proactive_task_1_impl = """
-import platform
-print("Hello from " + variables.get("PA_TASK_NAME"))
-print("Python version: ", platform.python_version())
-"""
-
 try:
     print("Creating a proactive job...")
     proactive_job = gateway.createJob()
@@ -40,8 +34,17 @@ try:
     print("Creating a proactive task #1...")
     proactive_task_1 = gateway.createPythonTask()
     proactive_task_1.setTaskName("SimplePythonTask1")
-    proactive_task_1.setTaskImplementation(proactive_task_1_impl)
+    proactive_task_1.addVariable("TASK_ENABLED", "True")
+    proactive_task_1.addVariable("INPUT_VARIABLES", "{}")
+    proactive_task_1.addVariable("SCORING", "accuracy")
+    proactive_task_1.setTaskImplementationFromURL(proactive_url + "/catalog/buckets/ai-machine-learning/resources/Logistic_Regression_Script/raw")
     proactive_task_1.addGenericInformation("PYTHON_COMMAND", "python3")
+
+    print("Adding a fork environment to the proactive task #1...")
+    proactive_task_1_fork_env = gateway.createForkEnvironment(language="groovy")
+    proactive_task_1_fork_env.setImplementationFromURL(proactive_url + "/catalog/buckets/scripts/resources/fork_env_ai/raw")
+    proactive_task_1.setForkEnvironment(proactive_task_1_fork_env)
+    proactive_job.addVariable("CONTAINER_PLATFORM", "docker")
 
     print("Adding proactive tasks to the proactive job...")
     proactive_job.addTask(proactive_task_1)
