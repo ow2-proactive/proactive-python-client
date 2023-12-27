@@ -6,7 +6,7 @@ class ProactiveBucketFactory:
         if bucket_name == 'ai-machine-learning':
             return ProactiveAiMachineLearningBucket(gateway)
         else:
-            return ValueError(f"Unknown bucket name: {bucket_name}")
+            return ValueError("Unknown bucket name: " + bucket_name)
 
     def getBucketList(self):
         return ['ai-machine-learning']
