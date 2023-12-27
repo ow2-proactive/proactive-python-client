@@ -16,6 +16,7 @@ from .model.ProactiveFlowActionType import *
 from .model.ProactiveTask import *
 from .model.ProactiveJob import *
 
+from .bucket.ProactiveBucketFactory import *
 
 class ProActiveGateway:
     """
@@ -156,6 +157,10 @@ class ProActiveGateway:
 
     def getRuntimeGateway(self):
         return self.runtime_gateway
+
+    def getBucket(self, bucket_name):
+        self.logger.debug('Returning the bucket: ' + bucket_name)
+        return ProactiveBucketFactory().getBucket(self, bucket_name)
 
     def submitWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables={}, workflow_generic_info={}):
         """
