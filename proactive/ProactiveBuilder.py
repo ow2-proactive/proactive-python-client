@@ -166,16 +166,28 @@ class ProactiveTaskBuilder(ProactiveBuilder):
         )
 
     def __create_pre_script__(self, pre_script):
-        return self.proactive_factory.create_simple_script(
-                    pre_script.getImplementation(),
-                    pre_script.getScriptLanguage()
-                )
+        pre_script_implementation = ''
+        if pre_script.getImplementationFromURL() is not None:
+            pre_script_implementation = self.proactive_factory.getRuntimeGateway().jvm.java.net.URL(pre_script.getImplementationFromURL())
+        else:
+            pre_script_implementation = pre_script.getImplementation()
+        simple_script = self.proactive_factory.create_simple_script(
+            pre_script_implementation,
+            pre_script.getScriptLanguage()
+        )
+        return simple_script
 
     def __create_post_script__(self, post_script):
-        return self.proactive_factory.create_simple_script(
-                    post_script.getImplementation(),
-                    post_script.getScriptLanguage()
-                )
+        post_script_implementation = ''
+        if post_script.getImplementationFromURL() is not None:
+            post_script_implementation = self.proactive_factory.getRuntimeGateway().jvm.java.net.URL(post_script.getImplementationFromURL())
+        else:
+            post_script_implementation = post_script.getImplementation()
+        simple_script = self.proactive_factory.create_simple_script(
+            post_script_implementation,
+            post_script.getScriptLanguage()
+        )
+        return simple_script
 
     def __create_script_task__(self, task_script):
         self.logger.debug('Building and setting the script task')
