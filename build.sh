@@ -27,7 +27,7 @@ source env/bin/activate
 pip3 list
 pip3 install -r requirements.txt
 
-python setup.py sdist --formats=zip
+python build.py sdist --formats=zip
 pip3 install dist/proactive*.zip
 pip3 list
 

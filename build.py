@@ -4,6 +4,20 @@ import datetime
 
 now = datetime.datetime.now()
 
+gradle_properties = {}
+with open('gradle.properties') as fp:
+    for line in fp:
+        if '=' in line:
+            name, value = line.replace('\n', '').split('=', 1)
+            if "SNAPSHOT" in value:
+                dev_version = "." + now.strftime("%y%m%d%H%M") + "dev"
+                # dev_version = "." + now.strftime("%y%m%d%H%M")
+                value = value.replace("-SNAPSHOT", dev_version)
+            gradle_properties[name] = value
+
+with open('VERSION', 'w') as version_file:
+    version_file.write(gradle_properties.get('version', '0.0.0'))
+
 with open('VERSION', 'r') as version_file:
     version_content = version_file.read().strip()
 

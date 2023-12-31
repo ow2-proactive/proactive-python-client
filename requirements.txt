@@ -9,3 +9,6 @@ docutils
 cloudpickle
 typer
 python-dotenv
+wheel
+setuptools
+twine

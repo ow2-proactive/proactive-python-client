@@ -14,7 +14,7 @@ python3 -m pip -V
 python3 -m pip install -r requirements.txt
 
 # generate ./build/proactive-XXX.zip
-python3 setup.py sdist --formats=zip
+python3 build.py sdist --formats=zip
 # install
 python3 -m pip install dist/proactive*.zip
 
