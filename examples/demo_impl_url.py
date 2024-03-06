@@ -15,7 +15,7 @@ if not proactive_url.startswith("http"):
     proactive_url  = "https://"+proactive_url+".activeeon.com:8443"
 
 print("Connecting on: " + proactive_url)
-gateway = proactive.ProActiveGateway(base_url=proactive_url, debug=False, javaopts=[], log4j_props_file=None, log4py_props_file=None)
+gateway = proactive.ProActiveGateway(base_url=proactive_url)
 
 username = os.getenv("PROACTIVE_USERNAME")
 password = os.getenv("PROACTIVE_PASSWORD")

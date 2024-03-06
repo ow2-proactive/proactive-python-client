@@ -2,6 +2,9 @@ import os
 import proactive
 import getpass
 
+from dotenv import load_dotenv
+load_dotenv()
+
 print("Logging on proactive-server...")
 proactive_url = os.getenv("PROACTIVE_URL")
 if not proactive_url:
@@ -12,7 +15,7 @@ if not proactive_url.startswith("http"):
     proactive_url  = "https://"+proactive_url+".activeeon.com:8443"
 
 print("Connecting on: " + proactive_url)
-gateway = proactive.ProActiveGateway(base_url=proactive_url, debug=False, javaopts=[], log4j_props_file=None, log4py_props_file=None)
+gateway = proactive.ProActiveGateway(base_url=proactive_url)
 
 username = os.getenv("PROACTIVE_USERNAME")
 password = os.getenv("PROACTIVE_PASSWORD")
@@ -50,7 +53,7 @@ try:
     proactive_job.addTask(proactive_task_1)
 
     print("Submitting the job to the proactive scheduler...")
-    job_id = gateway.submitJob(proactive_job, debug=False)
+    job_id = gateway.submitJob(proactive_job)
     print("job_id: " + str(job_id))
 
     print("Getting job output...")

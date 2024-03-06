@@ -2,6 +2,9 @@ import os
 import proactive
 import getpass
 
+from dotenv import load_dotenv
+load_dotenv()
+
 print("Logging on proactive-server...")
 proactive_url = os.getenv("PROACTIVE_URL")
 if not proactive_url:
