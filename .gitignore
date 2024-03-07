@@ -104,7 +104,9 @@ gradle/ext/
 build/
 .pytest_cache/
 .DS_Store
-.pypirc
+.pypirc*
 debug
 testslocal
 *.code-workspace
+.sync.ffs_db
+*.ffs_gui

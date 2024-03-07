@@ -2,9 +2,9 @@
 
 class ProactiveScriptLanguage:
     """
-      Represents the programming languages supported by Proactive
-
-      supported_languages (dict)
+    Represents the programming languages supported by Proactive
+    
+    supported_languages (dict)
     """
 
     supported_languages = {

@@ -3,7 +3,7 @@ import codecs
 
 from .ProactiveScriptLanguage import *
 from .ProactiveSelectionScript import *
-
+from .ProactiveRuntimeEnv import *
 
 class ProactiveTask(object):
     """
@@ -68,6 +68,9 @@ class ProactiveTask(object):
 
     def hasForkEnvironment(self):
         return True if self.fork_environment is not None else False
+
+    def setRuntimeEnvironment(self, type=None, image=None, nvidia_gpu=None, mount_host_path=None, mount_container_path=None, rootless=None, isolation=None, no_home=None, host_network=None, verbose=None):
+        self.fork_environment = ProactiveRuntimeEnv().create(type, image, nvidia_gpu, mount_host_path, mount_container_path, rootless, isolation, no_home, host_network, verbose)
 
     def setSelectionScript(self, selection_script):
         self.selection_script = selection_script
