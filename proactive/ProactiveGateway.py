@@ -204,7 +204,7 @@ class ProActiveGateway:
         return self.proactive_scheduler_client.submit(self.runtime_gateway.jvm.java.net.URL(workflow_url_spec),
                                                       workflow_variables_java_map).longValue()
 
-    def createTask(self, language=None):
+    def createTask(self, language=None, task_name=''):
         """
         Create a workflow task
 
@@ -212,16 +212,21 @@ class ProActiveGateway:
         :return: A ProactiveTask object
         """
         self.logger.info('Creating a task')
-        return ProactiveTask(language) if self.proactive_script_language.is_language_supported(language) else None
+        task = ProactiveTask(language) if self.proactive_script_language.is_language_supported(language) else None
+        if task is not None:
+            task.setTaskName(task_name)
+        return task
 
-    def createPythonTask(self):
+    def createPythonTask(self, task_name=''):
         """
         Create a workflow Python task
 
         :return: A Python ProactiveTask object
         """
         self.logger.info('Creating a Python task')
-        return ProactivePythonTask()
+        task = ProactivePythonTask()
+        task.setTaskName(task_name)
+        return task
 
     def createFlowScript(self, script_language=None):
         """
