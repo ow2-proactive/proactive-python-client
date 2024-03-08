@@ -1,5 +1,6 @@
 import sys
 import getpass
+import time
 
 from py4j.java_gateway import JavaGateway
 
@@ -496,6 +497,28 @@ class ProActiveGateway:
     @staticmethod
     def __decode__(value):
         return value.decode('ascii')
+
+    def getJobOutput(self, job_id, timeout=-1):
+        """
+        Retrieves the output of a specified job from the ProActive Scheduler.
+        This method supports both blocking and non-blocking execution modes. 
+        - In blocking mode (default), it waits indefinitely until the job execution completes and then fetches the job's output. 
+        - In non-blocking mode, specified by a non-negative timeout value, it attempts to retrieve the job's output within the given timeout period.
+        Parameters:
+        - job_id: The unique identifier of the job whose output is to be fetched.
+        - timeout: The maximum time in seconds to wait for job completion before attempting to fetch the output. A negative value indicates an indefinite wait (blocking mode).
+        Returns:
+        - The full log output of the job as a string.
+        """
+        if timeout < 0:
+            self.logger.debug("Waiting job execution to be finished...")
+            while not self.isJobFinished(str(job_id)):
+                time.sleep(1)
+            self.logger.debug("Getting job output...")
+            job_output = self.getProactiveRestApi().get_job_log_full(job_id)
+            return job_output
+        else:
+            return self.printJobOutput(job_id, timeout)
 
     def getJobResult(self, job_id, timeout=60000):
         """
