@@ -459,7 +459,7 @@ class ProActiveGateway:
         :param job_id: A valid job ID
         :return: True or False
         """
-        return self.proactive_scheduler_client.isJobFinished(job_id)
+        return self.proactive_scheduler_client.isJobFinished(str(job_id))
 
     def getJobInfo(self, job_id):
         """
