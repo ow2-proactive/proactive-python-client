@@ -1,4 +1,4 @@
-.PHONY: clean setup virtualenv build clean_build uninstall install test publish_test publish_prod help setup_venv uninstall_proactive
+.PHONY: clean setup setup_venv virtualenv build clean_build uninstall install test publish_test publish_prod print_version help get_env
 
 PYTHON=python3
 
@@ -44,12 +44,12 @@ build:
 
 clean_build: setup virtualenv build
 
-uninstall_proactive:
+uninstall:
 	@echo "Uninstalling proactive package..."
 	@. env/bin/activate && $(PYTHON) -m pip uninstall -y proactive
 	@echo "Proactive package uninstalled."
 
-install: uninstall_proactive
+install: uninstall
 	@echo "Installing proactive from dist..."
 	@. env/bin/activate && $(PYTHON) -m pip install dist/proactive*.zip
 	@echo "Proactive installed."
@@ -68,6 +68,10 @@ publish_prod:
 	@echo "Publishing to PyPI..."
 	@. env/bin/activate && twine upload dist/* --config-file .pypirc
 	@echo "Publishing completed."
+
+print_version:
+	@. env/bin/activate && $(PYTHON) -m pip show proactive
+	@. env/bin/activate && $(PYTHON) -c "import proactive; print(proactive.__version__)"
 
 help:
 	@cat Makefile
