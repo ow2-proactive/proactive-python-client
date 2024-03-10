@@ -37,3 +37,9 @@ jobs:
 
     - name: Check proactive version
       run: make print_version
+
+    - name: Publish to TestPyPI
+      env:
+        TWINE_USERNAME: ${{ secrets.TWINE_USERNAME }}
+        TWINE_PASSWORD: ${{ secrets.TESTPYPI_TOKEN }}
+      run: make publish_test_using_secrets

@@ -64,9 +64,19 @@ publish_test:
 	@. env/bin/activate && twine upload --repository-url https://test.pypi.org/legacy/ dist/* --config-file .pypirc
 	@echo "Publishing completed."
 
+publish_test_using_secrets:
+	@echo "Publishing to TestPyPI..."
+	@. env/bin/activate && twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+	@echo "Publishing completed."
+
 publish_prod:
 	@echo "Publishing to PyPI..."
 	@. env/bin/activate && twine upload dist/* --config-file .pypirc
+	@echo "Publishing completed."
+
+publish_prod_using_secrets:
+	@echo "Publishing to PyPI..."
+	@. env/bin/activate && twine upload dist/*
 	@echo "Publishing completed."
 
 print_version:
