@@ -389,7 +389,7 @@ class GatewayTestSuite(unittest.TestCase):
 
         myJob = self.gateway.createJob()
         myJob.setJobName("SimplePythonJobWithGroovySelectionFromFile")
-        myJob.addVariable("NODE_SOURCE_NAME", "Server-Static-Nodes")
+        myJob.addVariable("NODE_SOURCE_NAME", "On-Prem-Server-Static-Nodes")
         myJob.addTask(pythonTask)
         jobId = self.gateway.submitJob(myJob)
 
