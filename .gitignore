@@ -111,3 +111,4 @@ testslocal
 *.code-workspace
 .sync.ffs_db
 *.ffs_gui
+*.bkp

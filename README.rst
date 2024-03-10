@@ -1,188 +1,138 @@
-
+=======================
+ProActive Python Client
+=======================
 
 .. image:: https://img.shields.io/badge/License-BSD-blue.svg
-   :target: https://img.shields.io/badge/License-BSD-blue.svg
-   :alt: License BSD
-
+    :target: https://opensource.org/licenses/BSD-3-Clause
+    :alt: License BSD
 
 .. image:: https://img.shields.io/badge/Python-3-brightgreen.svg
-   :target: https://img.shields.io/badge/Python-3-brightgreen.svg
-   :alt: Python 3
+    :alt: Python 3
 
+.. image:: https://img.shields.io/pypi/v/proactive.svg
+    :target: https://pypi.org/project/proactive/
+    :alt: Proactive
 
-ProActive Scheduler Client
-==========================
+.. image:: https://readthedocs.org/projects/proactive-python-client/badge/?version=latest
+    :target: https://proactive-python-client.readthedocs.io/en/latest/?badge=latest
+    :alt: Documentation Status
 
-This module allows users to interact with a running ProActive Scheduler and Resource Manager.
+The ProActive Python Client enables seamless interaction with the ProActive Scheduler and Resource Manager, facilitating the automation of workflow submission and management tasks directly from Python.
 
-1. Requirements
-^^^^^^^^^^^^^^^
+Key Features
+------------
 
+* **Ease of Use**: Simple API for interacting with the ProActive Scheduler.
+* **Workflow Management**: Submit, monitor, and manage your ProActive workflows.
+* **Resource Management**: Leverage the Resource Manager for efficient computing resource allocation.
 
-* Python 2 and 3
+Getting Started
+---------------
 
-2. Installation
-^^^^^^^^^^^^^^^
+Prerequisites
+~~~~~~~~~~~~~
 
-``pip install proactive --upgrade``
+- Python version 3.5 or later is required.
 
-3. How to build
-^^^^^^^^^^^^^^^
+Installation
+~~~~~~~~~~~~
 
-Just run ``gradlew clean build``
+You can easily install the ProActive Python Client using pip::
 
-This will generate the ``proactive-XXX.zip`` file inside project's ``dist`` folder.
+    pip install proactive
 
-Run ``pip install dist/proactive-XXX.zip`` to install the package in your python environment.
+For access to the latest features and improvements, install the pre-release version::
 
-4. Build and run tests
-^^^^^^^^^^^^^^^^^^^^^^
+    pip install --pre proactive
 
-``./gradlew clean build -Pproactive_url=XXX -Pusername=XXX -Ppassword=XXX``
+Building from Source
+~~~~~~~~~~~~~~~~~~~~
 
-Replace ``XXX`` with the respective information.
+To build and install the package from source::
 
-5. Usage
-^^^^^^^^
+    # Build the package
+    make clean_build
+    # or use gradlew
+    gradlew clean build
 
-.. code-block::
+    # Install the built package
+    pip install dist/proactive-XXX.zip  # Replace XXX with the actual version
 
-   import os
-   import proactive
+Running Tests
+-------------
 
-   print("Logging on proactive-server...")
-   proactive_host = 'try.activeeon.com'
-   proactive_port = '8080'
-   proactive_url  = "http://"+proactive_host+":"+proactive_port
-   print("Connecting on: " + proactive_url)
-   javaopts=[]
-   # uncomment for detailed logs
-   # javaopts.append('-Dlog4j.configuration=file:'+os.path.join(os.getcwd(),'log4j.properties'))
-   gateway = proactive.ProActiveGateway(proactive_url, javaopts)
+With Gradle
+~~~~~~~~~~~
 
-   gateway.connect(username="", password="")  # put your login here!
-   assert gateway.isConnected() is True
-   print("Connected")
+Specify your ProActive credentials and run the tests::
 
-   try:
-       print("Creating a proactive task...")
-       proactive_task = gateway.createPythonTask()
-       proactive_task.setTaskName("SimplePythonTask")
-       proactive_task.setTaskImplementationFromFile('main.py', ['param1', 'param2'])
-       proactive_task.addInputFile('scripts/__init__.py')
-       proactive_task.addInputFile('scripts/hello.py')
+    ./gradlew clean build -Pproactive_url=YOUR_URL -Pusername=YOUR_USERNAME -Ppassword=YOUR_PASSWORD
 
-       print("Adding a fork environment to the proactive task...")
-       proactive_fork_env = gateway.createDefaultForkEnvironment()
-       proactive_fork_env.setImplementationFromFile("scripts/fork_env.py")
-       proactive_task.setForkEnvironment(proactive_fork_env)
+With Make
+~~~~~~~~~
 
-       print("Adding a selection script to the proactive task...")
-       proactive_selection_script = gateway.createDefaultSelectionScript()
-       proactive_selection_script.setImplementationFromFile("scripts/selection_script.py")
-       proactive_task.setSelectionScript(proactive_selection_script)
+First, create a ``.env`` file with your ProActive credentials::
 
-       print("Creating a proactive job...")
-       proactive_job = gateway.createJob()
-       proactive_job.setJobName("SimpleJob")
-       proactive_job.addTask(proactive_task)
-       proactive_job.setInputFolder(os.getcwd())
-       proactive_job.setOutputFolder(os.getcwd())
+    PROACTIVE_URL=YOUR_URL
+    PROACTIVE_USERNAME=YOUR_USERNAME
+    PROACTIVE_PASSWORD=YOUR_PASSWORD
 
-       print("Submitting the job to the proactive scheduler...")
-       job_id = gateway.submitJob(proactive_job, debug=False)
-       print("job_id: " + str(job_id))
+Then execute::
 
-       print("Getting job output...")
-       job_result = gateway.getJobResult(job_id)
-       print(job_result)
+    make test
 
-   finally:
-       print("Disconnecting")
-       gateway.disconnect()
-       print("Disconnected")
-       gateway.terminate()
-       print("Finished")
+Quickstart Example
+------------------
 
-6. Examples
-^^^^^^^^^^^
+This simple example demonstrates connecting to a ProActive server, creating a job, adding a Python task, and submitting the job::
 
-6.1 Creating a Python task
-~~~~~~~~~~~~~~~~~~~~~~~~~~
+    import os
+    import getpass
+    from proactive import ProActiveGateway
 
-.. code-block::
+    proactive_url = "https://try.activeeon.com:8443"
 
-   ...
-   proactive_task = gateway.createPythonTask()
-   proactive_task.setTaskName("SimplePythonTask")
-   proactive_task.setTaskImplementation("""print("Hello world!")""")
+    print(f"Connecting to {proactive_url}...")
+    gateway = ProActiveGateway(proactive_url)
 
-   # or by
-   # proactive_task.setTaskImplementationFromFile("scripts/print_python_env.py")
-   # proactive_task.setTaskImplementationFromLambdaFunction(lambda: 88 - 20 * 10)
+    # Securely input your credentials
+    gateway.connect(username=input("Username: "), password=getpass.getpass("Password: "))
+    assert gateway.isConnected(), "Failed to connect to the ProActive server!"
 
-   # add attached files
-   # proactive_task.addInputFile('scripts/hello.py')
+    # Job and task creation
+    print("Creating and configuring a ProActive job and task...")
+    proactive_job = gateway.createJob()
+    proactive_job.setJobName("SimpleJob")
 
-   # select your python version
-   # proactive_task.addGenericInformation("PYTHON_COMMAND", "/usr/bin/python3")
-   ...
+    proactive_task = gateway.createPythonTask("SimplePythonTask")
+    proactive_task.setTaskImplementation('print("Hello from ProActive!")')
+    proactive_task.addGenericInformation("PYTHON_COMMAND", "python3")
+    proactive_job.addTask(proactive_task)
 
-6.2 Adding a fork environment
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    # Job submission
+    job_id = gateway.submitJob(proactive_job)
+    print(f"Job submitted with ID: {job_id}")
 
-.. code-block::
+    # Retrieve job output
+    print("Job output:")
+    print(gateway.getJobOutput(job_id))
 
-   ...
-   fork_env = gateway.createDefaultForkEnvironment()
-   fork_env.setImplementationFromFile("scripts/fork_env.py")
+    # Cleanup
+    gateway.disconnect()
+    gateway.terminate()
+    print("Disconnected and finished.")
 
-   proactive_task.setForkEnvironment(fork_env)
-   ...
+Documentation
+-------------
 
-6.3 Adding a selection script
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+For more detailed usage and advanced functionalities, please refer to the `ProActive Python Client Documentation <https://proactive-python-client.readthedocs.io/en/latest/>`_.
 
-.. code-block::
+Examples Repository
+-------------------
 
-   ...
-   selection_script = gateway.createDefaultSelectionScript()
-   selection_script.setImplementationFromFile("scripts/selection_script.py")
+For practical examples showcasing various features of the ProActive Python Client, visit our `examples repository <https://github.com/ow2-proactive/proactive-python-client-examples>`_.
 
-   proactive_task.setSelectionScript(selection_script)
-   ...
+Contributing
+------------
 
-6.4 Create a job and add your task
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block::
-
-   ...
-   proactive_job = gateway.createJob()
-   proactive_job.setJobName("SimpleJob")
-   proactive_job.addTask(proactive_task)
-
-   # for file transfer
-   # proactive_job.setInputFolder(os.getcwd())
-   # proactive_job.setOutputFolder(os.getcwd())
-   ...
-
-6.5 Submit your job to the scheduler
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block::
-
-   ...
-   job_id = gateway.submitJob(proactive_job, debug=False) # set debug=True for more debug info
-   ...
-
-6.6 Get the job results
-~~~~~~~~~~~~~~~~~~~~~~~
-
-.. code-block::
-
-   ...
-   print("Getting job output...")
-   job_result = gateway.getJobResult(job_id)
-   print(job_result)
-   ...
+Contributions are welcome! If you have an improvement or a new feature in mind, feel free to fork the repository, make your changes, and submit a pull request.
