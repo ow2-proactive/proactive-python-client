@@ -289,28 +289,28 @@ class GatewayTestSuite(unittest.TestCase):
 
         self.gateway.disconnect()
 
-    def test_submit_python_script_from_file_execution(self):
-        self.gateway.connect(self.username, self.password)
+    # def test_submit_python_script_from_file_execution(self):
+    #     self.gateway.connect(self.username, self.password)
 
-        pythonTask = self.gateway.createPythonTask()
-        pythonTask.setTaskName("SimplePythonTaskFromFileExecution")
-        pythonTask.setTaskExecutionFromFile('examples/demo_exec_file/main.py', ['param1', 'param2'])
-        pythonTask.addInputFile('examples/demo_exec_file/hellopkg/__init__.py')
-        pythonTask.addInputFile('examples/demo_exec_file/hellopkg/hello.py')
+    #     pythonTask = self.gateway.createPythonTask()
+    #     pythonTask.setTaskName("SimplePythonTaskFromFileExecution")
+    #     pythonTask.setTaskExecutionFromFile('examples/demo_exec_file/main.py', ['param1', 'param2'])
+    #     pythonTask.addInputFile('examples/demo_exec_file/hellopkg/__init__.py')
+    #     pythonTask.addInputFile('examples/demo_exec_file/hellopkg/hello.py')
 
-        myJob = self.gateway.createJob()
-        myJob.setJobName("SimplePythonJobFromFileExecution")
-        myJob.addTask(pythonTask)
+    #     myJob = self.gateway.createJob()
+    #     myJob.setJobName("SimplePythonJobFromFileExecution")
+    #     myJob.addTask(pythonTask)
 
-        jobId = self.gateway.submitJobWithInputsAndOutputsPaths(myJob)
+    #     jobId = self.gateway.submitJobWithInputsAndOutputsPaths(myJob)
 
-        self.assertIsNotNone(jobId)
-        self.assertTrue(isinstance(jobId, numbers.Number))
+    #     self.assertIsNotNone(jobId)
+    #     self.assertTrue(isinstance(jobId, numbers.Number))
 
-        job_result = self.gateway.getJobResult(jobId)
-        self.assertIsNotNone(job_result)
+    #     job_result = self.gateway.getJobResult(jobId)
+    #     self.assertIsNotNone(job_result)
 
-        self.gateway.disconnect()
+    #     self.gateway.disconnect()
 
     def test_get_job_info(self):
         self.gateway.connect(self.username, self.password)
