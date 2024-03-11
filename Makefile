@@ -59,6 +59,12 @@ test: get_env
 	@. env/bin/activate && $(PYTHON) -m pytest --metadata proactive_url $(PROACTIVE_URL) --metadata username $(PROACTIVE_USERNAME) --metadata password $(PROACTIVE_PASSWORD) --junit-xml=build/reports/TEST-report.xml
 	@echo "Tests completed."
 
+test_using_secrets:
+	@echo "Running tests using GitHub Secrets..."
+	@. env/bin/activate && $(PYTHON) -m pip install --upgrade pytest pytest-cov
+	@. env/bin/activate && $(PYTHON) -m pytest --metadata proactive_url $(GITHUB_PROACTIVE_URL) --metadata username $(GITHUB_PROACTIVE_USERNAME) --metadata password $(GITHUB_PROACTIVE_PASSWORD) --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
+	@echo "Tests completed using GitHub Secrets."
+
 publish_test:
 	@echo "Publishing to TestPyPI..."
 	@. env/bin/activate && twine upload --repository-url https://test.pypi.org/legacy/ dist/* --config-file .pypirc
