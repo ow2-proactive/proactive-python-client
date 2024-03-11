@@ -1,4 +1,5 @@
 name: template
+
 on:
   workflow_dispatch: {}
 

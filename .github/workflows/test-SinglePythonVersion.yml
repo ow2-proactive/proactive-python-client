@@ -1,0 +1,60 @@
+name: Test Python Package on Single Python Version
+
+on:
+  workflow_dispatch:
+    inputs:
+      UBUNTU_VERSION:
+        description: 'UBUNTU_VERSION'
+        required: true
+        default: 'ubuntu-latest'
+      PYTHON_VERSION:
+        description: 'PYTHON_VERSION'
+        required: true
+        default: '3.9'
+      PROACTIVE_URL:
+        description: 'PROACTIVE_URL'
+        required: true
+        default: 'https://try.activeeon.com:8443'
+
+jobs:
+  test:
+    runs-on: '${{ github.event.inputs.UBUNTU_VERSION }}'
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v3
+      with:
+        python-version: '${{ github.event.inputs.PYTHON_VERSION }}'
+
+    - name: Install Java 8
+      uses: actions/setup-java@v3
+      with:
+        java-version: '8'
+        distribution: 'adopt'
+
+    - name: Display Pip and Python version
+      run: python -m pip -V
+
+    - name: Setting up project
+      run: make setup
+
+    - name: Setting up virtual environment
+      run: make setup_venv
+
+    - name: Building package
+      run: make build
+
+    - name: Installing proactive from dist
+      run: make install
+
+    - name: Check proactive version
+      run: make print_version
+
+    - name: Run tests using secrets
+      env:
+        GITHUB_PROACTIVE_URL: ${{ github.event.inputs.PROACTIVE_URL }}
+        GITHUB_PROACTIVE_USERNAME: ${{ secrets.PROACTIVE_USERNAME }}
+        GITHUB_PROACTIVE_PASSWORD: ${{ secrets.PROACTIVE_PASSWORD }}
+      run: make test_using_secrets
