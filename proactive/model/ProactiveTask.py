@@ -100,7 +100,8 @@ class ProactiveTask(object):
                 self.setTaskImplementation(content_file.read())
 
     def setTaskImplementation(self, task_implementation):
-        self.task_implementation = task_implementation
+        self.task_implementation = "\n"
+        self.task_implementation += task_implementation
         self.task_implementation_url = None
 
     def getTaskImplementation(self):
