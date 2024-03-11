@@ -25,13 +25,13 @@ The ProActive Python Client enables seamless interaction with the ProActive Sche
 You can easily install the ProActive Python Client using pip:
 
 ```bash
-pip install proactive
+pip install --upgrade proactive
 ```
 
 For access to the latest features and improvements, install the pre-release version:
 
 ```bash
-pip install --pre proactive
+pip install --upgrade --pre proactive
 ```
 
 ### Building from Source
