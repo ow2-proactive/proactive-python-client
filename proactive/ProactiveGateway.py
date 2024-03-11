@@ -480,6 +480,16 @@ class ProActiveGateway:
         """
         return self.proactive_scheduler_client.getJobInfo(str(job_id))
 
+    def waitForJob(self, job_id, timeout=60000):
+        """
+        Wait until the job is finished
+
+        :param job_id: A valid job ID
+        :param timeout: A timeout in milliseconds
+        :return: The job info
+        """
+        return self.proactive_scheduler_client.waitForJob(str(job_id), timeout)
+
     def getAllJobs(self, max_number_of_jobs=1000, my_jobs_only=False, pending=False, running=True, finished=False,
                    withIssuesOnly=False, child_jobs=True, job_name=None, project_name=None, user_name=None, tenant=None, parent_id=None):
         """
