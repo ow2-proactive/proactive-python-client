@@ -61,8 +61,9 @@ test: get_env
 
 test_using_secrets:
 	@echo "Running tests using GitHub Secrets..."
-	@. env/bin/activate && $(PYTHON) -m pip install --upgrade pytest pytest-cov
-	@. env/bin/activate && $(PYTHON) -m pytest --metadata proactive_url $(GITHUB_PROACTIVE_URL) --metadata username $(GITHUB_PROACTIVE_USERNAME) --metadata password $(GITHUB_PROACTIVE_PASSWORD) --doctest-modules --junitxml=junit/test-results.xml --cov=com --cov-report=xml --cov-report=html
+	pwd
+	find .
+	@. env/bin/activate && $(PYTHON) -m pytest --metadata proactive_url $(GITHUB_PROACTIVE_URL) --metadata username $(GITHUB_PROACTIVE_USERNAME) --metadata password $(GITHUB_PROACTIVE_PASSWORD) --junit-xml=build/reports/TEST-report.xml
 	@echo "Tests completed using GitHub Secrets."
 
 publish_test:
