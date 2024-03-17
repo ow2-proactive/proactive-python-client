@@ -10,8 +10,8 @@ class ProactiveJob:
       output_folder (string)
     """
 
-    def __init__(self):
-        self.job_name = ''
+    def __init__(self, job_name=''):
+        self.job_name = job_name
         self.job_tasks = []
         self.generic_information = {}
         self.variables = {}

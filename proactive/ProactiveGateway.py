@@ -210,24 +210,21 @@ class ProActiveGateway:
         Create a workflow task
 
         :param language: The script language
+        :param task_name: The task name
         :return: A ProactiveTask object
         """
         self.logger.info('Creating a task')
-        task = ProactiveTask(language) if self.proactive_script_language.is_language_supported(language) else None
-        if task is not None:
-            task.setTaskName(task_name)
-        return task
+        return ProactiveTask(language, task_name) if self.proactive_script_language.is_language_supported(language) else None
 
     def createPythonTask(self, task_name=''):
         """
         Create a workflow Python task
 
+        :param task_name: The task name
         :return: A Python ProactiveTask object
         """
         self.logger.info('Creating a Python task')
-        task = ProactivePythonTask()
-        task.setTaskName(task_name)
-        return task
+        return ProactivePythonTask(task_name)
 
     def createFlowScript(self, script_language=None):
         """
@@ -320,14 +317,15 @@ class ProActiveGateway:
         self.logger.info('Creating a post script')
         return ProactivePostScript(language) if self.proactive_script_language.is_language_supported(language) else None
 
-    def createJob(self):
+    def createJob(self, job_name=''):
         """
         Create a Proactive Job
 
+        :param job_name: The job name
         :return: A ProactiveJob object
         """
         self.logger.info('Creating a job')
-        return ProactiveJob()
+        return ProactiveJob(job_name)
 
     def buildJob(self, job_model, debug=False):
         """

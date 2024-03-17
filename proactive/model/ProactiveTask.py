@@ -23,11 +23,11 @@ class ProactiveTask(object):
     flow_block (ProactiveFlowBlock)
     """
 
-    def __init__(self, script_language=None):
+    def __init__(self, script_language=None, task_name=''):
         self.script_language = script_language
         self.fork_environment = None
         self.selection_script = None
-        self.task_name = ''
+        self.task_name = task_name
         self.task_implementation = ''
         self.task_implementation_url = None
         self.variables = {}
@@ -218,8 +218,8 @@ class ProactivePythonTask(ProactiveTask):
     Represents a proactive python task
     """
 
-    def __init__(self):
-        super(ProactivePythonTask, self).__init__(ProactiveScriptLanguage().python())
+    def __init__(self, task_name=''):
+        super(ProactivePythonTask, self).__init__(ProactiveScriptLanguage().python(), task_name)
 
     def setTaskExecutionFromFile(self, task_file, parameters=[], displayTaskResultOnScheduler=True):
         if os.path.exists(task_file):
