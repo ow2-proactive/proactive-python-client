@@ -153,6 +153,13 @@ class ProActiveGateway:
         del self.proactive_scheduler_client
         del self.runtime_gateway
 
+    def close(self):
+        """
+        Cleanup: disconnect and terminate
+        """
+        self.disconnect()
+        self.terminate()
+
     def getProactiveRestApi(self):
         return self.proactive_rest_api
 
