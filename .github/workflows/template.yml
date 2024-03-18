@@ -1,4 +1,4 @@
-name: template
+name: Template
 
 on:
   workflow_dispatch: {}
