@@ -44,6 +44,6 @@ def getProActiveGateway():
         username = input("Login: ")
         password = getpass.getpass(prompt="Password: ")
     gateway.connect(username, password)
-    assert gateway.isConnected() is True
+    assert gateway.isConnected(), "Failed to connect to the ProActive server!"
     print("Connected")
     return gateway
