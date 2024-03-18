@@ -1,20 +1,5 @@
 import com.github.jk1.license.render.*
 
-apply plugin: 'java'
-apply plugin: 'maven'
-apply plugin: 'com.github.jk1.dependency-license-report'
-
-repositories {
-    if (project.hasProperty('local')) {
-        mavenLocal()
-    }
-    mavenCentral()
-    maven {
-        url "https://plugins.gradle.org/m2/"
-    }
-    maven { url 'http://repository.activeeon.com/content/groups/proactive/'}
-}
-
 buildscript {
     repositories {
         maven {
@@ -29,6 +14,25 @@ buildscript {
     }
 }
 
+plugins {
+    id 'java'
+    id 'maven-publish'
+    // id 'com.github.jk1.dependency-license-report'
+}
+apply plugin: 'com.github.jk1.dependency-license-report'
+
+
+repositories {
+    if (project.hasProperty('local')) {
+        mavenLocal()
+    }
+    mavenCentral()
+    maven {
+        url "https://plugins.gradle.org/m2/"
+    }
+    maven { url 'http://repository.activeeon.com/content/groups/proactive/'}
+}
+
 group = 'org.ow2.proactive'
 version = version
 
@@ -38,7 +42,7 @@ configurations {
 
 dependencies {
     localDeps "org.ow2.proactive_grid_cloud_portal:rest-smartproxy:$version"
-    compile configurations.localDeps
+    implementation configurations.localDeps
 }
 
 clean.doFirst {
@@ -84,7 +88,7 @@ task testlocal(type:Exec) {
    }
 }
 
-task publish(type:Exec) {
+task publishPackage(type:Exec) {
    ignoreExitValue true
    try {
         commandLine './publish.sh'
@@ -93,12 +97,12 @@ task publish(type:Exec) {
    }
 }
 
-task install(overwrite: true) {
-}
+// task install(overwrite: true) {
+// }
 
 setup.dependsOn clean
 buildfinal.dependsOn setup
 buildlocal.dependsOn setup
 build.dependsOn buildfinal
-publish.dependsOn build
-install.dependsOn publish
+publishPackage.dependsOn build
+// install.dependsOn publishPackage
