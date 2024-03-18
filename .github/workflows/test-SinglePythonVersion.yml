@@ -6,14 +6,31 @@ on:
       UBUNTU_VERSION:
         description: 'UBUNTU_VERSION'
         required: true
-        default: 'ubuntu-latest'
+        type: choice
+        options:
+        - 'ubuntu-18.04'
+        - 'ubuntu-20.04'
+        - 'ubuntu-22.04'
+        - 'ubuntu-latest'
+        default: 'ubuntu-20.04'
       PYTHON_VERSION:
         description: 'PYTHON_VERSION'
         required: true
+        type: choice
+        options:
+        - '3.5'
+        - '3.6'
+        - '3.7'
+        - '3.8'
+        - '3.9'
+        - '3.10'
+        - '3.11'
+        - '3.12'
         default: '3.9'
       PROACTIVE_URL:
         description: 'PROACTIVE_URL'
         required: true
+        type: string
         default: 'https://try.activeeon.com:8443'
 
 jobs:
