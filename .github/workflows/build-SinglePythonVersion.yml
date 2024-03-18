@@ -1,0 +1,79 @@
+name: Build using single Python version
+
+on:
+  workflow_dispatch:
+    inputs:
+      UBUNTU_VERSION:
+        description: 'Ubuntu version'
+        required: true
+        type: choice
+        options:
+        - 'ubuntu-18.04'
+        - 'ubuntu-20.04'
+        - 'ubuntu-22.04'
+        - 'ubuntu-latest'
+        default: 'ubuntu-20.04'
+      PYTHON_VERSION:
+        description: 'Python version'
+        required: true
+        type: choice
+        options:
+        - '3.5'
+        - '3.6'
+        - '3.7'
+        - '3.8'
+        - '3.9'
+        - '3.10'
+        - '3.11'
+        - '3.12'
+        default: '3.9'
+      JAVA_VERSION:
+        description: 'Java version (LTS versions)'
+        required: true
+        type: choice
+        options:
+        - '8'
+        - '11'
+        - '17'
+        - '21'
+        default: '8'
+
+jobs:
+  build:
+    runs-on: '${{ github.event.inputs.UBUNTU_VERSION }}'
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Install Java ${{ github.event.inputs.JAVA_VERSION }}
+      uses: actions/setup-java@v3
+      with:
+        java-version: '${{ github.event.inputs.JAVA_VERSION }}'
+        distribution: 'adopt'
+
+    - name: Set up Python ${{ github.event.inputs.PYTHON_VERSION }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ github.event.inputs.PYTHON_VERSION }}
+
+    - name: Display Pip and Python version
+      run: python -m pip -V
+
+    - name: Display Gradle version
+      run: ./gradlew --version
+
+    - name: Setting up project
+      run: make setup
+
+    - name: Setting up virtual environment
+      run: make setup_venv
+
+    - name: Building package
+      run: make build
+
+    - name: Installing proactive from dist
+      run: make install
+
+    - name: Check proactive version
+      run: make print_version
