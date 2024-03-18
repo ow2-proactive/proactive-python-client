@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       UBUNTU_VERSION:
-        description: 'UBUNTU_VERSION'
+        description: 'Ubuntu version'
         required: true
         type: choice
         options:
@@ -14,7 +14,7 @@ on:
         - 'ubuntu-latest'
         default: 'ubuntu-20.04'
       PYTHON_VERSION:
-        description: 'PYTHON_VERSION'
+        description: 'Python version'
         required: true
         type: choice
         options:
@@ -27,8 +27,18 @@ on:
         - '3.11'
         - '3.12'
         default: '3.9'
+      JAVA_VERSION:
+        description: 'Java version (LTS versions)'
+        required: true
+        type: choice
+        options:
+        - '8'
+        - '11'
+        - '17'
+        - '21'
+        default: '8'
       PROACTIVE_URL:
-        description: 'PROACTIVE_URL'
+        description: 'ProActive Server URL'
         required: true
         type: string
         default: 'https://try.activeeon.com:8443'
@@ -45,10 +55,10 @@ jobs:
       with:
         python-version: '${{ github.event.inputs.PYTHON_VERSION }}'
 
-    - name: Install Java 8
+    - name: Install Java ${{ github.event.inputs.JAVA_VERSION }}
       uses: actions/setup-java@v3
       with:
-        java-version: '8'
+        java-version: '${{ github.event.inputs.JAVA_VERSION }}'
         distribution: 'adopt'
 
     - name: Display Pip and Python version
