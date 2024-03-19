@@ -160,6 +160,57 @@ gateway = getProActiveGateway()
 
 If the `.env` file does not exists, it will ask you to enter the `PROACTIVE_URL`, `PROACTIVE_USERNAME` and `PROACTIVE_PASSWORD`.
 
+## Supported programming languages
+
+The ProActive Python SDK supports a wide range of programming languages for task execution within the ProActive Scheduler environment.
+These supported languages include:
+
+- `bash` : Linux Bash
+- `cmd` : Windows Cmd
+- `docker-compose` : Docker Compose
+- `scalaw` : Scalaw
+- `groovy` : Groovy
+- `javascript` : JavaScript
+- `python` : Jython (implementation of Python in Java)
+- `cpython` : Python (implementation of Python in C – original Python implementation)
+- `ruby` : Ruby
+- `perl` : Perl
+- `powershell` : PowerShell
+- `R` : R Language
+
+This comprehensive support enables you to integrate a variety of programming languages into your workflows, allowing for a flexible and versatile development experience within the ProActive Scheduler.
+
+To print the list of supported programming languages in the ProActive Python SDK, you can use the following command:
+
+```python
+print(gateway.getProactiveScriptLanguage().get_supported_languages()) 
+````
+
+This command fetches the supported languages from the ProActive server via the Python SDK, ensuring you have access to the most up-to-date list directly from your Python script.
+
+### Example: Creating a Groovy Task
+
+To create a Groovy task using the ProActive Python SDK, you can follow these steps, which include creating a job, and adding a Groovy task to this job with a specific task implementation. Below is an example that demonstrates these steps:
+
+```python
+...
+# Create a new ProActive job
+print("Creating a new ProActive job...")
+job = gateway.createJob("Groovy_Job_Example")
+
+# Create a new task using Groovy
+print("Creating a Groovy task...")
+groovy_task = gateway.createTask(language="groovy")
+groovy_task.setTaskName("Groovy_Task_Example")
+groovy_task.setTaskImplementation("""
+println "Hello from Groovy task!"
+""")
+
+# Add the Groovy task to the job
+job.addTask(groovy_task)
+...
+```
+
 ## Documentation
 
 For more detailed usage and advanced functionalities, please refer to the [ProActive Python Client Documentation](https://proactive-python-client.readthedocs.io/en/latest/).
