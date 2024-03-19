@@ -1,11 +1,11 @@
-# ProActive Python Client
+# ProActive Python Client / SDK
 
 ![License BSD](https://img.shields.io/badge/License-BSD-blue.svg "License BSD")
 ![Python 3](https://img.shields.io/badge/Python-3-brightgreen.svg "Python 3")
 ![Proactive](https://img.shields.io/pypi/v/proactive.svg "Proactive")
 [![Documentation Status](https://readthedocs.org/projects/proactive-python-client/badge/?version=latest)](https://proactive-python-client.readthedocs.io/en/latest/?badge=latest)
 
-The ProActive Python Client enables seamless interaction with the ProActive Scheduler and Resource Manager, facilitating the automation of workflow submission and management tasks directly from Python.
+The ProActive Python Client (or Proactive Python SDK) enables seamless interaction with the ProActive Scheduler and Resource Manager, facilitating the automation of workflow submission and management tasks directly from Python.
 
 ## Key Features
 
@@ -18,7 +18,12 @@ The ProActive Python Client enables seamless interaction with the ProActive Sche
 ### Prerequisites
 
 - Python version 3.5 or later is required.
-- Java 8 SDK
+- Java 8 SDK.
+
+Notes:
+
+- If you want to build the package using the Java 11 SDK, you need to clone the git branch `gradle-5.1.1`
+- Java 17+ is not supported.
 
 ### Installation
 
@@ -92,7 +97,6 @@ make test
 This simple example demonstrates connecting to a ProActive server, creating a job, adding a Python task, and submitting the job:
 
 ```python
-import os
 import getpass
 from proactive import ProActiveGateway
 
@@ -105,18 +109,21 @@ gateway = ProActiveGateway(proactive_url)
 gateway.connect(username=input("Username: "), password=getpass.getpass("Password: "))
 assert gateway.isConnected(), "Failed to connect to the ProActive server!"
 
-# Job and task creation
-print("Creating and configuring a ProActive job and task...")
-proactive_job = gateway.createJob()
-proactive_job.setJobName("SimpleJob")
+# Create a ProActive job 
+print("Creating a ProActive job...") 
+job = gateway.createJob("SimpleJob")
 
-proactive_task = gateway.createPythonTask("SimplePythonTask")
-proactive_task.setTaskImplementation('print("Hello from ProActive!")')
-proactive_task.addGenericInformation("PYTHON_COMMAND", "python3")
-proactive_job.addTask(proactive_task)
+# Create a ProActive task 
+print("Creating a ProActive Python task...") 
+task = gateway.createPythonTask("SimplePythonTask")
+task.setTaskImplementation('print("Hello from ProActive!")')
+task.addGenericInformation("PYTHON_COMMAND", "python3")
+
+# Add the Python task to the job
+job.addTask(task)
 
 # Job submission
-job_id = gateway.submitJob(proactive_job)
+job_id = gateway.submitJob(job)
 print(f"Job submitted with ID: {job_id}")
 
 # Retrieve job output
@@ -124,9 +131,31 @@ print("Job output:")
 print(gateway.getJobOutput(job_id))
 
 # Cleanup
-gateway.disconnect()
-gateway.terminate()
+gateway.close()
 print("Disconnected and finished.")
+```
+
+If you have created the `.env` file, you can replace:
+
+```python
+import getpass
+from proactive import ProActiveGateway
+
+proactive_url = "https://try.activeeon.com:8443"
+
+print(f"Connecting to {proactive_url}...")
+gateway = ProActiveGateway(proactive_url)
+
+# Securely input your credentials
+gateway.connect(username=input("Username: "), password=getpass.getpass("Password: "))
+assert gateway.isConnected(), "Failed to connect to the ProActive server!"
+```
+
+by:
+
+```python
+from proactive import getProActiveGateway
+gateway = getProActiveGateway()
 ```
 
 ## Documentation
