@@ -211,6 +211,42 @@ job.addTask(groovy_task)
 ...
 ```
 
+## Task dependencies
+
+To manage task dependencies in your ProActive Python SDK scripts, you can use the addDependency method. This method allows you to specify that a task depends on the completion of another task before it can begin execution. Here's a simplified example to illustrate how you can manage task dependencies using the ProActive Python SDK:
+
+```python
+...
+# Create a ProActive job
+job = gateway.createJob("Simple_Dependency_Demo")
+
+# Create the first task (Task A)
+task_A = gateway.createPythonTask("Task_A")
+task_A.setTaskImplementation('print("Task A is running")')
+
+# Create the second task (Task B) which depends on Task A
+task_B = gateway.createPythonTask("Task_B")
+task_B.setTaskImplementation('print("Task B is running")')
+task_B.addDependency(task_A)
+
+# Add tasks to the job
+job.addTask(task_A)
+job.addTask(task_B)
+
+# Submit the job to the ProActive Scheduler
+job_id = gateway.submitJob(job)
+print(f"Job submitted with ID: {job_id}")
+...
+```
+
+In this example:
+
+- `Task A` is a simple Python task that prints `Task A is running`.
+- `Task B` is another Python task that prints `Task B is running`.
+- `Task B` has a dependency on `Task A`, meaning it will only start after `Task A` has successfully completed. This dependency is established using the `addDependency(task_A)` method.
+
+After both tasks are created and configured, they're added to the job, which is then submitted to the ProActive Scheduler. Task B will wait for Task A to finish before executing.
+
 ## Documentation
 
 For more detailed usage and advanced functionalities, please refer to the [ProActive Python Client Documentation](https://proactive-python-client.readthedocs.io/en/latest/).
