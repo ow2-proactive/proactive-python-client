@@ -277,6 +277,87 @@ job.addTask(task)
 
 This example illustrates the flexibility of the ProActive Python SDK in managing data flow between jobs and tasks through the use of variables. Job-level variables are useful for defining parameters that are common across all tasks in a job, while task-level variables allow for task-specific configurations.
 
+## Data management
+
+There are several ways to transfer data from/to a job/task, and between tasks:
+
+### Global variables
+
+To transfer data (variables) between TaskA and TaskB, we can use the mechanism of global variables, where the TaskA creates a global variable that is visible by the TaskB and any other tasks created on the same job.
+
+#### TaskA: Producing a global variable
+
+In `TaskA`, you can define a variable within the task implementation and set its value. After the task execution, you mark this variable as a global variable.
+
+```python
+...
+# TaskA Implementation
+taskA = gateway.createPythonTask("TaskA")
+taskA.setTaskImplementation('''
+# Task logic
+variableA = "Hello from TaskA"
+# Setting a resulting variable
+variables.put("variableFromA", variableA)
+''')
+...
+```
+
+#### TaskB: Consuming the global variable
+
+In `TaskB`, you access the global variable produced by `TaskA` using the `variables.get()` method. This requires `TaskB` to have a dependency on `TaskA`, ensuring `TaskA` executes before `TaskB` and the variable is available.
+
+```python
+...
+# TaskB Implementation
+taskB = gateway.createPythonTask("TaskB")
+taskB.addDependency(taskA)
+taskB.setTaskImplementation('''
+# Accessing the variable from TaskA
+variableFromA = variables.get("variableFromA")
+print("Received in TaskB:", variableFromA)
+''')
+...
+```
+
+### Result variable
+
+Using result variables is a powerful method to transfer data between tasks within the same job. This approach allows a task (e.g., `TaskA`) to produce a result that can be accessed by subsequent tasks (e.g., `TaskB`) that depend on it. Here's how you can work with result variables in ProActive workflows:
+
+#### TaskA: Producing a result variable
+
+`TaskA` executes its business logic and generates a result. This result is then implicitly available to any tasks that are defined as its successors, making it an effective way to pass data forward in a workflow.
+
+```python
+...
+# Create a Python task A
+print("Creating a Python task...")
+taskA = gateway.createPythonTask("PythonTaskA")
+taskA.setTaskImplementation("""
+print("Hello")
+result = "World"
+""")
+...
+```
+
+#### TaskB: Consuming the result variable
+
+`TaskB`, which has a dependency on TaskA, can access the result produced by `TaskA`. This is done by iterating over the `results` object, which contains the outcomes of all predecessor tasks TaskB is dependent on.
+
+```python
+...
+# Create a Python task B
+print("Creating a Python task...")
+taskB = gateway.createPythonTask("PythonTaskB")
+taskB.addDependency(taskA)
+taskB.setTaskImplementation("""
+for res in results:
+    print(str(res))
+""")
+...
+```
+
+To ensure that `TaskB` correctly consumes the result variable produced by `TaskA`, you must explicitly declare `TaskA` as a dependency of `TaskB`. This setup guarantees the sequential execution order where `TaskA` completes before `TaskB` starts, allowing `TaskB` to access the results produced by `TaskA`.
+
 ## Documentation
 
 For more detailed usage and advanced functionalities, please refer to the [ProActive Python Client Documentation](https://proactive-python-client.readthedocs.io/en/latest/).
