@@ -220,8 +220,11 @@ class ProActiveGateway:
         :param task_name: The task name
         :return: A ProactiveTask object
         """
-        self.logger.info('Creating a task')
-        return ProactiveTask(language, task_name) if self.proactive_script_language.is_language_supported(language) else None
+        self.logger.info('Creating a ' + str(language) + ' task')
+        if language == self.proactive_script_language.python():
+            return self.createPythonTask(task_name)
+        else:
+            return ProactiveTask(language, task_name) if self.proactive_script_language.is_language_supported(language) else None
 
     def createPythonTask(self, task_name=''):
         """
