@@ -247,6 +247,36 @@ In this example:
 
 After both tasks are created and configured, they're added to the job, which is then submitted to the ProActive Scheduler. Task B will wait for Task A to finish before executing.
 
+## Job and task variables
+
+In the ProActive Scheduler, managing data flow and configuration across jobs and their constituent tasks is streamlined through the use of variables. These variables can be defined both at the job level, affecting all tasks within the job, and at the individual task level, for task-specific configurations. The following example demonstrates how to set and utilize these variables using the ProActive Python SDK, showcasing a simple yet effective way to pass and access data within your ProActive workflows.
+
+```python
+...
+# Create a new ProActive job
+job = gateway.createJob("Example_Job")
+
+# Define job-level variables
+job.addVariable("jobVar", "jobValue")
+
+# Create the first Python task
+task = gateway.createPythonTask()
+task.setTaskName("task")
+task.setTaskImplementation("""
+print("Job variable: ", variables.get("jobVar"))
+print("Task variable: ", variables.get("taskVar"))
+""")
+
+# Define task-level variables
+task.addVariable("taskVar", "taskValue")
+
+# Add the tasks to the job
+job.addTask(task)
+...
+```
+
+This example illustrates the flexibility of the ProActive Python SDK in managing data flow between jobs and tasks through the use of variables. Job-level variables are useful for defining parameters that are common across all tasks in a job, while task-level variables allow for task-specific configurations.
+
 ## Documentation
 
 For more detailed usage and advanced functionalities, please refer to the [ProActive Python Client Documentation](https://proactive-python-client.readthedocs.io/en/latest/).
