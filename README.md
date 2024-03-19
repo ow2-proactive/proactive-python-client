@@ -158,6 +158,8 @@ from proactive import getProActiveGateway
 gateway = getProActiveGateway()
 ```
 
+If the `.env` file does not exists, it will ask you to enter the `PROACTIVE_URL`, `PROACTIVE_USERNAME` and `PROACTIVE_PASSWORD`.
+
 ## Documentation
 
 For more detailed usage and advanced functionalities, please refer to the [ProActive Python Client Documentation](https://proactive-python-client.readthedocs.io/en/latest/).
