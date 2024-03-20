@@ -280,7 +280,7 @@ In this example:
 - `Task B` is another Python task that prints `Task B is running`.
 - `Task B` has a dependency on `Task A`, meaning it will only start after `Task A` has successfully completed. This dependency is established using the `addDependency(task_A)` method.
 
-After both tasks are created and configured, they're added to the job, which is then submitted to the ProActive Scheduler. Task B will wait for Task A to finish before executing.
+After both tasks are created and configured, they're added to the job, which is then submitted to the ProActive Scheduler. `Task B` will wait for `Task A` to finish before executing.
 
 ## Job and task variables
 
@@ -318,7 +318,7 @@ There are several ways to transfer data from/to a job/task, and between tasks:
 
 ### Global variables
 
-To transfer data (variables) between TaskA and TaskB, we can use the mechanism of global variables, where the TaskA creates a global variable that is visible by the TaskB and any other tasks created on the same job.
+To transfer data (variables) between `TaskA` and `TaskB`, we can use the mechanism of global variables, where the `TaskA` creates a global variable that is visible by the `TaskB` and any other tasks created on the same job.
 
 #### TaskA: Producing a global variable
 
@@ -376,7 +376,7 @@ result = "World"
 
 #### TaskB: Consuming the result variable
 
-`TaskB`, which has a dependency on `TaskA`, can access the result produced by `TaskA`. This is done by iterating over the `results` object, which contains the outcomes of all predecessor tasks TaskB is dependent on.
+`TaskB`, which has a dependency on `TaskA`, can access the result produced by `TaskA`. This is done by iterating over the `results` object, which contains the outcomes of all predecessor tasks `TaskB` is dependent on.
 
 ```python
 ...
