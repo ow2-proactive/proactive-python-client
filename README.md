@@ -26,13 +26,13 @@ The ProActive Python Client (or Proactive Python SDK) enables seamless interacti
     - [Example: Creating a Groovy Task](#example-creating-a-groovy-task)
   - [Task dependencies](#task-dependencies)
   - [Job and task variables](#job-and-task-variables)
-  - [Data management](#data-management)
     - [Global variables](#global-variables)
       - [TaskA: Producing a global variable](#taska-producing-a-global-variable)
       - [TaskB: Consuming the global variable](#taskb-consuming-the-global-variable)
     - [Result variable](#result-variable)
       - [TaskA: Producing a result variable](#taska-producing-a-result-variable)
       - [TaskB: Consuming the result variable](#taskb-consuming-the-result-variable)
+  - [Data management](#data-management)
     - [Data spaces](#data-spaces)
       - [Example: Managing Data Transfers with User and Global Spaces](#example-managing-data-transfers-with-user-and-global-spaces)
         - [Transferring data to the user space](#transferring-data-to-the-user-space)
@@ -317,10 +317,6 @@ job.addTask(task)
 
 This example illustrates the flexibility of the ProActive Python SDK in managing data flow between jobs and tasks through the use of variables. Job-level variables are useful for defining parameters that are common across all tasks in a job, while task-level variables allow for task-specific configurations.
 
-## Data management
-
-There are several ways to transfer data from/to a job/task, and between tasks:
-
 ### Global variables
 
 To transfer data (variables) between `TaskA` and `TaskB`, we can use the mechanism of global variables, where the `TaskA` creates a global variable that is visible by the `TaskB` and any other tasks created on the same job.
@@ -397,6 +393,10 @@ for res in results:
 ```
 
 To ensure that `TaskB` correctly consumes the result variable produced by `TaskA`, you must explicitly declare `TaskA` as a dependency of `TaskB`. This setup guarantees the sequential execution order where `TaskA` completes before `TaskB` starts, allowing `TaskB` to access the results produced by `TaskA`.
+
+## Data management
+
+Efficient data management is pivotal in executing distributed tasks with the ProActive Scheduler. This encompasses handling input and output files, managing data flow between tasks, and storing or sharing resources across different executions. The ProActive Python Client facilitates robust data management through various mechanisms, enabling you to manipulate data spaces and directly transfer files to/from the task's execution environment. This section elucidates two primary aspects of data management: "Data Spaces" and "Uploading and Downloading Files," highlighting their applications and differences to cater to diverse workflow requirements.
 
 ### Data spaces
 
