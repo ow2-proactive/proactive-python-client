@@ -70,6 +70,21 @@ class ProactiveTask(object):
         return True if self.fork_environment is not None else False
 
     def setRuntimeEnvironment(self, type=None, image=None, nvidia_gpu=None, mount_host_path=None, mount_container_path=None, rootless=None, isolation=None, no_home=None, host_network=None, verbose=None):
+        """
+        Defines and sets the runtime environment for executing a task within a containerized environment.
+        Parameters:
+        - type (str): Specifies the type of container technology to use for running the task. 
+        Options include "docker", "podman", "singularity", or any other value to indicate a non-containerized execution.
+        - image (str): The container image to use for running the task. Ensure that the 'py4j' Python package is available in the specified image.
+        - nvidia_gpu (bool): Whether to enable NVIDIA GPU support within the container. Automatically set to False if no NVIDIA GPUs are present.
+        - mount_host_path (str): The host machine path to mount into the container, providing the container access to specific directories or files from the host.
+        - mount_container_path (str): The path inside the container where the host's file system (or a part of it) specified by `mount_host_path` will be accessible.
+        - rootless (bool): Enables or disables rootless mode for the container execution, applicable to all container types (default False).
+        - isolation (bool): Enables or disables isolation mode specifically for Singularity containers (default False). This parameter is only applicable if 'type' is set to "singularity".
+        - no_home (bool): When set to True, the user's home directory is not mounted inside the container if the home directory is not the current working directory. Only applicable to Singularity containers (default False).
+        - host_network (bool): Configures the container to use the host's network stack directly, bypassing the default or custom network namespaces (default False).
+        - verbose (bool): Enables verbose output for the container runtime environment setup process (default False).
+        """
         self.fork_environment = ProactiveRuntimeEnv().create(type, image, nvidia_gpu, mount_host_path, mount_container_path, rootless, isolation, no_home, host_network, verbose)
 
     def setSelectionScript(self, selection_script):
