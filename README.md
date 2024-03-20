@@ -376,7 +376,7 @@ result = "World"
 
 #### TaskB: Consuming the result variable
 
-`TaskB`, which has a dependency on TaskA, can access the result produced by `TaskA`. This is done by iterating over the `results` object, which contains the outcomes of all predecessor tasks TaskB is dependent on.
+`TaskB`, which has a dependency on `TaskA`, can access the result produced by `TaskA`. This is done by iterating over the `results` object, which contains the outcomes of all predecessor tasks TaskB is dependent on.
 
 ```python
 ...
@@ -402,7 +402,7 @@ Data spaces in the ProActive Scheduler offer a robust mechanism for managing fil
 
 #### Example: Managing Data Transfers with User and Global Spaces
 
-The following example illustrates how to perform file transfers between the local environment and the ProActive Scheduler's data spaces, showcasing both user and global spaces.
+The following example illustrates how to perform file transfers between the local environment (where the task is running) and the ProActive Scheduler's data spaces, showcasing both user and global spaces.
 
 **Scenario**:
 
@@ -410,9 +410,17 @@ The following example illustrates how to perform file transfers between the loca
 2. The file is then transferred to the user space using `userspaceapi` for demonstration purposes.
 3. Instructions are provided to modify the code to utilize the global space instead, using `globalspaceapi`.
 
+Note that the `local space` in this context, is the data space where the `TaskA` is running (e.g. `/tmp/PA_*/*/*`).
+
+The default path to the user and global spaces are usually defined as:
+
+- `$PA_SCHEDULER_HOME/data/defaultuser/`
+
+- `$PA_SCHEDULER_HOME/data/defaultglobal/`
+
 ##### Transferring data to the user space
 
-To transfer files from the local machine to the user space in `TaskA`, you can use the following approach:
+To transfer files from its local space to the user space in `TaskA`, you can use the following approach:
 
 ```python
 ...
