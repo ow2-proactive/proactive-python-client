@@ -358,6 +358,108 @@ for res in results:
 
 To ensure that `TaskB` correctly consumes the result variable produced by `TaskA`, you must explicitly declare `TaskA` as a dependency of `TaskB`. This setup guarantees the sequential execution order where `TaskA` completes before `TaskB` starts, allowing `TaskB` to access the results produced by `TaskA`.
 
+### Data spaces
+
+Data spaces in the ProActive Scheduler offer a robust mechanism for managing file transfers across different spaces, including user and global data spaces. These spaces facilitate the storage and retrieval of files, allowing for efficient data management within jobs and tasks.
+
+- **User Space**: A private storage area accessible only to the user's jobs, ideal for personal or sensitive data.
+- **Global Space**: A shared storage space accessible by all users, suitable for commonly used data or resources.
+
+#### Example: Managing Data Transfers with User and Global Spaces
+
+The following example illustrates how to perform file transfers between the local environment and the ProActive Scheduler's data spaces, showcasing both user and global spaces.
+
+**Scenario**:
+
+1. A text file named `hello_world.txt` containing "Hello World" is created in the local space.
+2. The file is then transferred to the user space using `userspaceapi` for demonstration purposes.
+3. Instructions are provided to modify the code to utilize the global space instead, using `globalspaceapi`.
+
+##### Transferring data to the user space
+
+To transfer files from the local machine to the user space in `TaskA`, you can use the following approach:
+
+```python
+...
+# Task A: Creating and transferring a file to the user space
+taskA = gateway.createPythonTask("TaskA")
+taskA.setTaskImplementation("""
+import os
+
+file_name = 'hello_world.txt'
+with open(file_name, 'w') as file:
+    file.write("Hello World")
+print("File created: " + file_name)
+
+# Define the data space path
+dataspace_path = 'path/in/user/space/' + file_name
+
+# Transferring file to the user space
+print("Transferring file to the user space")
+userspaceapi.connect()
+userspaceapi.pushFile(gateway.jvm.java.io.File(file_name), dataspace_path)
+print("Transfer complete")
+
+# Transfer the file info to the next task
+variables.put("TASK_A_FILE_NAME", file_name)
+variables.put("TASK_A_DATASPACE_PATH", dataspace_path)
+""")
+...
+```
+
+##### Transferring data from the user space
+
+In `TaskB`, to import files from the user space back to the local space, follow this method:
+
+```python
+...
+# Task B: Importing and displaying the file from the user space
+taskB = gateway.createPythonTask("TaskB")
+taskB.addDependency(taskA)
+taskB.setTaskImplementation("""
+import os
+
+# Get the file info from the previous task
+file_name = variables.get("TASK_A_FILE_NAME")
+dataspace_path = variables.get("TASK_A_DATASPACE_PATH")
+
+# Transfer file from the user space to the local space
+print("Importing file from the user space")
+userspaceapi.connect()
+userspaceapi.pullFile(dataspace_path, gateway.jvm.java.io.File(file_name))
+if os.path.exists(file_name):
+    with open(file_name, 'r') as file:
+        print("File contents: " + file.read())
+else:
+    print("File does not exist.")
+""")
+...
+```
+
+#### Modifying for Global Space Use
+
+To adapt the above example for transferring data to and from the global space, replace the `userspaceapi` calls with `globalspaceapi` as demonstrated below:
+
+**For Transferring to Global Space in TaskA**:
+
+```python
+print("Transferring file to the global space")
+globalspaceapi.connect()
+globalspaceapi.pushFile(gateway.jvm.java.io.File(file_name), dataspace_path)
+print("Transfer complete")
+```
+
+**For Importing from Global Space in TaskB**:
+
+```python
+print("Importing file from the global space")
+globalspaceapi.connect()
+globalspaceapi.pullFile(dataspace_path, gateway.jvm.java.io.File(file_name))
+print("Import complete")
+```
+
+This comprehensive guide and example provide clear instructions on how to effectively manage data transfers within ProActive Scheduler workflows, utilizing both user and global data spaces for flexible data management solutions.
+
 ## Documentation
 
 For more detailed usage and advanced functionalities, please refer to the [ProActive Python Client Documentation](https://proactive-python-client.readthedocs.io/en/latest/).
