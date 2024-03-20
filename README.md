@@ -7,6 +7,41 @@
 
 The ProActive Python Client (or Proactive Python SDK) enables seamless interaction with the ProActive Scheduler and Resource Manager, facilitating the automation of workflow submission and management tasks directly from Python.
 
+## Summary
+
+- [ProActive Python Client / SDK](#proactive-python-client--sdk)
+  - [Summary](#summary)
+  - [Key Features](#key-features)
+  - [Getting Started](#getting-started)
+    - [Prerequisites](#prerequisites)
+    - [Installation](#installation)
+    - [Building from Source](#building-from-source)
+      - [Linux or Mac](#linux-or-mac)
+      - [Windows](#windows)
+    - [Running Tests](#running-tests)
+      - [With Gradle](#with-gradle)
+      - [With Make](#with-make)
+  - [Quickstart Example](#quickstart-example)
+  - [Supported programming languages](#supported-programming-languages)
+    - [Example: Creating a Groovy Task](#example-creating-a-groovy-task)
+  - [Task dependencies](#task-dependencies)
+  - [Job and task variables](#job-and-task-variables)
+  - [Data management](#data-management)
+    - [Global variables](#global-variables)
+      - [TaskA: Producing a global variable](#taska-producing-a-global-variable)
+      - [TaskB: Consuming the global variable](#taskb-consuming-the-global-variable)
+    - [Result variable](#result-variable)
+      - [TaskA: Producing a result variable](#taska-producing-a-result-variable)
+      - [TaskB: Consuming the result variable](#taskb-consuming-the-result-variable)
+    - [Data spaces](#data-spaces)
+      - [Example: Managing Data Transfers with User and Global Spaces](#example-managing-data-transfers-with-user-and-global-spaces)
+        - [Transferring data to the user space](#transferring-data-to-the-user-space)
+        - [Transferring data from the user space](#transferring-data-from-the-user-space)
+      - [Modifying for Global Space Use](#modifying-for-global-space-use)
+  - [Documentation](#documentation)
+  - [Examples Repository](#examples-repository)
+  - [Contributing](#contributing)
+
 ## Key Features
 
 - **Ease of Use**: Simple API for interacting with the ProActive Scheduler.
