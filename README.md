@@ -5,7 +5,7 @@
 ![Proactive](https://img.shields.io/pypi/v/proactive.svg "Proactive")
 [![Documentation Status](https://readthedocs.org/projects/proactive-python-client/badge/?version=latest)](https://proactive-python-client.readthedocs.io/en/latest/?badge=latest)
 
-The ProActive Python Client (or Proactive Python SDK) enables seamless interaction with the ProActive Scheduler and Resource Manager, facilitating the automation of workflow submission and management of tasks directly from Python.
+The ProActive Python Client (or Proactive Python SDK) enables seamless interaction with the ProActive Scheduler and Resource Manager, facilitating the automation of workflow submission and the management of tasks directly from Python.
 
 ## Summary
 
