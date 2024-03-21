@@ -5,7 +5,7 @@
 ![Proactive](https://img.shields.io/pypi/v/proactive.svg "Proactive")
 [![Documentation Status](https://readthedocs.org/projects/proactive-python-client/badge/?version=latest)](https://proactive-python-client.readthedocs.io/en/latest/?badge=latest)
 
-The ProActive Python Client (or Proactive Python SDK) enables seamless interaction with the ProActive Scheduler and Resource Manager, facilitating the automation of workflow submission and management tasks directly from Python.
+The ProActive Python Client (or Proactive Python SDK) enables seamless interaction with the ProActive Scheduler and Resource Manager, facilitating the automation of workflow submission and management of tasks directly from Python.
 
 ## Summary
 
@@ -24,6 +24,11 @@ The ProActive Python Client (or Proactive Python SDK) enables seamless interacti
   - [Quickstart Example](#quickstart-example)
   - [Supported programming languages](#supported-programming-languages)
     - [Example: Creating a Groovy Task](#example-creating-a-groovy-task)
+  - [Task implementation](#task-implementation)
+    - [Inline Implementation](#inline-implementation)
+    - [Copy Implementation from an External File](#copy-implementation-from-an-external-file)
+    - [Copy Implementation from a URL File](#copy-implementation-from-a-url-file)
+    - [Reference Implementation from an External File](#reference-implementation-from-an-external-file)
   - [Task dependencies](#task-dependencies)
   - [Job and task variables](#job-and-task-variables)
     - [Global variables](#global-variables)
@@ -37,7 +42,7 @@ The ProActive Python Client (or Proactive Python SDK) enables seamless interacti
       - [Example: Managing Data Transfers with User and Global Spaces](#example-managing-data-transfers-with-user-and-global-spaces)
         - [Transferring data to the user space](#transferring-data-to-the-user-space)
         - [Transferring data from the user space](#transferring-data-from-the-user-space)
-      - [Modifying for Global Space Use](#modifying-for-global-space-use)
+      - [Adapting for Global Space Use](#adapting-for-global-space-use)
     - [Uploading and Downloading Files](#uploading-and-downloading-files)
       - [Uploading Files to the Task's Local Space](#uploading-files-to-the-tasks-local-space)
         - [Example: Uploading Files for Task Execution](#example-uploading-files-for-task-execution)
@@ -73,7 +78,7 @@ You can easily install the ProActive Python Client using pip:
 pip install --upgrade proactive
 ```
 
-For access to the latest features and improvements, install the pre-release version:
+To access to the latest features and improvements, install the pre-release version:
 
 ```bash
 pip install --upgrade --pre proactive
@@ -134,7 +139,7 @@ make test
 
 ## Quickstart Example
 
-This simple example demonstrates connecting to a ProActive server, creating a job, adding a Python task, and submitting the job:
+This simple example demonstrates how to connect to a ProActive server, create a job, add a Python task, and submit the job:
 
 ```python
 import getpass
@@ -198,7 +203,9 @@ from proactive import getProActiveGateway
 gateway = getProActiveGateway()
 ```
 
-If the `.env` file does not exists, it will ask you to enter the `PROACTIVE_URL`, `PROACTIVE_USERNAME` and `PROACTIVE_PASSWORD`.
+If the `.env` file does not exists, it will prompt you to enter the `PROACTIVE_URL`, `PROACTIVE_USERNAME` and `PROACTIVE_PASSWORD`.
+
+Please see [demo_basic.py](https://github.com/ow2-proactive/proactive-python-client-examples/blob/main/demo_basic.py) for a complete example.
 
 ## Supported programming languages
 
@@ -218,7 +225,7 @@ These supported languages include:
 - `powershell` : PowerShell
 - `R` : R Language
 
-This comprehensive support enables you to integrate a variety of programming languages into your workflows, allowing for a flexible and versatile development experience within the ProActive Scheduler.
+This comprehensive support enables you to integrate a variety of programming languages into your workflows, fostering for a flexible and versatile development experience within the ProActive Scheduler.
 
 To print the list of supported programming languages in the ProActive Python SDK, you can use the following command:
 
@@ -226,7 +233,7 @@ To print the list of supported programming languages in the ProActive Python SDK
 print(gateway.getProactiveScriptLanguage().get_supported_languages()) 
 ````
 
-This command fetches the supported languages from the ProActive server via the Python SDK, ensuring you have access to the most up-to-date list directly from your Python script.
+This command fetches the supported languages from the ProActive server via the Python SDK, ensuring that you have access to the most up-to-date list directly from your Python script.
 
 ### Example: Creating a Groovy Task
 
@@ -251,9 +258,71 @@ job.addTask(groovy_task)
 ...
 ```
 
+Please see [demo_multilanguage_job.py](https://github.com/ow2-proactive/proactive-python-client-examples/blob/main/demo_multilanguage_job.py) for a complete example.
+
+## Task implementation
+
+Task implementations are central to defining the operations a task will perform within the ProActive Scheduler. The ProActive Python Client offers several methods to specify these implementations, catering to a variety of use cases and preferences. Below, we explore these methods in detail:
+
+### Inline Implementation
+
+Inline implementation allows you to directly embed the task logic within your script. This approach is straightforward and ideal for simple tasks or quick prototyping.
+
+**Example:**
+
+```python
+task.setTaskImplementation('print("Hello from ProActive!")')
+```
+
+Please see [demo_basic.py](https://github.com/ow2-proactive/proactive-python-client-examples/blob/main/demo_basic.py) for a complete example.
+
+### Copy Implementation from an External File
+
+For tasks with more complex logic, or when you wish to maintain a cleaner script, you can specify the task implementation from an external Python file. This method simplifies code management and enhances readability.
+
+**Example:**
+
+```python
+task.setTaskImplementationFromFile('path/to/your_script.py')
+```
+
+Please see [demo_impl_file.py](https://github.com/ow2-proactive/proactive-python-client-examples/blob/main/demo_impl_file.py) for a complete example.
+
+### Copy Implementation from a URL File
+
+When your task implementation resides online, for instance, in a GitHub repository, you can load it directly via its URL. This method ensures your tasks are always up-to-date with the latest version of the script hosted online.
+
+**Example:**
+
+```python
+task.setTaskImplementationFromURL('https://path/to/your_script.py')
+```
+
+Please see [demo_impl_url.py](https://github.com/ow2-proactive/proactive-python-client-examples/blob/main/demo_impl_url.py) for a complete example.
+
+### Reference Implementation from an External File
+
+Advanced scenarios might require running a Python script with arguments or using specific Python modules. In such cases, you can reference the main script and include additional resources, such as libraries or datasets, ensuring all necessary files are available for the task execution.
+
+**Example:**
+
+```python
+# Specify the main script and arguments
+task.setTaskExecutionFromFile('main_script.py', ['arg1', 'arg2'])
+
+# Include an entire directory as input files
+task.addInputFile('path/to/directory/**')
+```
+
+**Important:** When using `addInputFile` and `addOutputFile`, remember to invoke `submitJobWithInputsAndOutputsPaths(job)` instead of `submitJob(job)` to ensure proper handling of file paths.
+
+Please see [demo_exec_file.py](https://github.com/ow2-proactive/proactive-python-client-examples/blob/main/demo_exec_file.py) for a complete example.
+
+These methods provide the flexibility to structure your tasks in a way that best fits your project's requirements, whether for simplicity, code organization, or integration with external resources.
+
 ## Task dependencies
 
-To manage task dependencies in your ProActive Python SDK scripts, you can use the addDependency method. This method allows you to specify that a task depends on the completion of another task before it can begin execution. Here's a simplified example to illustrate how you can manage task dependencies using the ProActive Python SDK:
+To manage task dependencies in your ProActive Python SDK scripts, you can use the `addDependency` method. This method allows you to specify the task dependence on the completion of another task before it can begin execution. Here's a simplified example to illustrate how you can manage task dependencies using the ProActive Python SDK:
 
 ```python
 ...
@@ -287,6 +356,8 @@ In this example:
 
 After both tasks are created and configured, they're added to the job, which is then submitted to the ProActive Scheduler. `Task B` will wait for `Task A` to finish before executing.
 
+Please see [demo_task_dependency.py](https://github.com/ow2-proactive/proactive-python-client-examples/blob/main/demo_task_dependency.py) for a complete example.
+
 ## Job and task variables
 
 In the ProActive Scheduler, managing data flow and configuration across jobs and their constituent tasks is streamlined through the use of variables. These variables can be defined both at the job level, affecting all tasks within the job, and at the individual task level, for task-specific configurations. The following example demonstrates how to set and utilize these variables using the ProActive Python SDK, showcasing a simple yet effective way to pass and access data within your ProActive workflows.
@@ -317,6 +388,8 @@ job.addTask(task)
 
 This example illustrates the flexibility of the ProActive Python SDK in managing data flow between jobs and tasks through the use of variables. Job-level variables are useful for defining parameters that are common across all tasks in a job, while task-level variables allow for task-specific configurations.
 
+Please see [demo_job_task_var.py](https://github.com/ow2-proactive/proactive-python-client-examples/blob/main/demo_job_task_var.py) for a complete example.
+
 ### Global variables
 
 To transfer data (variables) between `TaskA` and `TaskB`, we can use the mechanism of global variables, where the `TaskA` creates a global variable that is visible by the `TaskB` and any other tasks created on the same job.
@@ -332,7 +405,7 @@ taskA = gateway.createPythonTask("TaskA")
 taskA.setTaskImplementation('''
 # Task logic
 variableA = "Hello from TaskA"
-# Setting a resulting variable
+# Setting a global variable
 variables.put("variableFromA", variableA)
 ''')
 ...
@@ -340,7 +413,7 @@ variables.put("variableFromA", variableA)
 
 #### TaskB: Consuming the global variable
 
-In `TaskB`, you access the global variable produced by `TaskA` using the `variables.get()` method. This requires `TaskB` to have a dependency on `TaskA`, ensuring `TaskA` executes before `TaskB` and the variable is available.
+In `TaskB`, you access the global variable produced by `TaskA` using the `variables.get()` method. This requires `TaskB` to have a dependency on `TaskA`, ensuring that `TaskA` executes before `TaskB` and the variable becomes available.
 
 ```python
 ...
@@ -348,12 +421,14 @@ In `TaskB`, you access the global variable produced by `TaskA` using the `variab
 taskB = gateway.createPythonTask("TaskB")
 taskB.addDependency(taskA)
 taskB.setTaskImplementation('''
-# Accessing the variable from TaskA
+# Accessing the global variable created by TaskA
 variableFromA = variables.get("variableFromA")
 print("Received in TaskB:", variableFromA)
 ''')
 ...
 ```
+
+Please see [demo_global_var.py](https://github.com/ow2-proactive/proactive-python-client-examples/blob/main/demo_global_var.py) for a complete example.
 
 ### Result variable
 
@@ -377,7 +452,7 @@ result = "World"
 
 #### TaskB: Consuming the result variable
 
-`TaskB`, which has a dependency on `TaskA`, can access the result produced by `TaskA`. This is done by iterating over the `results` object, which contains the outcomes of all predecessor tasks `TaskB` is dependent on.
+`TaskB`, which has a dependency on `TaskA`, can access the result produced by `TaskA`. This is achieved by iterating over the `results` object, which encompasses the outcomes of all predecessor tasks that `TaskB` is dependent on.
 
 ```python
 ...
@@ -393,6 +468,8 @@ for res in results:
 ```
 
 To ensure that `TaskB` correctly consumes the result variable produced by `TaskA`, you must explicitly declare `TaskA` as a dependency of `TaskB`. This setup guarantees the sequential execution order where `TaskA` completes before `TaskB` starts, allowing `TaskB` to access the results produced by `TaskA`.
+
+Please see [demo_task_result.py](https://github.com/ow2-proactive/proactive-python-client-examples/blob/main/demo_task_result.py) for a complete example.
 
 ## Data management
 
@@ -457,7 +534,7 @@ variables.put("TASK_A_DATASPACE_PATH", dataspace_path)
 
 ##### Transferring data from the user space
 
-In `TaskB`, to import files from the user space back to the task's local space, follow this method:
+In `TaskB`, to import files from the user space back to the task's local space, use the following method:
 
 ```python
 ...
@@ -484,7 +561,7 @@ else:
 ...
 ```
 
-#### Modifying for Global Space Use
+#### Adapting for Global Space Use
 
 To adapt the above example for transferring data to and from the global space, replace the `userspaceapi` calls with `globalspaceapi` as demonstrated below:
 
@@ -507,6 +584,8 @@ print("Import complete")
 ```
 
 This comprehensive guide and example provide clear instructions on how to effectively manage data transfers within ProActive Scheduler workflows, utilizing both user and global data spaces for flexible data management solutions.
+
+Please see [demo_dataspace_api.py](https://github.com/ow2-proactive/proactive-python-client-examples/blob/main/demo_dataspace_api.py) for a complete example.
 
 ### Uploading and Downloading Files
 
@@ -543,6 +622,8 @@ task.addOutputFile('path/in/task/local/space/**')
 In this example, `path/in/task/local/space/**` should be replaced with the specific path in the task's local space where the output files are located. The `**` pattern ensures that all files and subdirectories under this path are downloaded.
 
 The `addInputFile` and `addOutputFile` methods provide a straightforward approach to manage file transfers directly between your local machine and the ProActive task's execution environment. This mechanism simplifies the process of providing input data to your tasks and retrieving the results, enhancing the efficiency and flexibility of your ProActive workflows. Note that this process is distinct from using the ProActive Scheduler's user or global data spaces, which involve transferring files within the server's data space rather than between the user's local machine and the task's local space.
+
+Please see [demo_transf_file.py](https://github.com/ow2-proactive/proactive-python-client-examples/blob/main/demo_transf_file.py) for a complete example.
 
 ## Documentation
 
