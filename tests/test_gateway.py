@@ -162,14 +162,14 @@ class GatewayTestSuite(unittest.TestCase):
     def test_submit_python_script_with_loop(self):
         self.gateway.connect(self.username, self.password)
 
-        # Creating the split task
+        # Creating the start task
         pythonTaskStart = self.gateway.createPythonTask()
         pythonTaskStart.setTaskName("StartPythonTask")
         pythonTaskStart.setTaskImplementation("""print("Hello world!")""")
 
         pythonTaskStart.setFlowBlock(self.gateway.getProactiveFlowBlockType().start())
 
-        # Creating the replicated task
+        # Creating the loop task
         pythonTaskLoop = self.gateway.createPythonTask()
         pythonTaskLoop.setTaskName("LoopPythonTask")
         pythonTaskLoop.setTaskImplementation("""print("Hello world!")""")
@@ -195,7 +195,7 @@ class GatewayTestSuite(unittest.TestCase):
     def test_submit_python_script_with_branch(self):
         self.gateway.connect(self.username, self.password)
 
-        # Creating the split task
+        # Creating the condition task
         pythonTaskCondition = self.gateway.createPythonTask()
         pythonTaskCondition.setTaskName("ConditionPythonTask")
         pythonTaskCondition.setTaskImplementation("""print("Hello condition world!")""")
