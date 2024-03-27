@@ -488,6 +488,16 @@ class ProActiveGateway:
         """
         return self.proactive_scheduler_client.isJobFinished(str(job_id))
 
+    def isTaskFinished(self, job_id, task_name):
+        """
+        Verify if a task is finished
+
+        :param job_id: A valid job ID
+        :param task_name: A valid task name
+        :return: True or False
+        """
+        return self.proactive_scheduler_client.isTaskFinished(str(job_id), task_name)
+
     def getJobInfo(self, job_id):
         """
         Get the job info
