@@ -452,6 +452,15 @@ class ProActiveGateway:
         """
         return self.proactive_script_language
 
+    def getTaskStatus(self, job_id, task_name):
+        task_status = None
+        job_state = self.getJobState(job_id)
+        for task_state in job_state.getTasks():
+            if task_state.getName() == task_name:
+                task_status = str(task_state.getStatus().toString())
+                break
+        return task_status
+
     def getJobState(self, job_id):
         """
         Get the job state
