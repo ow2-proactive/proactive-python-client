@@ -106,7 +106,6 @@ This simple example demonstrates connecting to a ProActive server, creating a jo
 
     proactive_task = gateway.createPythonTask("SimplePythonTask")
     proactive_task.setTaskImplementation('print("Hello from ProActive!")')
-    proactive_task.addGenericInformation("PYTHON_COMMAND", "python3")
     proactive_job.addTask(proactive_task)
 
     # Job submission

@@ -229,15 +229,16 @@ class ProActiveGateway:
         else:
             return ProactiveTask(language, task_name) if self.proactive_script_language.is_language_supported(language) else None
 
-    def createPythonTask(self, task_name=''):
+    def createPythonTask(self, task_name='', default_python='python3'):
         """
         Creates a new task designed to execute Python scripts.
 
         :param task_name: The name of the task to be created.
+        :param default_python: The default python to be used.
         :return: A ProactiveTask object set up for Python script execution.
         """
         self.logger.info('Creating a Python task')
-        return ProactivePythonTask(task_name)
+        return ProactivePythonTask(task_name, default_python)
 
     def createFlowScript(self, script_language=None):
         """

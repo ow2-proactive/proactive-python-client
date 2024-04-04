@@ -162,7 +162,6 @@ job = gateway.createJob("SimpleJob")
 print("Creating a ProActive Python task...") 
 task = gateway.createPythonTask("SimplePythonTask")
 task.setTaskImplementation('print("Hello from ProActive!")')
-task.addGenericInformation("PYTHON_COMMAND", "python3")
 
 # Add the Python task to the job
 job.addTask(task)

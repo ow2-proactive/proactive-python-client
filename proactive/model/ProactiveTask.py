@@ -233,8 +233,9 @@ class ProactivePythonTask(ProactiveTask):
     Represents a proactive python task
     """
 
-    def __init__(self, task_name=''):
+    def __init__(self, task_name='', default_python='python3'):
         super(ProactivePythonTask, self).__init__(ProactiveScriptLanguage().python(), task_name)
+        self.addGenericInformation("PYTHON_COMMAND", default_python)
 
     def setTaskExecutionFromFile(self, task_file, parameters=[], displayTaskResultOnScheduler=True):
         if os.path.exists(task_file):
