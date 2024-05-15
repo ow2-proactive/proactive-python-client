@@ -586,6 +586,26 @@ class ProActiveGateway:
                 all_results.append(str(result.getValue()))
         return os.linesep.join(v for v in all_results)
 
+    def getJobResultMap(self, job_id, timeout=60000):
+        """
+        Retrieves the resultMap of a completed job.
+
+        :param job_id: The ID of the job to fetch the result for.
+        :param timeout: The timeout in milliseconds for waiting for the job to finish.
+        :return: The result of the job if available within the timeout period.
+        """
+        return self.proactive_scheduler_client.waitForJob(job_id, timeout).getResultMap()
+
+    def getJobPreciousResults(self, job_id, timeout=60000):
+        """
+        Retrieves the precious results of a completed job.
+
+        :param job_id: The ID of the job to fetch the result for.
+        :param timeout: The timeout in milliseconds for waiting for the job to finish.
+        :return: The result of the job if available within the timeout period.
+        """
+        return self.proactive_scheduler_client.waitForJob(job_id, timeout).getPreciousResults()
+
     def getTaskResult(self, job_id, task_name, timeout=60000):
         """
         Retrieves the result of a specified task from a job.
