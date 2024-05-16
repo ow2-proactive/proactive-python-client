@@ -622,6 +622,17 @@ class ProActiveGateway:
             task_result = self.__decode__(task_result.getValue())
         return task_result.getValue()
 
+    def getTaskPreciousResult(self, job_id, task_name, timeout=60000):
+        """
+        Retrieves the precious results of a specified task from a job.
+
+        :param job_id: The ID of the job to fetch the result for.
+        :param task_name: The name of the task to fetch the result for.
+        :param timeout: The timeout in milliseconds for waiting for the job to finish.
+        :return: The result of the job if available within the timeout period.
+        """
+        return self.proactive_scheduler_client.waitForJob(str(job_id), timeout).getPreciousResults().get(task_name).value()
+
     def printJobOutput(self, job_id, timeout=60000):
         """
         Get the job output
