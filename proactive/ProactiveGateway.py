@@ -594,7 +594,7 @@ class ProActiveGateway:
         :param timeout: The timeout in milliseconds for waiting for the job to finish.
         :return: The result of the job if available within the timeout period.
         """
-        return self.proactive_scheduler_client.waitForJob(job_id, timeout).getResultMap()
+        return self.proactive_scheduler_client.waitForJob(str(job_id), timeout).getResultMap()
 
     def getJobPreciousResults(self, job_id, timeout=60000):
         """
@@ -604,7 +604,7 @@ class ProActiveGateway:
         :param timeout: The timeout in milliseconds for waiting for the job to finish.
         :return: The result of the job if available within the timeout period.
         """
-        return self.proactive_scheduler_client.waitForJob(job_id, timeout).getPreciousResults()
+        return self.proactive_scheduler_client.waitForJob(str(job_id), timeout).getPreciousResults()
 
     def getTaskResult(self, job_id, task_name, timeout=60000):
         """
