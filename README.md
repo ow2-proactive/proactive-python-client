@@ -18,6 +18,7 @@ The ProActive Python Client (or Proactive Python SDK) enables seamless interacti
     - [Building from Source](#building-from-source)
       - [Linux or Mac](#linux-or-mac)
       - [Windows](#windows)
+      - [GitHub Codespaces (Linux)](#github-codespaces-linux)
     - [Running Tests](#running-tests)
       - [With Gradle](#with-gradle)
       - [With Make](#with-make)
@@ -94,10 +95,10 @@ To build and install the package from source:
 # Build the package
 make clean_build
 # or use gradlew
-gradlew clean build
+# gradlew clean build
 
 # Install the built package
-pip install dist/proactive-XXX.zip  # Replace XXX with the actual version
+pip install dist/*.zip  # Replace XXX with the actual version
 ```
 
 #### Windows
@@ -108,8 +109,50 @@ build.bat CLEAN_BUILD
 
 REM Install the built package
 REM Replace XXX with the actual version
-pip install dist\proactive-XXX.zip
+pip install dist\*.zip
 ```
+
+#### GitHub Codespaces (Linux)
+
+To set up your environment in GitHub Codespaces for building the ProActive Python Client, follow these steps:
+
+1. **Update the package list and install the Java 8 SDK:**
+
+    ```bash
+    sudo apt update
+    sudo apt install openjdk-8-jdk
+    ```
+
+2. **Clone the `jenv` repository and set up `jenv`:**
+
+    ```bash
+    git clone https://github.com/jenv/jenv.git ~/.jenv
+    echo 'export PATH="$HOME/.jenv/bin:$PATH"' >> ~/.bash_profile
+    echo 'eval "$(jenv init -)"' >> ~/.bash_profile
+    source ~/.bash_profile
+    ```
+
+3. **Add Java 8 to `jenv` and set it as the global version:**
+
+    ```bash
+    jenv add /usr/lib/jvm/java-8-openjdk-amd64/jre/
+    jenv global 1.8
+    java -version
+    ```
+
+4. **Build and install the package from source:**
+
+    ```bash
+    # Build the package
+    make clean_build
+    # or use gradlew
+    # ./gradlew clean build
+
+    # Install the built package
+    pip install dist/*.zip
+    ```
+
+By following these steps, you'll have the Java 8 SDK installed and configured with `jenv`, and you will be able to build and install the ProActive Python Client package from source within GitHub Codespaces.
 
 ### Running Tests
 
