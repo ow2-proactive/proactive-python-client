@@ -687,3 +687,5 @@ class ProActiveGateway:
         job_xml_data = self.exportJob2XML(job_model, debug)
         with open(xml_file_path, "w") as text_file:
             text_file.write("{0}".format(job_xml_data))
+    def test(self):
+        print("hello from test!")
