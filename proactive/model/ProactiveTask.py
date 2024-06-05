@@ -226,6 +226,49 @@ class ProactiveTask(object):
 
     def hasFlowBlock(self):
         return True if self.flow_block is not None else False
+    
+    def setSignals(self, taskSignals):
+        # TODO
+        taskPreScript = ProactivePreScript(ProactiveScriptLanguage().groovy())
+        taskPreScriptImplementation = """
+        import com.google.common.base.Splitter;
+        import org.ow2.proactive.scheduler.common.job.JobVariable;
+        """
+        for taskSignal in taskSignals:
+            signalName = taskSignal
+            signalVariables = taskSignals[signalName]
+            # print(signalName, signalVariables)
+            taskPreScriptImplementation += f"""
+            // Define signal variables
+            List<JobVariable> signalVariables{signalName} = new java.util.ArrayList<JobVariable>()
+            """
+            for signalVariable in signalVariables:
+                variableName = signalVariable['name']
+                variableValue = signalVariable['value']
+                variableModel = signalVariable['model']
+                variableDescription = signalVariable['description']
+                variableGroup = signalVariable['group']
+                variableAdvanced = signalVariable['advanced']
+                variableHidden = signalVariable['hidden']
+                taskPreScriptImplementation += f"""
+                signalVariables{signalName}.add(new JobVariable("{variableName}", "{variableValue}", "{variableModel}", "{variableDescription}", "{variableGroup}", {variableAdvanced}, {variableHidden}))
+                """
+        # ...
+        # receivedSignalObj = {
+        #     "name": "Update",
+        #     "variables": {
+        #         "INTEGER_VARIABLE": "12",
+        #         "LIST_VARIABLE": "True",
+        #     }
+        # }
+        taskPreScriptImplementation += """
+        task_name = variables.get("PA_TASK_NAME")
+        task_id = variables.get("PA_TASK_ID")
+        receivedSignalObjId = "RECEIVED_SIGNAL_"+task_name+"_"+task_id
+        variables.put(receivedSignalObjId, receivedSignalObj)
+        """
+        taskPreScript.setImplementation(taskPreScriptImplementation)
+        self.setPreScript(taskPreScript)
 
 
 class ProactivePythonTask(ProactiveTask):
