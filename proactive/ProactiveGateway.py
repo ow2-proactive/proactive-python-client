@@ -687,3 +687,9 @@ class ProActiveGateway:
         job_xml_data = self.exportJob2XML(job_model, debug)
         with open(xml_file_path, "w") as text_file:
             text_file.write("{0}".format(job_xml_data))
+
+    def killJob(self, job_id):
+        return self.proactive_scheduler_client.killJob(str(job_id))
+
+    def killTask(self, job_id, task_name):
+        return self.proactive_scheduler_client.killTask(str(job_id), task_name)
