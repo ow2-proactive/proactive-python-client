@@ -268,7 +268,6 @@ class ProactiveTask(object):
         signalapi.removeManySignals(new HashSet<>(signalsSet.collect {{ signal -> "ready_" + signal }}))
         // Display the received signal and add it to the job result
         println("Received signal: "+ receivedSignal)
-
         println("Signal variables:")
         def signalvariables = receivedSignal.getUpdatedVariables().each {{ k, v -> println "${{k}}:${{v}}" }}
         task_name = variables.get("PA_TASK_NAME")
