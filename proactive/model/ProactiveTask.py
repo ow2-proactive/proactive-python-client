@@ -228,7 +228,6 @@ class ProactiveTask(object):
         return True if self.flow_block is not None else False
     
     def setSignals(self, taskSignals):
-        # TODO
         taskPreScript = ProactivePreScript(ProactiveScriptLanguage().groovy())
         taskPreScriptImplementation = """
         import com.google.common.base.Splitter;
@@ -237,7 +236,7 @@ class ProactiveTask(object):
         for taskSignal in taskSignals:
             signalName = taskSignal
             signalVariables = taskSignals[signalName]
-            # print(signalName, signalVariables)
+            signals = list(taskSignals.keys())
             taskPreScriptImplementation += f"""
             // Define signal variables
             List<JobVariable> signalVariables{signalName} = new java.util.ArrayList<JobVariable>()
@@ -248,28 +247,41 @@ class ProactiveTask(object):
                 variableModel = signalVariable['model']
                 variableDescription = signalVariable['description']
                 variableGroup = signalVariable['group']
-                variableAdvanced = signalVariable['advanced']
-                variableHidden = signalVariable['hidden']
+                variableAdvanced = str(signalVariable['advanced']).lower()
+                variableHidden = str(signalVariable['hidden']).lower()
                 taskPreScriptImplementation += f"""
                 signalVariables{signalName}.add(new JobVariable("{variableName}", "{variableValue}", "{variableModel}", "{variableDescription}", "{variableGroup}", {variableAdvanced}, {variableHidden}))
                 """
-        # ...
-        # receivedSignalObj = {
-        #     "name": "Update",
-        #     "variables": {
-        #         "INTEGER_VARIABLE": "12",
-        #         "LIST_VARIABLE": "True",
-        #     }
-        # }
-        taskPreScriptImplementation += """
+            taskPreScriptImplementation += f"""
+                if (signalVariables{signalName}.isEmpty()) {{
+                    signalapi.readyForSignal("{signalName}")
+                }} else {{
+                    signalapi.readyForSignal("{signalName}", signalVariables{signalName})
+                }}
+            """
+        taskPreScriptImplementation += f"""
+        signalsSet = {signals}.toSet()
+        // Wait until one signal among those specified is received
+        println("Waiting for any signal among "+ signalsSet)
+        receivedSignal = signalapi.waitForAny(signalsSet)
+        // Remove ready signals
+        signalapi.removeManySignals(new HashSet<>(signalsSet.collect {{ signal -> "ready_" + signal }}))
+        // Display the received signal and add it to the job result
+        println("Received signal: "+ receivedSignal)
+
+        println("Signal variables:")
+        def signalvariables = receivedSignal.getUpdatedVariables().each {{ k, v -> println "${{k}}:${{v}}" }}
         task_name = variables.get("PA_TASK_NAME")
         task_id = variables.get("PA_TASK_ID")
         receivedSignalObjId = "RECEIVED_SIGNAL_"+task_name+"_"+task_id
-        variables.put(receivedSignalObjId, receivedSignalObj)
+        def receivedSignalObj = [
+            name: receivedSignal.toString(),
+            variables: signalvariables  
+        ]
+        variables.put(receivedSignalObjId, receivedSignalObj) 
         """
         taskPreScript.setImplementation(taskPreScriptImplementation)
         self.setPreScript(taskPreScript)
-
 
 class ProactivePythonTask(ProactiveTask):
     """
