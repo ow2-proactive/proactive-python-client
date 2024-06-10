@@ -711,11 +711,10 @@ class ProActiveGateway:
         } 
         # Make the POST request
         response = requests.post(url, headers=headers, json=variables)
-        print("response: " + str(response))
         # Check the response
         if response.status_code == 200:
             print('Signal sent successfully.')
             return True
         else:
-            print(f'Failed to send signal. Status code: {response.status_code}, Response: {response.text}')
+            print('Failed to send signal. Status code: {}, Response: {}'.format(response.status_code, response.text))
             return False
