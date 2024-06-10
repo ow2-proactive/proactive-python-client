@@ -226,7 +226,80 @@ class ProactiveTask(object):
 
     def hasFlowBlock(self):
         return True if self.flow_block is not None else False
-
+    
+    def setSignals(self, taskSignals, scope="prescript"):
+        if scope not in ['prescript', 'taskscript', 'postscript']:
+            raise ValueError("The signals scope should be one of the following options: 'prescript', 'taskscript' or 'postscript'")
+        signalsScriptImplementation = """
+        import com.google.common.base.Splitter;
+        import org.ow2.proactive.scheduler.common.job.JobVariable;
+        """
+        for taskSignal in taskSignals:
+            signalName = taskSignal
+            signalVariables = taskSignals[signalName]
+            signals = list(taskSignals.keys())
+            signalsScriptImplementation += """
+            // Define signal variables
+            List<JobVariable> signalVariables{signalName} = new java.util.ArrayList<JobVariable>()
+            """.format(signalName=signalName)
+            for signalVariable in signalVariables:
+                variableName = signalVariable['name']
+                variableValue = signalVariable['value']
+                variableModel = signalVariable['model']
+                variableDescription = signalVariable['description']
+                variableGroup = signalVariable['group']
+                variableAdvanced = str(signalVariable['advanced']).lower()
+                variableHidden = str(signalVariable['hidden']).lower()
+                signalsScriptImplementation += """
+                signalVariables{signalName}.add(new JobVariable("{variableName}", "{variableValue}", "{variableModel}", "{variableDescription}", "{variableGroup}", {variableAdvanced}, {variableHidden}))
+                """.format(
+                    signalName=signalName,
+                    variableName=variableName,
+                    variableValue=variableValue,
+                    variableModel=variableModel,
+                    variableDescription=variableDescription,
+                    variableGroup=variableGroup,
+                    variableAdvanced=variableAdvanced,
+                    variableHidden=variableHidden
+                )
+            signalsScriptImplementation += """
+                if (signalVariables{signalName}.isEmpty()) {{
+                    signalapi.readyForSignal("{signalName}")
+                }} else {{
+                    signalapi.readyForSignal("{signalName}", signalVariables{signalName})
+                }}
+            """.format(signalName=signalName)
+        signalsScriptImplementation += """
+        signalsSet = {signals}.toSet()
+        // Wait until one signal among those specified is received
+        println("Waiting for any signal among " + signalsSet)
+        receivedSignal = signalapi.waitForAny(signalsSet)
+        // Remove ready signals
+        signalapi.removeManySignals(new HashSet<>(signalsSet.collect {{ signal -> "ready_" + signal }}))
+        // Display the received signal and add it to the job result
+        println("Received signal: " + receivedSignal)
+        println("Signal variables: ")
+        def signalvariables = receivedSignal.getUpdatedVariables().each {{ k, v -> println "${{k}}:${{v}}" }}
+        task_name = variables.get("PA_TASK_NAME")
+        task_id = variables.get("PA_TASK_ID")
+        receivedSignalObjId = "RECEIVED_SIGNAL_" + task_name + "_" + task_id
+        def receivedSignalObj = [
+            name: receivedSignal.toString(),
+            variables: signalvariables
+        ]
+        variables.put(receivedSignalObjId, receivedSignalObj)
+        """.format(signals=signals)
+        if scope == 'prescript':
+            taskPreScript = ProactivePreScript(ProactiveScriptLanguage().groovy())
+            taskPreScript.setImplementation(signalsScriptImplementation)
+            self.setPreScript(taskPreScript)
+        if scope == 'taskscript':
+            self.setScriptLanguage(ProactiveScriptLanguage().groovy())
+            self.setTaskImplementation(signalsScriptImplementation)
+        if scope == 'postscript':
+            taskPostScript = ProactivePostScript(ProactiveScriptLanguage().groovy())
+            taskPostScript.setImplementation(signalsScriptImplementation)
+            self.setPostScript(taskPostScript)
 
 class ProactivePythonTask(ProactiveTask):
     """
