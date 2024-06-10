@@ -693,3 +693,29 @@ class ProActiveGateway:
 
     def killTask(self, job_id, task_name):
         return self.proactive_scheduler_client.killTask(str(job_id), task_name)
+
+    def sendSignal(self, job_id, signal, variables):
+        """
+        Sends a signal to the specified job.
+
+        :param job_id: The ID of the job to send the signal to.
+        :param timeout: The name of the signal to be sent.
+        :param variables: A dictionary containing variables names and values to be sent with the signal.
+        :return: True if the signal is sent successfully, False otherwise.
+        """
+        sessionid = self.proactive_scheduler_client.getSession()
+        url = f'{self.base_url}/rest/scheduler/job/{job_id}/signals?signal={signal}'
+        headers = {
+            'sessionid': sessionid,
+            'Content-Type': 'application/json'
+        } 
+        # Make the POST request
+        response = requests.post(url, headers=headers, json=variables)
+        print("response: " + str(response))
+        # Check the response
+        if response.status_code == 200:
+            print('Signal sent successfully.')
+            return True
+        else:
+            print(f'Failed to send signal. Status code: {response.status_code}, Response: {response.text}')
+            return False
