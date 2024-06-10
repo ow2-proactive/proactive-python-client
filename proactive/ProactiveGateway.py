@@ -704,7 +704,7 @@ class ProActiveGateway:
         :return: True if the signal is sent successfully, False otherwise.
         """
         sessionid = self.proactive_scheduler_client.getSession()
-        url = f'{self.base_url}/rest/scheduler/job/{job_id}/signals?signal={signal}'
+        url = '{}/rest/scheduler/job/{}/signals?signal={}'.format(self.base_url, job_id, signal)
         headers = {
             'sessionid': sessionid,
             'Content-Type': 'application/json'
