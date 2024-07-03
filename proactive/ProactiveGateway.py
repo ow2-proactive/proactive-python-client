@@ -687,3 +687,34 @@ class ProActiveGateway:
         job_xml_data = self.exportJob2XML(job_model, debug)
         with open(xml_file_path, "w") as text_file:
             text_file.write("{0}".format(job_xml_data))
+
+    def killJob(self, job_id):
+        return self.proactive_scheduler_client.killJob(str(job_id))
+
+    def killTask(self, job_id, task_name):
+        return self.proactive_scheduler_client.killTask(str(job_id), task_name)
+
+    def sendSignal(self, job_id, signal, variables):
+        """
+        Sends a signal to the specified job.
+
+        :param job_id: The ID of the job to send the signal to.
+        :param timeout: The name of the signal to be sent.
+        :param variables: A dictionary containing variables names and values to be sent with the signal.
+        :return: True if the signal is sent successfully, False otherwise.
+        """
+        sessionid = self.proactive_scheduler_client.getSession()
+        url = '{}/rest/scheduler/job/{}/signals?signal={}'.format(self.base_url, job_id, signal)
+        headers = {
+            'sessionid': sessionid,
+            'Content-Type': 'application/json'
+        } 
+        # Make the POST request
+        response = requests.post(url, headers=headers, json=variables)
+        # Check the response
+        if response.status_code == 200:
+            print('Signal sent successfully.')
+            return True
+        else:
+            print('Failed to send signal. Status code: {}, Response: {}'.format(response.status_code, response.text))
+            return False
