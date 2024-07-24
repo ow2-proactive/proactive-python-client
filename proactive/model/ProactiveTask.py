@@ -308,6 +308,10 @@ class ProactivePythonTask(ProactiveTask):
 
     def __init__(self, task_name='', default_python='python3'):
         super(ProactivePythonTask, self).__init__(ProactiveScriptLanguage().python(), task_name)
+        self.setDefaultPython(default_python)
+
+    def setDefaultPython(self, default_python='python3'):
+        self.default_python = default_python
         self.addGenericInformation("PYTHON_COMMAND", default_python)
 
     def setTaskExecutionFromFile(self, task_file, parameters=[], displayTaskResultOnScheduler=True):
