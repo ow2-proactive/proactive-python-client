@@ -1,5 +1,9 @@
+import os
+import subprocess
 import cloudpickle
 import codecs
+
+from tempfile import TemporaryDirectory
 
 from .ProactiveScriptLanguage import *
 from .ProactiveSelectionScript import *
@@ -307,14 +311,113 @@ class ProactivePythonTask(ProactiveTask):
     """
 
     def __init__(self, task_name='', default_python='python3'):
+        """
+        Initializes a ProactivePythonTask instance.
+        
+        Parameters:
+        - task_name (str): Name of the task (default is an empty string).
+        - default_python (str): Default Python interpreter to use (default is 'python3').
+        """
         super(ProactivePythonTask, self).__init__(ProactiveScriptLanguage().python(), task_name)
         self.setDefaultPython(default_python)
 
     def setDefaultPython(self, default_python='python3'):
+        """
+        Sets the default Python interpreter for the task.
+        
+        Parameters:
+        - default_python (str): The Python interpreter to use (default is 'python3').
+        """
         self.default_python = default_python
         self.addGenericInformation("PYTHON_COMMAND", default_python)
 
+    def setVirtualEnv(self, requirements=[], basepath="./", name="venv", verbosity=False, overwrite=False, install_requirements_if_exists=False):
+        """
+        Sets up a virtual environment for the task.
+        
+        Parameters:
+        - requirements (list): List of Python packages to install in the virtual environment (default is an empty list).
+        - basepath (str): Base path where the virtual environment will be created (default is current directory).
+        - name (str): Name of the virtual environment directory (default is 'venv').
+        - verbosity (bool): If True, enables verbose output (default is False).
+        - overwrite (bool): If True, overwrites the existing virtual environment (default is False).
+        - install_requirements_if_exists (bool): If True, installs requirements even if the virtual environment already exists (default is False).
+        """
+        if basepath is None:
+            basepath = TemporaryDirectory().name
+        venv_path = os.path.join(basepath, name)
+        requirements_str = ' '.join(requirements)
+        # Script to handle virtual environment creation
+        fork_env_script = """
+def envScript = localspace + "/createVirtualEnv.sh"
+File file = new File(envScript)
+file << "#!/bin/bash\\n"
+file << "cd " + localspace + "\\n"
+if (new File("{venv_path}").exists()) {{
+    if ("{overwrite}" == "true") {{
+        file << "echo [INFO] Overwriting existing virtualenv\\n"
+        file << "rm -rf {venv_path}\\n"
+        file << "{python} -m venv {venv_path}\\n"
+        file << "source {venv_path}/bin/activate\\n"
+        file << "pip install --upgrade pip\\n"
+        file << "pip install py4j\\n"
+        file << "echo [INFO] Installing requirements\\n"
+        modules = "{requirements}".split("\\\\s+")
+        for (String module : modules) {{
+            file << "pip install " + module + "\\n"
+        }}
+    }} else {{
+        file << "echo [INFO] Using existing virtualenv\\n"
+        file << "source {venv_path}/bin/activate\\n"
+        if ("{install_requirements_if_exists}" == "true") {{
+            file << "echo [INFO] Installing requirements\\n"
+            modules = "{requirements}".split("\\\\s+")
+            for (String module : modules) {{
+                file << "pip install " + module + "\\n"
+            }}
+        }}
+    }}
+}} else {{
+    file << "echo [INFO] Creating a new virtualenv\\n"
+    file << "{python} -m venv {venv_path}\\n"
+    file << "source {venv_path}/bin/activate\\n"
+    file << "pip install --upgrade pip\\n"
+    file << "pip install py4j\\n"
+    file << "echo [INFO] Installing requirements\\n"
+    modules = "{requirements}".split("\\\\s+")
+    for (String module : modules) {{
+        file << "pip install " + module + "\\n"
+    }}
+}}
+("chmod u+x " + envScript).execute().text
+if ("{verbosity}" == "true") {{
+    file << "pip -V && pip freeze\\n"
+    println envScript + "\\n" + file.text
+    println envScript.execute().text
+}} else {{
+    envScript.execute().waitFor()
+}}
+        """.format(
+            venv_path=venv_path,
+            python=self.default_python,
+            overwrite=str(overwrite).lower(),
+            requirements=requirements_str,
+            verbosity=str(verbosity).lower(),
+            install_requirements_if_exists=str(install_requirements_if_exists).lower()
+        )
+        fork_env = ProactiveForkEnv(ProactiveScriptLanguage().groovy())
+        fork_env.setImplementation(fork_env_script)
+        self.setForkEnvironment(fork_env)
+
     def setTaskExecutionFromFile(self, task_file, parameters=[], displayTaskResultOnScheduler=True):
+        """
+        Sets the task implementation from a Python script file.
+        
+        Parameters:
+        - task_file (str): Path to the Python script file.
+        - parameters (list): List of parameters to pass to the script (default is an empty list).
+        - displayTaskResultOnScheduler (bool): If True, displays the task result on the scheduler (default is True).
+        """
         if os.path.exists(task_file):
             params_string = ' '.join(parameters)
             task_implementation = "import subprocess"
@@ -335,6 +438,12 @@ class ProactivePythonTask(ProactiveTask):
             self.addInputFile(task_file)
 
     def setTaskExecutionFromLambdaFunction(self, lambda_function):
+        """
+        Sets the task implementation from a lambda function.
+        
+        Parameters:
+        - lambda_function (function): The lambda function to execute.
+        """
         pickled_lambda = codecs.encode(cloudpickle.dumps(lambda_function), "base64")
         task_implementation = "import pickle"
         task_implementation += "\n"
@@ -344,4 +453,3 @@ class ProactivePythonTask(ProactiveTask):
         task_implementation += "\n"
         task_implementation += "print('result: ', result)"
         self.setTaskImplementation(task_implementation)
-
