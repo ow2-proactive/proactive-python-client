@@ -44,6 +44,8 @@ build:
 
 clean_build: setup virtualenv build
 
+clean_install: clean_build install
+
 uninstall:
 	@echo "Uninstalling proactive package..."
 	@. env/bin/activate && $(PYTHON) -m pip uninstall -y proactive
