@@ -408,6 +408,7 @@ if ("{verbosity}" == "true") {{
         fork_env = ProactiveForkEnv(ProactiveScriptLanguage().groovy())
         fork_env.setImplementation(fork_env_script)
         self.setForkEnvironment(fork_env)
+        self.setDefaultPython(os.path.join(venv_path, 'bin', 'python'))
 
     def setTaskExecutionFromFile(self, task_file, parameters=[], displayTaskResultOnScheduler=True):
         """
