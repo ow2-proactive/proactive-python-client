@@ -187,3 +187,11 @@ class ProactiveFactory:
         """
         return self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.job.factories.Job2XMLTransformer()
 
+    def create_stax_job_factory(self):
+        """
+        Create a ProActive StaxJobFactory
+        https://www.activeeon.com/public_content/documentation/javadoc/latest/org/ow2/proactive/scheduler/common/job/factories/StaxJobFactory.html
+
+        :return: A StaxJobFactory object
+        """
+        return self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.job.factories.StaxJobFactory(True) # handleGlobalVariables=True

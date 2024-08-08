@@ -3,6 +3,7 @@ import getpass
 import time
 
 from py4j.java_gateway import JavaGateway
+from py4j.java_collections import MapConverter, SetConverter
 
 import logging.config
 
@@ -18,6 +19,9 @@ from .model.ProactiveTask import *
 from .model.ProactiveJob import *
 
 from .bucket.ProactiveBucketFactory import *
+
+def convert_java_map_to_python_dict(java_map):
+    return {entry.getKey(): entry.getValue() for entry in java_map.entrySet()}
 
 class ProActiveGateway:
     """
@@ -201,6 +205,46 @@ class ProActiveGateway:
         self.logger.debug('Submitting from file the job \'' + workflow_xml_file_path + '\'')
         return self.proactive_scheduler_client.submit(self.runtime_gateway.jvm.java.io.File(workflow_xml_file_path),
                                                       workflow_variables_java_map).longValue()
+
+    def submitCustomWorkflowFromFile(self, workflow_xml_file_path, workflow_variables=None, workflow_generic_info=None, job_name=None, job_description=None, project_name=None, bucket_name=None, label=None, workflow_tags=None, debug=False):
+        self.logger.info('Creating a proactive job from the XML file \'' + workflow_xml_file_path + '\'')
+        StaxJobFactory = self.proactive_factory.create_stax_job_factory()
+        Job = StaxJobFactory.createJob(workflow_xml_file_path)
+        if job_name:
+            Job.setName(job_name)
+        if job_description:
+            Job.setDescription(job_description)
+        if project_name:
+            Job.setProjectName(project_name)
+        if bucket_name:
+            Job.setBucketName(bucket_name)
+        if label:
+            Job.setLabel(label)
+        if isinstance(workflow_variables, dict):
+            self.logger.debug('Adding variables')
+            job_variables = {}
+            for key, value in workflow_variables.items():
+                JobVariable = self.proactive_factory.create_job_variable()
+                JobVariable.setName(key)
+                JobVariable.setValue(value)
+                job_variables[key] = JobVariable
+            variables_java_map = MapConverter().convert(job_variables, self.runtime_gateway._gateway_client)
+            current_variables_java_map = Job.getVariables()
+            current_variables_python_dict = convert_java_map_to_python_dict(current_variables_java_map)
+            new_variables_python_dict = convert_java_map_to_python_dict(variables_java_map)
+            merged_variables_python_dict = {**current_variables_python_dict, **new_variables_python_dict}
+            merged_variables_java_map = MapConverter().convert(merged_variables_python_dict, self.runtime_gateway._gateway_client)
+            Job.setVariables(merged_variables_java_map)
+        if isinstance(workflow_generic_info, dict):
+            self.logger.debug('Adding the generic information')
+            for key, value in workflow_generic_info.items():
+                Job.addGenericInformation(key, value)
+        if isinstance(workflow_tags, list):
+            self.logger.debug('Adding tags')
+            workflow_tags_java_set = SetConverter().convert(workflow_tags, self.runtime_gateway._gateway_client)
+            Job.setWorkflowTags(workflow_tags_java_set)
+        self.logger.info('Submitting the job ' + Job.getName())
+        return self.proactive_scheduler_client.submit(Job).longValue()
 
     def submitWorkflowFromURL(self, workflow_url_spec, workflow_variables={}):
         """
