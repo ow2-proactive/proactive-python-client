@@ -1,11 +1,16 @@
+import os
 import sys
 import getpass
 import time
+import tempfile
 
 from py4j.java_gateway import JavaGateway
 from py4j.java_collections import MapConverter, SetConverter
 
-import logging.config
+import logging
+# Configure the logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+logger = logging.getLogger('ProactiveGateway')
 
 from .ProactiveRestApi import *
 from .ProactiveFactory import *
@@ -206,7 +211,7 @@ class ProActiveGateway:
         return self.proactive_scheduler_client.submit(self.runtime_gateway.jvm.java.io.File(workflow_xml_file_path),
                                                       workflow_variables_java_map).longValue()
 
-    def submitCustomWorkflowFromFile(self, workflow_xml_file_path, workflow_variables=None, workflow_generic_info=None, job_name=None, job_description=None, project_name=None, bucket_name=None, label=None, workflow_tags=None, debug=False):
+    def submitCustomWorkflowFromFile(self, workflow_xml_file_path, workflow_variables=None, workflow_generic_info=None, job_name=None, job_description=None, project_name=None, bucket_name=None, label=None, workflow_tags=None):
         self.logger.info('Creating a proactive job from the XML file \'' + workflow_xml_file_path + '\'')
         StaxJobFactory = self.proactive_factory.create_stax_job_factory()
         Job = StaxJobFactory.createJob(workflow_xml_file_path)
@@ -245,6 +250,64 @@ class ProActiveGateway:
             Job.setWorkflowTags(workflow_tags_java_set)
         self.logger.info('Submitting the job ' + Job.getName())
         return self.proactive_scheduler_client.submit(Job).longValue()
+
+    def submitCustomWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables=None, workflow_generic_info=None, job_name=None, job_description=None, project_name=None, workflow_tags=None, local_file_path=None):
+        try:
+            object_str = self.getProactiveRestApi().get_object_from_catalog(bucket_name, workflow_name)
+            PA_CATALOG_REST_URL = self.base_url + "/catalog"
+            self.logger.debug("PA_CATALOG_REST_URL: " + PA_CATALOG_REST_URL)
+            object_str = object_str.replace('${PA_CATALOG_REST_URL}', PA_CATALOG_REST_URL)
+            # Create a temporary file that will be deleted automatically
+            with tempfile.NamedTemporaryFile() as temp_file:
+                # Write some data to the file
+                temp_file.write(object_str.encode('utf-8'))
+                # Get the absolute path of the temporary file
+                temp_file_path = os.path.abspath(temp_file.name)
+                # The file will be deleted when closed
+                self.logger.info(f'Temporary file created and will be deleted: {temp_file_path}')
+                # Copy the content to a new file
+                if local_file_path:
+                    # local_copy_path = os.path.join(os.getcwd(), 'workflow.xml')
+                    with open(local_file_path, 'wb') as local_copy_file:
+                        temp_file.seek(0)
+                        local_copy_file.write(temp_file.read())
+                    self.logger.info(f'Local copy of the temporary file created: {local_file_path}')
+                StaxJobFactory = self.proactive_factory.create_stax_job_factory()
+                Job = StaxJobFactory.createJob(temp_file_path)
+                if job_name:
+                    Job.setName(job_name)
+                if job_description:
+                    Job.setDescription(job_description)
+                if project_name:
+                    Job.setProjectName(project_name)
+                if isinstance(workflow_variables, dict):
+                    self.logger.debug('Adding variables')
+                    job_variables = {}
+                    for key, value in workflow_variables.items():
+                        JobVariable = self.proactive_factory.create_job_variable()
+                        JobVariable.setName(key)
+                        JobVariable.setValue(value)
+                        job_variables[key] = JobVariable
+                    variables_java_map = MapConverter().convert(job_variables, self.runtime_gateway._gateway_client)
+                    current_variables_java_map = Job.getVariables()
+                    current_variables_python_dict = convert_java_map_to_python_dict(current_variables_java_map)
+                    new_variables_python_dict = convert_java_map_to_python_dict(variables_java_map)
+                    merged_variables_python_dict = {**current_variables_python_dict, **new_variables_python_dict}
+                    merged_variables_java_map = MapConverter().convert(merged_variables_python_dict, self.runtime_gateway._gateway_client)
+                    Job.setVariables(merged_variables_java_map)
+                if isinstance(workflow_generic_info, dict):
+                    self.logger.debug('Adding the generic information')
+                    for key, value in workflow_generic_info.items():
+                        Job.addGenericInformation(key, value)
+                if isinstance(workflow_tags, list):
+                    self.logger.debug('Adding tags')
+                    workflow_tags_java_set = SetConverter().convert(workflow_tags, self.runtime_gateway._gateway_client)
+                    Job.setWorkflowTags(workflow_tags_java_set)
+                self.logger.info('Submitting the job ' + Job.getName())
+                return self.proactive_scheduler_client.submit(Job).longValue()
+        except Exception as e:
+            self.logger.error("Error occurred while submitting the custom workflow from catalog", exc_info=True)
+            return None
 
     def submitWorkflowFromURL(self, workflow_url_spec, workflow_variables={}):
         """
@@ -565,6 +628,21 @@ class ProActiveGateway:
         """
         return self.proactive_scheduler_client.waitForJob(str(job_id), timeout)
 
+    def waitJobIsFinished(self, job_id, time_to_check=.5):
+        # Monitor job status
+        is_finished = False
+        while not is_finished:
+            # Get the current state of the job
+            job_status = self.getJobStatus(job_id)
+            # Print the current job status
+            self.logger.debug(f"Current job status: {job_status}")
+            # Check if the job has finished
+            if job_status.upper() in ["FINISHED", "CANCELED", "FAILED"]:
+                is_finished = True
+            else:
+                # Wait before checking again
+                time.sleep(time_to_check)
+
     def getAllJobs(self, max_number_of_jobs=1000, my_jobs_only=False, pending=False, running=True, finished=False,
                    withIssuesOnly=False, child_jobs=True, job_name=None, project_name=None, user_name=None, tenant=None, parent_id=None):
         """
@@ -757,8 +835,8 @@ class ProActiveGateway:
         response = requests.post(url, headers=headers, json=variables)
         # Check the response
         if response.status_code == 200:
-            print('Signal sent successfully.')
+            self.logger.info('Signal sent successfully.')
             return True
         else:
-            print('Failed to send signal. Status code: {}, Response: {}'.format(response.status_code, response.text))
+            self.logger.info('Failed to send signal. Status code: {}, Response: {}'.format(response.status_code, response.text))
             return False
