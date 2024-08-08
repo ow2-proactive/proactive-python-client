@@ -1,9 +1,11 @@
+import os
 import getpass
 import requests
 import json
 import ssl
 import warnings
 import contextlib
+import tempfile
 
 from urllib3.exceptions import InsecureRequestWarning
 from .ProactiveUtils import convert_palist_to_list
@@ -234,6 +236,46 @@ class ProactiveRestApi:
             else:
                 service_endpoint_url = service_endpoint['url']
         return service_endpoint_url
+
+    def get_object_from_catalog(self, bucket_name, object_name):
+        result = None
+        assert bucket_name, "The bucket name should be a valid bucket name (not be None or empty)."
+        assert object_name, "The object name should be a valid object name (not be None or empty)."
+        if self.connected():
+            api_url = self.base_url.replace(
+                "rest", 
+                "/catalog/buckets/{bucket_name}/resources/{object_name}/raw".format(bucket_name=bucket_name, object_name=object_name)
+            )
+            if self.debug: print("api_url: ", api_url)
+            api_url_headers = {"sessionid": self.session_id}
+            with no_ssl_verification():
+                response = requests.get(api_url, headers=api_url_headers)
+                if self.debug: print(response.status_code, response.text)
+                if response.status_code == 200:
+                    result = response.text
+        else:
+            if self.debug: print("[ERROR] You are not connected!")
+        return result
+    
+    def download_object_from_catalog(self, bucket_name, object_name, file_path):
+        try:
+            object_str = self.getProactiveRestApi().get_object_from_catalog(bucket_name, object_name)
+            # Create a temporary file that will be deleted automatically
+            with tempfile.NamedTemporaryFile() as temp_file:
+                # Write some data to the file
+                temp_file.write(object_str.encode('utf-8'))
+                # Get the absolute path of the temporary file
+                temp_file_path = os.path.abspath(temp_file.name)
+                # The file will be deleted when closed
+                self.logger.info(f'Temporary file created and will be deleted: {temp_file_path}')
+                # Copy the content to a new file
+                with open(file_path, 'wb') as local_file:
+                    temp_file.seek(0)
+                    local_file.write(temp_file.read())
+                self.logger.info(f'The object file created at: {file_path}')
+        except Exception as e:
+            self.logger.error("Error occurred while downloading the object from catalog", exc_info=True)
+            return None
 
     def logout(self):
         if self.connected():
