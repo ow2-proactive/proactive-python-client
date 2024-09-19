@@ -410,6 +410,92 @@ if ("{verbosity}" == "true") {{
         self.setForkEnvironment(fork_env)
         self.setDefaultPython(os.path.join(venv_path, 'bin', 'python'))
 
+    def setVirtualEnvFromFile(self, requirements_file, basepath="./", name="venv", verbosity=False, overwrite=False, install_requirements_if_exists=False):
+        """
+        Sets up a virtual environment for the task using requirements from a file.
+        
+        Parameters:
+        - requirements_file (str): Path to a text file containing Python packages to install.
+        - basepath (str): Base path where the virtual environment will be created (default is current directory).
+        - name (str): Name of the virtual environment directory (default is 'venv').
+        - verbosity (bool): If True, enables verbose output (default is False).
+        - overwrite (bool): If True, overwrites the existing virtual environment (default is False).
+        - install_requirements_if_exists (bool): If True, installs requirements even if the virtual environment already exists (default is False).
+        """
+        if not os.path.exists(requirements_file):
+            raise FileNotFoundError(f"Requirements file not found: {requirements_file}")
+
+        with open(requirements_file, 'r') as file:
+            requirements = [line.strip() for line in file if line.strip() and not line.startswith('#')]
+
+        if basepath is None:
+            basepath = TemporaryDirectory().name
+        venv_path = os.path.join(basepath, name)
+        requirements_str = ' '.join(requirements)
+
+        # Script to handle virtual environment creation
+        fork_env_script = """
+def envScript = localspace + "/createVirtualEnv.sh"
+File file = new File(envScript)
+file << "#!/bin/bash\\n"
+file << "cd " + localspace + "\\n"
+if (new File("{venv_path}").exists()) {{
+    if ("{overwrite}" == "true") {{
+        file << "echo [INFO] Overwriting existing virtualenv\\n"
+        file << "rm -rf {venv_path}\\n"
+        file << "{python} -m venv {venv_path}\\n"
+        file << "source {venv_path}/bin/activate\\n"
+        file << "pip install --upgrade pip\\n"
+        file << "pip install py4j\\n"
+        file << "echo [INFO] Installing requirements\\n"
+        modules = "{requirements}".split("\\\\s+")
+        for (String module : modules) {{
+            file << "pip install " + module + " || {{ echo 'Failed to install ' + module; exit 1; }}\\n"
+        }}
+    }} else {{
+        file << "echo [INFO] Using existing virtualenv\\n"
+        file << "source {venv_path}/bin/activate\\n"
+        if ("{install_requirements_if_exists}" == "true") {{
+            file << "echo [INFO] Installing requirements\\n"
+            modules = "{requirements}".split("\\\\s+")
+            for (String module : modules) {{
+                file << "pip install " + module + " || {{ echo 'Failed to install ' + module; exit 1; }}\\n"
+            }}
+        }}
+    }}
+}} else {{
+    file << "echo [INFO] Creating a new virtualenv\\n"
+    file << "{python} -m venv {venv_path}\\n"
+    file << "source {venv_path}/bin/activate\\n"
+    file << "pip install --upgrade pip\\n"
+    file << "pip install py4j\\n"
+    file << "echo [INFO] Installing requirements\\n"
+    modules = "{requirements}".split("\\\\s+")
+    for (String module : modules) {{
+        file << "pip install " + module + " || {{ echo 'Failed to install ' + module; exit 1; }}\\n"
+    }}
+}}
+("chmod u+x " + envScript).execute().text
+if ("{verbosity}" == "true") {{
+    file << "pip -V && pip freeze && pip check\\n"
+    println envScript + "\\n" + file.text
+    println envScript.execute().text
+}} else {{
+    envScript.execute().waitFor()
+}}
+        """.format(
+            venv_path=venv_path,
+            python=self.default_python,
+            overwrite=str(overwrite).lower(),
+            requirements=requirements_str,
+            verbosity=str(verbosity).lower(),
+            install_requirements_if_exists=str(install_requirements_if_exists).lower()
+        )
+        fork_env = ProactiveForkEnv(ProactiveScriptLanguage().groovy())
+        fork_env.setImplementation(fork_env_script)
+        self.setForkEnvironment(fork_env)
+        self.setDefaultPython(os.path.join(venv_path, 'bin', 'python'))
+
     def setTaskExecutionFromFile(self, task_file, parameters=[], displayTaskResultOnScheduler=True):
         """
         Sets the task implementation from a Python script file.
