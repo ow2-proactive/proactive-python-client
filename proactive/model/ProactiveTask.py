@@ -423,7 +423,7 @@ if ("{verbosity}" == "true") {{
         - install_requirements_if_exists (bool): If True, installs requirements even if the virtual environment already exists (default is False).
         """
         if not os.path.exists(requirements_file):
-            raise FileNotFoundError(f"Requirements file not found: {requirements_file}")
+            raise FileNotFoundError("Requirements file not found: {}".format(requirements_file))
 
         with open(requirements_file, 'r') as file:
             requirements = [line.strip() for line in file if line.strip() and not line.startswith('#')]
