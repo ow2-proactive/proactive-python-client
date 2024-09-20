@@ -264,14 +264,14 @@ class ProActiveGateway:
                 # Get the absolute path of the temporary file
                 temp_file_path = os.path.abspath(temp_file.name)
                 # The file will be deleted when closed
-                self.logger.info(f'Temporary file created and will be deleted: {temp_file_path}')
+                self.logger.info('Temporary file created and will be deleted: {}'.format(temp_file_path))
                 # Copy the content to a new file
                 if local_file_path:
                     # local_copy_path = os.path.join(os.getcwd(), 'workflow.xml')
                     with open(local_file_path, 'wb') as local_copy_file:
                         temp_file.seek(0)
                         local_copy_file.write(temp_file.read())
-                    self.logger.info(f'Local copy of the temporary file created: {local_file_path}')
+                    self.logger.info('Local copy of the temporary file created: {}'.format(local_file_path))
                 StaxJobFactory = self.proactive_factory.create_stax_job_factory()
                 Job = StaxJobFactory.createJob(temp_file_path)
                 if job_name:

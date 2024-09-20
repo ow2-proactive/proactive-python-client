@@ -410,6 +410,33 @@ if ("{verbosity}" == "true") {{
         self.setForkEnvironment(fork_env)
         self.setDefaultPython(os.path.join(venv_path, 'bin', 'python'))
 
+    def setVirtualEnvFromFile(self, requirements_file, basepath="./", name="venv", verbosity=False, overwrite=False, install_requirements_if_exists=False):
+        """
+        Sets up a virtual environment for the task using requirements from a file.
+        
+        Parameters:
+        - requirements_file (str): Path to a text file containing Python packages to install.
+        - basepath (str): Base path where the virtual environment will be created (default is current directory).
+        - name (str): Name of the virtual environment directory (default is 'venv').
+        - verbosity (bool): If True, enables verbose output (default is False).
+        - overwrite (bool): If True, overwrites the existing virtual environment (default is False).
+        - install_requirements_if_exists (bool): If True, installs requirements even if the virtual environment already exists (default is False).
+        """
+        if not os.path.exists(requirements_file):
+            raise FileNotFoundError("Requirements file not found: {}".format(requirements_file))
+
+        with open(requirements_file, 'r') as file:
+            requirements = [line.strip() for line in file if line.strip() and not line.startswith('#')]
+
+        self.setVirtualEnv(
+            requirements=requirements,
+            basepath=basepath,
+            name=name,
+            verbosity=verbosity,
+            overwrite=overwrite,
+            install_requirements_if_exists=install_requirements_if_exists
+        )
+
     def setTaskExecutionFromFile(self, task_file, parameters=[], displayTaskResultOnScheduler=True):
         """
         Sets the task implementation from a Python script file.
