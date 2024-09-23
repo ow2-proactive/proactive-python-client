@@ -49,7 +49,7 @@ The ProActive Python Client (or Proactive Python SDK) enables seamless interacti
         - [Example: Uploading Files for Task Execution](#example-uploading-files-for-task-execution)
       - [Downloading Files from the Task's Local Space](#downloading-files-from-the-tasks-local-space)
         - [Example: Downloading Task Results](#example-downloading-task-results)
-  - [Virtual Environment Setup](#virtual-environment)
+  - [Virtual Environment Setup](#virtual-environment-setup)
   - [Documentation](#documentation)
   - [Examples Repository](#examples-repository)
   - [Contributing](#contributing)
@@ -679,9 +679,9 @@ This function allows you to configure a Python virtual environment by providing 
 
 **Usage:**
 ```python
-task.setVirtualEnv(["package2==version"])
-
-- **Parameter:** A list of Python packages (e.g., `"equests==2.26.0"`, `"pandas"`, etc.) to be installed in the virtual environment before executing the Python task.
+task.setVirtualEnv(["requests==2.26."])
+```
+- **Parameter:** A list of Python packages to be installed in the virtual environment before executing the Python task.
   
   This ensures that the task will run using the Python packages specified, allowing for flexibility in dependencies and avoiding conflicts.
 
