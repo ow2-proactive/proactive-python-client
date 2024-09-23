@@ -683,11 +683,11 @@ task.setVirtualEnv(["requests==2.26."])
 ```
 - **Parameter:** A list of Python packages to be installed in the virtual environment before executing the Python task.
   
-  This ensures that the task will run using the Python packages specified, allowing for flexibility in dependencies and avoiding conflicts.
+This ensures that the task will run using the Python packages specified, allowing for flexibility in dependencies and avoiding conflicts.
 
 #### `setVirtualEnvFromFile`
 
-Alternatively, you can define the virtual environment configuration using a file that contains the environment settings, such as a `requirements.txt` or `environment.yml` file.
+Alternatively, you can define the virtual environment configuration using a file that contains the environment settings, such as a `requirements.txt`file.
 
 **Usage:**
 ```python
