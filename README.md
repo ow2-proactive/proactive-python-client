@@ -49,6 +49,7 @@ The ProActive Python Client (or Proactive Python SDK) enables seamless interacti
         - [Example: Uploading Files for Task Execution](#example-uploading-files-for-task-execution)
       - [Downloading Files from the Task's Local Space](#downloading-files-from-the-tasks-local-space)
         - [Example: Downloading Task Results](#example-downloading-task-results)
+  - [Virtual Environment Setup](#virtual-environment-setup)
   - [Documentation](#documentation)
   - [Examples Repository](#examples-repository)
   - [Contributing](#contributing)
@@ -663,9 +664,41 @@ task.addOutputFile('path/in/task/local/space/**')
 
 In this example, `path/in/task/local/space/**` should be replaced with the specific path in the task's local space where the output files are located. The `**` pattern ensures that all files and subdirectories under this path are downloaded.
 
-The `addInputFile` and `addOutputFile` methods provide a straightforward approach to manage file transfers directly between your local machine and the ProActive task's execution environment. This mechanism simplifies the process of providing input data to your tasks and retrieving the results, enhancing the efficiency and flexibility of your ProActive workflows. Note that this process is distinct from using the ProActive Scheduler's user or global data spaces, which involve transferring files within the server's data space rather than between the user's local machine and the task's local space.
+The `addInputFile` and `addOutputFile` methods provide a straightforward approach to manage file transfers directly between your local machine and the ProActive task's execution environment. This mechanism simplifies the process of providing input data to your tasks and retrieving the results, enhancing the efficiency and flexibility of your ProActive workflows. Note that this process is distinct from using the ProActive Scheduler's user or global data spaces, which involve transferring files within the server's data space rather than between the user's local machine and the task's local space. 
 
 Please see [demo_transf_file.py](https://github.com/ow2-proactive/proactive-python-client-examples/blob/main/demo_transf_file.py) for a complete example.
+
+
+### Virtual Environment Setup 
+
+ProActive provides functionality to manage Python virtual environments directly within the task configuration. This feature is available exclusively for **Python tasks** and allows users to define and install the required Python packages in a virtual environment, ensuring the task runs with the specified dependencies.
+
+#### `setVirtualEnv`
+
+This function allows you to configure a Python virtual environment by providing a list of Python packages to install in the virtual environment. The default list is empty if not specified.
+
+**Usage:**
+```python
+task.setVirtualEnv(["requests==2.26."])
+```
+- **Parameter:** A list of Python packages to be installed in the virtual environment before executing the Python task.
+  
+This ensures that the task will run using the Python packages specified, allowing for flexibility in dependencies and avoiding conflicts.
+
+#### `setVirtualEnvFromFile`
+
+Alternatively, you can define the virtual environment configuration using a file that contains the environment settings, such as a `requirements.txt`file.
+
+**Usage:**
+```python
+task.setVirtualEnvFromFile("/path/to/requirements.txt")
+```
+
+- **Parameter:** The path to the file containing the package specifications.
+
+ProActive will automatically install the packages specified in the file into the virtual environment before running the task.
+
+Please see [demo_virtualenv.py](https://github.com/ow2-proactive/proactive-python-client-examples/blob/main/demo_virtualenv.py) for a complete example.
 
 ## Documentation
 
