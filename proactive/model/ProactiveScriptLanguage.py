@@ -39,7 +39,7 @@ class ProactiveScriptLanguage:
         for key, value in self.supported_languages.items():
             if key.lower() == normalized_name or value.lower() == normalized_name:
                 return value
-        raise AttributeError(f"'{self.__class__.__name__}' object has no attribute '{name}'")
+        raise AttributeError("'{0}' object has no attribute '{1}'".format(self.__class__.__name__, name))
 
     def linux_bash(self):
         return self.supported_languages["Linux_Bash"]
