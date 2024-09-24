@@ -628,14 +628,14 @@ class ProActiveGateway:
         """
         return self.proactive_scheduler_client.waitForJob(str(job_id), timeout)
 
-    def waitJobIsFinished(self, job_id, time_to_check=.5):
+    def waitJobIsFinished(self, job_id, time_to_check=0.5):
         # Monitor job status
         is_finished = False
         while not is_finished:
             # Get the current state of the job
             job_status = self.getJobStatus(job_id)
             # Print the current job status
-            self.logger.debug(f"Current job status: {job_status}")
+            self.logger.debug("Current job status: {0}".format(job_status))
             # Check if the job has finished
             if job_status.upper() in ["FINISHED", "CANCELED", "FAILED"]:
                 is_finished = True
