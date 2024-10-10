@@ -267,12 +267,12 @@ class ProactiveRestApi:
                 # Get the absolute path of the temporary file
                 temp_file_path = os.path.abspath(temp_file.name)
                 # The file will be deleted when closed
-                self.logger.info(f'Temporary file created and will be deleted: {temp_file_path}')
+                self.logger.info('Temporary file created and will be deleted: {}'.format(temp_file_path))
                 # Copy the content to a new file
                 with open(file_path, 'wb') as local_file:
                     temp_file.seek(0)
                     local_file.write(temp_file.read())
-                self.logger.info(f'The object file created at: {file_path}')
+                self.logger.info('The object file created at: {}'.format(file_path))
         except Exception as e:
             self.logger.error("Error occurred while downloading the object from catalog", exc_info=True)
             return None
