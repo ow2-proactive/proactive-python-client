@@ -344,7 +344,7 @@ class ProActiveGateway:
         :param default_python: The default python to be used.
         :return: A ProactiveTask object set up for Python script execution.
         """
-        self.logger.info('Creating a Python task')
+        self.logger.info('Creating a Python task ' + task_name)
         return ProactivePythonTask(task_name, default_python)
 
     def createFlowScript(self, script_language=None):
@@ -456,7 +456,7 @@ class ProActiveGateway:
         :param debug: If set True, the submitted job will be printed for a debugging purpose
         :return: A Proactive job ready to be submitted
         """
-        self.logger.info('Building the job' + job_model.getJobName())
+        self.logger.info('Building the job ' + job_model.getJobName())
         return ProactiveJobBuilder(self.proactive_factory, job_model, self.debug, self.log4py_props_file).create().display(debug).getProactiveJob()
 
     def submitJob(self, job_model, debug=False):
@@ -468,7 +468,7 @@ class ProActiveGateway:
         :return: The ID of the submitted job.
         """
         proactive_job = self.buildJob(job_model, debug)
-        self.logger.info('Submitting the job' + job_model.getJobName())
+        self.logger.info('Submitting the job ' + job_model.getJobName())
         return self.proactive_scheduler_client.submit(proactive_job).longValue()
 
     def submitJobWithInputsAndOutputsPaths(self, job_model, input_folder_path='.', output_folder_path='.', debug=False):
@@ -482,7 +482,7 @@ class ProActiveGateway:
         :return: The submitted job ID
         """
         proactive_job = self.buildJob(job_model, debug)
-        self.logger.info('Submitting the job' + job_model.getJobName())
+        self.logger.info('Submitting the job ' + job_model.getJobName())
         return self.proactive_scheduler_client.submit(
             proactive_job,
             input_folder_path,
