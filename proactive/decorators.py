@@ -1,8 +1,17 @@
 from functools import wraps
-from proactive import getProActiveGateway
+from proactive import getProActiveGateway, ProactiveScriptLanguage
 
 # Global list to store tasks defined by decorators
 registered_tasks = []
+
+class TaskDecorator:
+    def __init__(self, language):
+        self.language = language
+
+    def __call__(self, name=None, depends_on=None):
+        def decorator(func):
+            return task(name=name, depends_on=depends_on, language=self.language)(func)
+        return decorator
 
 def task(name=None, depends_on=None, language='Python'):
     """
@@ -29,6 +38,25 @@ def task(name=None, depends_on=None, language='Python'):
             return func(*args, **kwargs)
         return wrapper
     return decorator
+
+# Adding specific language decorators dynamically to the TaskDecorator class
+task.python = TaskDecorator(language=ProactiveScriptLanguage().python())
+task.groovy = TaskDecorator(language=ProactiveScriptLanguage().groovy())
+task.bash = TaskDecorator(language=ProactiveScriptLanguage().bash())
+task.shell = TaskDecorator(language=ProactiveScriptLanguage().shell())
+task.r = TaskDecorator(language=ProactiveScriptLanguage().r())
+task.powershell = TaskDecorator(language=ProactiveScriptLanguage().powershell())
+task.perl = TaskDecorator(language=ProactiveScriptLanguage().perl())
+task.ruby = TaskDecorator(language=ProactiveScriptLanguage().ruby())
+task.cmd = TaskDecorator(language=ProactiveScriptLanguage().windows_cmd())
+task.javascript = TaskDecorator(language=ProactiveScriptLanguage().javascript())
+task.scalaw = TaskDecorator(language=ProactiveScriptLanguage().scalaw())
+task.docker_compose = TaskDecorator(language=ProactiveScriptLanguage().docker_compose())
+task.dockerfile = TaskDecorator(language=ProactiveScriptLanguage().dockerfile())
+task.kubernetes = TaskDecorator(language=ProactiveScriptLanguage().kubernetes())
+task.php = TaskDecorator(language=ProactiveScriptLanguage().php())
+task.vbscript = TaskDecorator(language=ProactiveScriptLanguage().vbscript())
+task.jython = TaskDecorator(language=ProactiveScriptLanguage().jython())
 
 def job(name, print_job_output=True):
     """
