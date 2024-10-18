@@ -4,6 +4,15 @@ from proactive import getProActiveGateway
 # Global list to store tasks defined by decorators
 registered_tasks = []
 
+class TaskDecorator:
+    def __init__(self, language):
+        self.language = language
+
+    def __call__(self, name=None, depends_on=None):
+        def decorator(func):
+            return task(name=name, depends_on=depends_on, language=self.language)(func)
+        return decorator
+
 def task(name=None, depends_on=None, language='Python'):
     """
     Decorator to define a ProActive task.
@@ -29,6 +38,21 @@ def task(name=None, depends_on=None, language='Python'):
             return func(*args, **kwargs)
         return wrapper
     return decorator
+
+# Adding specific language decorators dynamically to the TaskDecorator class
+task.python = TaskDecorator(language='Python')
+task.groovy = TaskDecorator(language='groovy')
+task.bash = TaskDecorator(language='bash')
+task.r = TaskDecorator(language='R')
+task.powershell = TaskDecorator(language='powershell')
+task.perl = TaskDecorator(language='perl')
+task.ruby = TaskDecorator(language='ruby')
+task.cmd = TaskDecorator(language='cmd')
+task.javascript = TaskDecorator(language='javascript')
+task.scalaw = TaskDecorator(language='scalaw')
+task.docker_compose = TaskDecorator(language='docker-compose')
+task.cpython = TaskDecorator(language='cpython')
+
 
 def job(name, print_job_output=True):
     """
