@@ -8,18 +8,19 @@ class TaskDecorator:
     def __init__(self, language):
         self.language = language
 
-    def __call__(self, name=None, depends_on=None):
+    def __call__(self, name=None, depends_on=None, runtime_env=None):
         def decorator(func):
-            return task(name=name, depends_on=depends_on, language=self.language)(func)
+            return task(name=name, depends_on=depends_on, language=self.language, runtime_env=runtime_env)(func)
         return decorator
 
-def task(name=None, depends_on=None, language='Python'):
+def task(name=None, depends_on=None, language='Python', runtime_env=None):
     """
     Decorator to define a ProActive task.
 
     :param name: Optional name for the task. If not provided, the function name will be used.
     :param depends_on: Optional list of task names that this task depends on.
     :param language: Language of the task (e.g., 'Python', 'Groovy', etc.). Default is 'Python'.
+    :param runtime_env: Optional dictionary defining the runtime environment settings for the task.
     """
     def decorator(func):
         @wraps(func)
@@ -31,7 +32,8 @@ def task(name=None, depends_on=None, language='Python'):
                 'Func': func,
                 'Args': args,
                 'Kwargs': kwargs,
-                'DependsOn': depends_on
+                'DependsOn': depends_on,
+                'RuntimeEnv': runtime_env
             }
             registered_tasks.append(task_def)
             # Execute the function as normal
@@ -104,6 +106,34 @@ def job(name, print_job_output=True):
                     print(f"Exception details: {e}")
                     continue
 
+                # Set the runtime environment if provided
+                # Parameters:
+                # - type (str): Specifies the type of container technology to use for running the task. 
+                # Options include "docker", "podman", "singularity", or any other value to indicate a non-containerized execution.
+                # - image (str): The container image to use for running the task. Ensure that the 'py4j' Python package is available in the specified image.
+                # - nvidia_gpu (bool): Whether to enable NVIDIA GPU support within the container. Automatically set to False if no NVIDIA GPUs are present.
+                # - mount_host_path (str): The host machine path to mount into the container, providing the container access to specific directories or files from the host.
+                # - mount_container_path (str): The path inside the container where the host's file system (or a part of it) specified by `mount_host_path` will be accessible.
+                # - rootless (bool): Enables or disables rootless mode for the container execution, applicable to all container types (default False).
+                # - isolation (bool): Enables or disables isolation mode specifically for Singularity containers (default False). This parameter is only applicable if 'type' is set to "singularity".
+                # - no_home (bool): When set to True, the user's home directory is not mounted inside the container if the home directory is not the current working directory. Only applicable to Singularity containers (default False).
+                # - host_network (bool): Configures the container to use the host's network stack directly, bypassing the default or custom network namespaces (default False).
+                # - verbose (bool): Enables verbose output for the container runtime environment setup process (default False).
+
+                if task_def['RuntimeEnv']:
+                    task.setRuntimeEnvironment(
+                        type=task_def['RuntimeEnv'].get('type'),
+                        image=task_def['RuntimeEnv'].get('image'),
+                        nvidia_gpu=task_def['RuntimeEnv'].get('nvidia_gpu'),
+                        mount_host_path=task_def['RuntimeEnv'].get('mount_host_path'),
+                        mount_container_path=task_def['RuntimeEnv'].get('mount_container_path'),
+                        rootless=task_def['RuntimeEnv'].get('rootless'),
+                        isolation=task_def['RuntimeEnv'].get('isolation'),
+                        no_home=task_def['RuntimeEnv'].get('no_home'),
+                        host_network=task_def['RuntimeEnv'].get('host_network'),
+                        verbose=str(task_def['RuntimeEnv'].get('verbose')).lower() if task_def['RuntimeEnv'].get('verbose') is not None else None
+                    )
+
                 job.addTask(task)
                 task_objects[task_def['Name']] = task
 
@@ -135,3 +165,4 @@ def job(name, print_job_output=True):
             print("Disconnected and finished.")
         return wrapper
     return decorator
+
