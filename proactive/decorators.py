@@ -8,12 +8,12 @@ class TaskDecorator:
     def __init__(self, language):
         self.language = language
 
-    def __call__(self, name=None, depends_on=None, runtime_env=None):
+    def __call__(self, name=None, depends_on=None, runtime_env=None, virtual_env=None):
         def decorator(func):
-            return task(name=name, depends_on=depends_on, language=self.language, runtime_env=runtime_env)(func)
+            return task(name=name, depends_on=depends_on, language=self.language, runtime_env=runtime_env, virtual_env=virtual_env)(func)
         return decorator
 
-def task(name=None, depends_on=None, language='Python', runtime_env=None):
+def task(name=None, depends_on=None, language='Python', runtime_env=None, virtual_env=None):
     """
     Decorator to define a ProActive task.
 
@@ -21,6 +21,14 @@ def task(name=None, depends_on=None, language='Python', runtime_env=None):
     :param depends_on: Optional list of task names that this task depends on.
     :param language: Language of the task (e.g., 'Python', 'Groovy', etc.). Default is 'Python'.
     :param runtime_env: Optional dictionary defining the runtime environment settings for the task.
+    :param virtual_env: Optional dictionary defining the virtual environment settings for the task.
+        - requirements (list): List of Python packages to install in the virtual environment.
+        - basepath (str): Base path where the virtual environment will be created.
+        - name (str): Name of the virtual environment directory.
+        - verbosity (bool): If True, enables verbose output.
+        - overwrite (bool): If True, overwrites the existing virtual environment.
+        - install_requirements_if_exists (bool): If True, installs requirements even if the virtual environment already exists.
+        - requirements_file (str): File containing the list of requirements.
     """
     def decorator(func):
         @wraps(func)
@@ -33,7 +41,8 @@ def task(name=None, depends_on=None, language='Python', runtime_env=None):
                 'Args': args,
                 'Kwargs': kwargs,
                 'DependsOn': depends_on,
-                'RuntimeEnv': runtime_env
+                'RuntimeEnv': runtime_env,
+                'VirtualEnv': virtual_env
             }
             registered_tasks.append(task_def)
             # Execute the function as normal
@@ -94,7 +103,7 @@ def job(name, print_job_output=True):
                 if task is None:
                     print(f"Error: Failed to create task '{task_def['Name']}' with language '{task_def['Language']}'.")
                     continue
-                
+
                 # Execute the task function to get the script content
                 script_content = task_def['Func'](*task_def['Args'], **task_def['Kwargs'])
 
@@ -119,7 +128,6 @@ def job(name, print_job_output=True):
                 # - no_home (bool): When set to True, the user's home directory is not mounted inside the container if the home directory is not the current working directory. Only applicable to Singularity containers (default False).
                 # - host_network (bool): Configures the container to use the host's network stack directly, bypassing the default or custom network namespaces (default False).
                 # - verbose (bool): Enables verbose output for the container runtime environment setup process (default False).
-
                 if task_def['RuntimeEnv']:
                     task.setRuntimeEnvironment(
                         type=task_def['RuntimeEnv'].get('type'),
@@ -133,6 +141,28 @@ def job(name, print_job_output=True):
                         host_network=task_def['RuntimeEnv'].get('host_network'),
                         verbose=str(task_def['RuntimeEnv'].get('verbose')).lower() if task_def['RuntimeEnv'].get('verbose') is not None else None
                     )
+
+                # Set the virtual environment if provided
+                if task_def['VirtualEnv']:
+                    ve = task_def['VirtualEnv']
+                    if 'requirements' in ve:
+                        task.setVirtualEnv(
+                            requirements=ve.get('requirements', []),
+                            basepath=ve.get('basepath', "./"),
+                            name=ve.get('name', "venv"),
+                            verbosity=ve.get('verbosity', False),
+                            overwrite=ve.get('overwrite', False),
+                            install_requirements_if_exists=ve.get('install_requirements_if_exists', False)
+                        )
+                    if 'requirements_file' in ve:
+                        task.setVirtualEnvFromFile(
+                            requirements_file=ve.get('requirements_file'),
+                            basepath=ve.get('basepath', "./"),
+                            name=ve.get('name', "venv"),
+                            verbosity=ve.get('verbosity', False),
+                            overwrite=ve.get('overwrite', False),
+                            install_requirements_if_exists=ve.get('install_requirements_if_exists', False)
+                        )
 
                 job.addTask(task)
                 task_objects[task_def['Name']] = task
@@ -165,4 +195,3 @@ def job(name, print_job_output=True):
             print("Disconnected and finished.")
         return wrapper
     return decorator
-
