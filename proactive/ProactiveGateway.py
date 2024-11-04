@@ -40,12 +40,14 @@ class ProActiveGateway:
     def __init__(self, base_url, debug=False, javaopts=[], log4j_props_file=None, log4py_props_file=None):
         """
         Initializes a new instance of the ProActiveGateway class.
-
-        :param base_url: The base URL of the ProActive server.
-        :param debug: If True, enables debug mode which provides additional logging information.
-        :param javaopts: A list of additional options to pass to the Java virtual machine.
-        :param log4j_props_file: The path to the log4j properties file for configuring logging.
-        :param log4py_props_file: The path to the log4py properties file for configuring logging.
+        Args:
+            base_url (str): The base URL of the ProActive server
+            debug (bool, optional): Enables debug mode for additional logging. Defaults to False
+            javaopts (list, optional): Additional options for the Java virtual machine. Defaults to []
+            log4j_props_file (str, optional): Path to the log4j properties file. Defaults to None
+            log4py_props_file (str, optional): Path to the log4py properties file. Defaults to None
+        Returns:
+            None
         """
         self.root_dir = os.path.dirname(os.path.abspath(__file__))
         self.current_path = self.root_dir + "/java/lib/*"
@@ -100,12 +102,16 @@ class ProActiveGateway:
 
     def connect(self, username=None, password=None, credentials_path=None, insecure=True):
         """
-        Connects to the ProActive server using either provided credentials or a credentials file.
-
-        :param username: The username for authentication.
-        :param password: The password for authentication.
-        :param credentials_path: The path to a credentials file.
-        :param insecure: If True, connects without verifying the SSL certificate. Use with caution.
+        Connects to the ProActive server using provided credentials.
+        Args:
+            username (str, optional): Username for authentication. Defaults to None
+            password (str, optional): Password for authentication. Defaults to None
+            credentials_path (str, optional): Path to credentials file. Defaults to None
+            insecure (bool, optional): If True, skips SSL certificate verification. Defaults to True
+        Returns:
+            None
+        Raises:
+            ConnectionError: If connection to the server fails
         """
         credentials_file = None
         if credentials_path is not None:
@@ -128,8 +134,10 @@ class ProActiveGateway:
     def isConnected(self):
         """
         Checks if the gateway is currently connected to the ProActive server.
-
-        :return: True if connected, False otherwise.
+        Args:
+            None
+        Returns:
+            bool: True if connected, False otherwise
         """
         return self.proactive_scheduler_client.isConnected()
 
@@ -184,34 +192,64 @@ class ProActiveGateway:
 
     def submitWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables={}, workflow_generic_info={}):
         """
-        Submits a job from the ProActive catalog to the scheduler.
-
-        :param bucket_name: The name of the bucket containing the workflow.
-        :param workflow_name: The name of the workflow to be submitted.
-        :param workflow_variables: A dictionary of variables to be passed to the workflow.
-        :param workflow_generic_info: A dictionary of generic information to be associated with the job.
-        :return: The ID of the submitted job.
+        Submits a workflow from the ProActive catalog to the scheduler.
+        Args:
+            bucket_name (str): Name of the bucket containing the workflow
+            workflow_name (str): Name of the workflow to submit
+            workflow_variables (dict, optional): Variables to pass to the workflow. Defaults to {}
+            workflow_generic_info (dict, optional): Generic information for the workflow. Defaults to {}
+        Returns:
+            int: ID of the submitted job
+        Raises:
+            ValueError: If bucket or workflow name is invalid
+            RuntimeError: If submission fails
         """
         workflow_variables_java_map = MapConverter().convert(workflow_variables, self.runtime_gateway._gateway_client)
         workflow_generic_info_java_map = MapConverter().convert(workflow_generic_info, self.runtime_gateway._gateway_client)
         self.logger.debug('Submitting from catalog the job \'' + bucket_name + '/' + workflow_name + '\'')
-        return self.proactive_scheduler_client.submitFromCatalog(self.base_url + "/catalog", bucket_name, workflow_name,
-                                                                 workflow_variables_java_map, workflow_generic_info_java_map).longValue()
+        return self.proactive_scheduler_client.submitFromCatalog(self.base_url + "/catalog", bucket_name, workflow_name, workflow_variables_java_map, workflow_generic_info_java_map).longValue()
 
     def submitWorkflowFromFile(self, workflow_xml_file_path, workflow_variables={}):
         """
-        Submit a job from an xml file to the scheduler
-
-        :param workflow_xml_file_path: The workflow xml file path
-        :param workflow_variables: The workflow input variables
-        :return: The submitted job id
+        Submits a workflow from an XML file to the scheduler.
+        The job will execute tasks as soon as resources are available.
+        The job is considered finished once all tasks have completed (with either error or success).
+        Args:
+            workflow_xml_file_path (str): Path to the workflow XML file
+            workflow_variables (dict, optional): Variables to pass to the workflow. Defaults to {}
+        Returns:
+            int: ID of the submitted job
+        Raises:
+            NotConnectedException: If the client is not connected to the scheduler
+            PermissionException: If the user does not have permission to submit a job
+            SubmissionClosedException: If job submission is not possible (e.g. scheduler is stopped)
+            JobCreationException: If there was an error creating the job
         """
         workflow_variables_java_map = MapConverter().convert(workflow_variables, self.runtime_gateway._gateway_client)
         self.logger.debug('Submitting from file the job \'' + workflow_xml_file_path + '\'')
-        return self.proactive_scheduler_client.submit(self.runtime_gateway.jvm.java.io.File(workflow_xml_file_path),
-                                                      workflow_variables_java_map).longValue()
+        return self.proactive_scheduler_client.submit(self.runtime_gateway.jvm.java.io.File(workflow_xml_file_path), workflow_variables_java_map).longValue()
 
     def submitCustomWorkflowFromFile(self, workflow_xml_file_path, workflow_variables=None, workflow_generic_info=None, job_name=None, job_description=None, project_name=None, bucket_name=None, label=None, workflow_tags=None):
+        """
+        Submits a customized workflow from an XML file to the scheduler with additional configuration options.
+        Args:
+            workflow_xml_file_path (str): Path to the workflow XML file
+            workflow_variables (dict, optional): Variables to pass to the workflow. Defaults to None
+            workflow_generic_info (dict, optional): Generic information for the workflow. Defaults to None
+            job_name (str, optional): Custom name for the job. Defaults to None
+            job_description (str, optional): Description of the job. Defaults to None
+            project_name (str, optional): Name of the project the job belongs to. Defaults to None
+            bucket_name (str, optional): Name of the bucket to associate with the job. Defaults to None
+            label (str, optional): Label to assign to the job. Defaults to None
+            workflow_tags (list, optional): List of tags to associate with the workflow. Defaults to None
+        Returns:
+            int: ID of the submitted job
+        Raises:
+            NotConnectedException: If the client is not connected to the scheduler
+            PermissionException: If the user does not have permission to submit a job
+            SubmissionClosedException: If job submission is not possible
+            JobCreationException: If there was an error creating the job
+        """
         self.logger.info('Creating a proactive job from the XML file \'' + workflow_xml_file_path + '\'')
         StaxJobFactory = self.proactive_factory.create_stax_job_factory()
         Job = StaxJobFactory.createJob(workflow_xml_file_path)
@@ -252,6 +290,48 @@ class ProActiveGateway:
         return self.proactive_scheduler_client.submit(Job).longValue()
 
     def submitCustomWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables=None, workflow_generic_info=None, job_name=None, job_description=None, project_name=None, workflow_tags=None, local_file_path=None):
+        """
+        Submits a customized workflow from the ProActive catalog with additional configuration options.
+        This method allows for more granular control over the workflow submission process by providing
+        options to modify job properties, variables, and metadata before submission.
+        Args:
+            bucket_name (str): Name of the bucket containing the workflow to be submitted.
+            workflow_name (str): Name of the workflow to submit from the catalog.
+            workflow_variables (dict, optional): Dictionary of workflow variables where:
+                - key (str): Variable name
+                - value (str): Variable value
+                Defaults to None.
+            workflow_generic_info (dict, optional): Dictionary of generic information for the workflow where:
+                - key (str): Information name
+                - value (str): Information value 
+                Defaults to None.
+            job_name (str, optional): Custom name to assign to the job. If not provided,
+                the original workflow name will be used. Defaults to None.
+            job_description (str, optional): Description to assign to the job.
+                Defaults to None.
+            project_name (str, optional): Name of the project to associate with the job.
+                Defaults to None.
+            workflow_tags (list, optional): List of string tags to associate with the workflow.
+                Defaults to None.
+            local_file_path (str, optional): Path where a local copy of the workflow XML file
+                should be saved. If provided, creates a copy of the workflow file at this location.
+                Defaults to None.
+        Returns:
+            int: Job ID of the submitted workflow if successful, None if submission fails.
+        Raises:
+            Exception: If there is an error during workflow retrieval or submission.
+                Common causes include:
+                - Invalid bucket name or workflow name
+                - Network connectivity issues
+                - Permission issues
+                - Invalid workflow variables or generic info format
+        Note:
+            - The method first retrieves the workflow from the catalog, then applies any
+            custom configurations before submission.
+            - If local_file_path is provided, a copy of the workflow XML will be saved
+            before submission, which can be useful for debugging or version control.
+            - All variables and generic info values must be strings or be convertible to strings.
+        """
         try:
             object_str = self.getProactiveRestApi().get_object_from_catalog(bucket_name, workflow_name)
             PA_CATALOG_REST_URL = self.base_url + "/catalog"
@@ -311,24 +391,63 @@ class ProActiveGateway:
 
     def submitWorkflowFromURL(self, workflow_url_spec, workflow_variables={}):
         """
-        Submit a job from an url to the scheduler
-
-        :param workflow_url_spec: The workflow url
-        :param workflow_variables: The workflow input variables
-        :return: The submitted job id
+        Submits a workflow to the ProActive scheduler from a URL location.
+        This method downloads and submits a workflow definition from a specified URL,
+        allowing for remote workflow deployment.
+        Args:
+            workflow_url_spec (str): The complete URL to the workflow definition file.
+                The URL must be accessible from the ProActive server and point to a valid
+                workflow XML file.
+            workflow_variables (dict, optional): Dictionary of variables to pass to the workflow where:
+                - key (str): Variable name
+                - value (str): Variable value
+                Defaults to an empty dictionary.
+        Returns:
+            int: The job ID of the submitted workflow as a long integer value.
+                This ID can be used to monitor and manage the job after submission.
+        Raises:
+            NotConnectedException: If not connected to the ProActive scheduler
+            PermissionException: If user lacks permissions to submit jobs
+            SubmissionClosedException: If the scheduler is not accepting job submissions
+            JobCreationException: If the workflow XML is invalid or cannot be processed
+            MalformedURLException: If the provided URL is invalid or malformed
+            IOException: If there are network issues accessing the URL
+        Note:
+            - The workflow file at the specified URL must be in valid ProActive XML format
+            - The URL must be accessible from the ProActive server, not just the client
+            - All workflow variables must be strings or be convertible to strings
+            - The method converts the workflow variables to a Java map internally
+            - The returned job ID can be used with other methods like getJobStatus() or waitForJob()
         """
         workflow_variables_java_map = MapConverter().convert(workflow_variables, self.runtime_gateway._gateway_client)
         self.logger.debug('Submitting from URL the job \'' + workflow_url_spec + '\'')
-        return self.proactive_scheduler_client.submit(self.runtime_gateway.jvm.java.net.URL(workflow_url_spec),
-                                                      workflow_variables_java_map).longValue()
+        return self.proactive_scheduler_client.submit(self.runtime_gateway.jvm.java.net.URL(workflow_url_spec), workflow_variables_java_map).longValue()
 
     def createTask(self, language=None, task_name=''):
         """
-        Create a workflow task
-
-        :param language: The script language
-        :param task_name: The task name
-        :return: A ProactiveTask object
+        Creates a new task for executing scripts in a specified programming language.
+        For Python tasks, it creates a specialized Python task object. For other
+        supported languages, it creates a standard ProactiveTask object.
+        Args:
+            language (str, optional): The programming language for the task's script.
+                Must be one of the languages supported by the ProActive scheduler.
+                For Python tasks, use the value returned by proactive_script_language.python().
+                Defaults to None.
+            task_name (str, optional): Name to assign to the task. If not provided,
+                an empty string will be used. Defaults to ''.
+        Returns:
+            Union[ProactiveTask, ProactivePythonTask, None]: 
+                - A ProactivePythonTask object if language is Python
+                - A ProactiveTask object if language is supported but not Python
+                - None if the specified language is not supported
+        Note:
+            - Python tasks are handled specially through the createPythonTask() method
+            which provides additional Python-specific configurations
+            - The language must be one of the supported script languages in the
+            ProActive environment, which can be checked using
+            proactive_script_language.is_language_supported()
+            - You can get the list of supported languages through the
+            getProactiveScriptLanguage() method
         """
         self.logger.info('Creating a ' + str(language) + ' task')
         if language == self.proactive_script_language.python():
@@ -338,21 +457,40 @@ class ProActiveGateway:
 
     def createPythonTask(self, task_name='', default_python='python3'):
         """
-        Creates a new task designed to execute Python scripts.
-
-        :param task_name: The name of the task to be created.
-        :param default_python: The default python to be used.
-        :return: A ProactiveTask object set up for Python script execution.
+        Creates a specialized ProActiveTask object configured specifically for Python script execution.
+        This method provides a convenient way to create tasks that will run Python code in the
+        ProActive environment.
+        Args:
+            task_name (str, optional): Name to assign to the task. This name will be used to 
+                identify the task in the workflow and in monitoring tools. If not provided,
+                defaults to an empty string and a system-generated name will be used.
+            default_python (str, optional): The Python command or executable path to use for task
+                execution. Specifies which Python interpreter should be used to run the task.
+                Defaults to 'python3'. Common values include:
+                - 'python3': Use Python 3.x
+                - 'python': Use system default Python
+                - '/usr/bin/python3.8': Use specific Python version/path
+        Returns:
+            ProactivePythonTask: A task object specifically configured for Python execution.
+        Note:
+            - The Python environment used must have all required dependencies installed
+            - The selected Python version must be available on the execution nodes
+            - Task names should be unique within a workflow
+            - The task is not executed until it is added to a job and the job is submitted
+            - Python tasks automatically handle proper script formatting and environment setup
+            - You can access task results and output after execution using task_id
         """
         self.logger.info('Creating a Python task ' + task_name)
         return ProactivePythonTask(task_name, default_python)
 
     def createFlowScript(self, script_language=None):
         """
-        Create a flow script
-
-        :param script_language: The script language
-        :return: A ProactiveFlowScript object
+        Creates a flow script for controlling workflow execution.
+        Args:
+            script_language (str, optional): Language to use for the flow script. If not provided,
+                defaults to JavaScript.
+        Returns:
+            ProactiveFlowScript: A flow script object that can be used to control workflow execution
         """
         if script_language is None:
             script_language = self.proactive_script_language.javascript()
@@ -361,11 +499,12 @@ class ProActiveGateway:
 
     def createReplicateFlowScript(self, script_implementation, script_language="javascript"):
         """
-        Create a replicate flow script
-
-        :param script_implementation: The script implementation
-        :param script_language: The script language
-        :return: A replicate ProactiveFlowScript object
+        Creates a flow script that replicates tasks in the workflow.
+        Args:
+            script_implementation (str): The script code to be executed for replication
+            script_language (str, optional): Language to use for the flow script. Defaults to "javascript"
+        Returns:
+            ProactiveFlowScript: A flow script object configured for task replication
         """
         self.logger.info('Creating a Replicate flow script')
         flow_script = ProactiveFlowScript(script_language)
@@ -375,12 +514,13 @@ class ProActiveGateway:
 
     def createLoopFlowScript(self, script_implementation, target, script_language="javascript"):
         """
-        Create a loop flow script
-
-        :param script_implementation: The script implementation
-        :param target: The loop target
-        :param script_language: The script language
-        :return: A loop ProactiveFlowScript object
+        Creates a flow script that implements a loop in the workflow.
+        Args:
+            script_implementation (str): The script code to be executed for the loop
+            target (str): The target task name that the loop should jump back to
+            script_language (str, optional): Language to use for the flow script. Defaults to "javascript"
+        Returns:
+            ProactiveFlowScript: A flow script object configured for loop control
         """
         self.logger.info('Creating a Loop flow script')
         flow_script = ProactiveFlowScript(script_language)
@@ -389,17 +529,19 @@ class ProActiveGateway:
         flow_script.setActionTarget(target)
         return flow_script
 
-    def createBranchFlowScript(self, script_implementation, target_if, target_else, target_continuation,
-                               script_language="javascript"):
+    def createBranchFlowScript(self, script_implementation, target_if, target_else, target_continuation, script_language="javascript"):
         """
-        Create a branch flow script
-
-        :param script_implementation: The script implementation
-        :param target_if: The if target task
-        :param target_else: The else target task
-        :param target_continuation: The continuationn target task
-        :param script_language: The script language
-        :return: A branch ProactiveFlowScript object
+        Creates a flow script that implements branching logic in the workflow.
+        Args:
+            script_implementation (str): The script code to be executed for the branch condition
+            target_if (str): Name of the task to execute if condition is true
+            target_else (str): Name of the task to execute if condition is false 
+            target_continuation (str): Name of the task to execute after the branch completes
+            script_language (str, optional): Language to use for the flow script. Defaults to "javascript"
+        Returns:
+            ProactiveFlowScript: A flow script object configured for branch control
+        Raises:
+            ValueError: If any of the target task names are invalid
         """
         self.logger.info('Creating a Branch flow script')
         flow_script = ProactiveFlowScript(script_language)
@@ -412,28 +554,32 @@ class ProActiveGateway:
 
     def getProactiveFlowBlockType(self):
         """
-        Get the Proactive flow block
-
-        :return: The ProactiveFlowBlock object
+        Gets the ProActive flow block type.
+        Args:
+            None
+        Returns:
+            ProactiveFlowBlock: The ProactiveFlowBlock object
         """
         return self.proactive_flow_block
 
     def createPreScript(self, language=None):
         """
-        Create a Proactive pre-script
-
-        :param language: The script language
-        :return: A ProactivePreScript object
+        Creates a pre-script for a ProActive task.
+        Args:
+            language (str, optional): Language to use for the pre-script. Defaults to None
+        Returns:
+            ProactivePreScript: A pre-script object if language is supported, None otherwise
         """
         self.logger.info('Creating a pre script')
         return ProactivePreScript(language) if self.proactive_script_language.is_language_supported(language) else None
 
     def createPostScript(self, language=None):
         """
-        Create a Proactive post-script
-
-        :param language: The script language
-        :return: A ProactivePostScript object
+        Creates a post-script for a ProActive task.
+        Args:
+            language (str, optional): Language to use for the post-script. Defaults to None
+        Returns:
+            ProactivePostScript: A post-script object if language is supported, None otherwise
         """
         self.logger.info('Creating a post script')
         return ProactivePostScript(language) if self.proactive_script_language.is_language_supported(language) else None
@@ -441,20 +587,22 @@ class ProActiveGateway:
     def createJob(self, job_name=''):
         """
         Creates a new job with the specified name.
-
-        :param job_name: The name of the job to be created.
-        :return: A ProactiveJob object representing the newly created job.
+        Args:
+            job_name (str, optional): Name for the job. Defaults to ''
+        Returns:
+            ProactiveJob: A ProactiveJob object representing the newly created job
         """
         self.logger.info('Creating a job')
         return ProactiveJob(job_name)
 
     def buildJob(self, job_model, debug=False):
         """
-        Build the Proactive job to be submitted to the scheduler
-
-        :param job_model: A valid job model
-        :param debug: If set True, the submitted job will be printed for a debugging purpose
-        :return: A Proactive job ready to be submitted
+        Builds a ProActive job to be submitted to the scheduler.
+        Args:
+            job_model: A valid job model
+            debug (bool, optional): If True, prints the job configuration for debugging. Defaults to False
+        Returns:
+            ProactiveJob: A ProActive job ready to be submitted
         """
         self.logger.info('Building the job ' + job_model.getJobName())
         return ProactiveJobBuilder(self.proactive_factory, job_model, self.debug, self.log4py_props_file).create().display(debug).getProactiveJob()
@@ -462,10 +610,16 @@ class ProActiveGateway:
     def submitJob(self, job_model, debug=False):
         """
         Submits a job to the ProActive Scheduler.
-
-        :param job_model: The job model to be submitted.
-        :param debug: If True, prints the job configuration for debugging purposes.
-        :return: The ID of the submitted job.
+        Args:
+            job_model: The job model to be submitted
+            debug (bool, optional): If True, prints the job configuration for debugging. Defaults to False
+        Returns:
+            int: ID of the submitted job
+        Raises:
+            NotConnectedException: If the client is not connected to the scheduler
+            PermissionException: If the user does not have permission to submit a job
+            SubmissionClosedException: If job submission is not possible (e.g. scheduler is stopped)
+            JobCreationException: If there was an error creating the job
         """
         proactive_job = self.buildJob(job_model, debug)
         self.logger.info('Submitting the job ' + job_model.getJobName())
@@ -473,13 +627,19 @@ class ProActiveGateway:
 
     def submitJobWithInputsAndOutputsPaths(self, job_model, input_folder_path='.', output_folder_path='.', debug=False):
         """
-        Submit a job to the Proactive Scheduler with input and output paths
-
-        :param job_model: A valid job model
-        :param input_folder_path: Path to the directory containing input files
-        :param output_folder_path: Path to the local directory which will contain output files
-        :param debug: If set True, the submitted job will be printed for a debugging purpose
-        :return: The submitted job ID
+        Submits a job to the ProActive Scheduler with specified input and output paths.
+        Args:
+            job_model: A valid job model
+            input_folder_path (str, optional): Path to the directory containing input files. Defaults to '.'
+            output_folder_path (str, optional): Path to the local directory which will contain output files. Defaults to '.'
+            debug (bool, optional): If True, prints the job configuration for debugging. Defaults to False
+        Returns:
+            int: ID of the submitted job
+        Raises:
+            NotConnectedException: If the client is not connected to the scheduler
+            PermissionException: If the user does not have permission to submit a job
+            SubmissionClosedException: If job submission is not possible (e.g. scheduler is stopped)
+            JobCreationException: If there was an error creating the job
         """
         proactive_job = self.buildJob(job_model, debug)
         self.logger.info('Submitting the job ' + job_model.getJobName())
@@ -493,77 +653,102 @@ class ProActiveGateway:
 
     def createForkEnvironment(self, language=None):
         """
-        Create a Proactive fork environment
-
-        :param language: The script language
-        :return: A ProactiveForkEnv object
+        Creates a ProActive fork environment.
+        Args:
+            language (str, optional): The script language to use. Defaults to None
+        Returns:
+            ProactiveForkEnv: A ProActive fork environment object
         """
         self.logger.info('Creating a fork environment')
         return ProactiveForkEnv(language) if self.proactive_script_language.is_language_supported(language) else None
 
     def createDefaultForkEnvironment(self):
         """
-        Create a default fork environment
-
-        :return: A default ProactiveForkEnv object
+        Creates a default fork environment.
+        Args:
+            None
+        Returns:
+            ProactiveForkEnv: A default ProActive fork environment object
         """
         self.logger.info('Creating a default fork environment')
         return ProactiveForkEnv(self.proactive_script_language.jython())
 
     def createPythonForkEnvironment(self):
         """
-        Create a Python fork environment
-
-        :return: A Python ProactiveForkEnv object
+        Creates a Python fork environment.
+        Args:
+            None
+        Returns:
+            ProactiveForkEnv: A Python ProActive fork environment object
         """
         self.logger.info('Creating a Python fork environment')
         return ProactiveForkEnv(self.proactive_script_language.python())
 
     def createSelectionScript(self, language=None):
         """
-        Create a Proactive selection script
-
-        :param language: The script language
-        :return: A ProactiveSelectionScript object
+        Creates a ProActive selection script.
+        Args:
+            language (str, optional): The script language to use. Defaults to None
+        Returns:
+            ProactiveSelectionScript: A ProActive selection script object
         """
         self.logger.info('Creating a selection script')
         return ProactiveSelectionScript(language) if self.proactive_script_language.is_language_supported(language) else None
 
     def createDefaultSelectionScript(self):
         """
-        Create a default selection script
-
-        :return: A default ProactiveSelectionScript object
+        Creates a default selection script.
+        Args:
+            None
+        Returns:
+            ProactiveSelectionScript: A default ProActive selection script object
         """
         self.logger.info('Creating a default selection script')
         return ProactiveSelectionScript(self.proactive_script_language.jython())
 
     def createPythonSelectionScript(self):
         """
-        Create a Python selection script
-
-        :return: A Python ProactiveSelectionScript object
+        Creates a Python selection script.
+        Args:
+            None
+        Returns:
+            ProactiveSelectionScript: A Python ProActive selection script object
         """
         self.logger.info('Creating a Python selection script')
         return ProactiveSelectionScript(self.proactive_script_language.python())
 
     def getProactiveClient(self):
         """
-        Get the Proactive gateway
-
-        :return: A smart proxy object
+        Gets the ProActive scheduler client.
+        Args:
+            None
+        Returns:
+            SmartProxyClient: The ProActive scheduler client object
         """
         return self.proactive_scheduler_client
 
     def getProactiveScriptLanguage(self):
         """
-        Get Proactive script languages
-
-        :return: The ProactiveScriptLanguage object
+        Gets the ProActive script language object.
+        Args:
+            None
+        Returns:
+            ProactiveScriptLanguage: The ProActive script language object
         """
         return self.proactive_script_language
 
     def getTaskStatus(self, job_id, task_name):
+        """
+        Retrieves the status of a specific task within a job.
+        Args:
+            job_id (str): ID of the job containing the task
+            task_name (str): Name of the task to check
+        Returns:
+            str: Status of the task, or None if task not found
+        Raises:
+            ValueError: If job_id or task_name is invalid
+            RuntimeError: If status cannot be retrieved
+        """
         task_status = None
         job_state = self.getJobState(job_id)
         for task_state in job_state.getTasks():
@@ -574,61 +759,96 @@ class ProActiveGateway:
 
     def getJobState(self, job_id):
         """
-        Retrieves the current state of the specified job.
-
-        :param job_id: The ID of the job.
-        :return: The state of the job.
+        Retrieves the current state of a job.
+        Args:
+            job_id (str): ID of the job to check
+        Returns:
+            JobState: Current state of the job
+        Raises:
+            ValueError: If job_id is invalid
+            RuntimeError: If state cannot be retrieved
         """
         return self.proactive_scheduler_client.getJobState(str(job_id))
 
     def getJobStatus(self, job_id):
         """
         Retrieves the status of the specified job.
-
-        :param job_id: The ID of the job to check.
-        :return: The status of the job as a string.
+        Args:
+            job_id (str): The ID of the job to check
+        Returns:
+            str: The status of the job
+        Raises:
+            ValueError: If job_id is invalid
+            RuntimeError: If status cannot be retrieved
         """
         return str(self.getJobState(str(job_id)).getJobInfo().getStatus().toString())
 
     def isJobFinished(self, job_id):
         """
         Checks if the specified job has finished execution.
-
-        :param job_id: The ID of the job to check.
-        :return: True if the job is finished, False otherwise.
+        Args:
+            job_id (str): ID of the job to check
+        Returns:
+            bool: True if the job is finished, False otherwise
+        Raises:
+            ValueError: If job_id is invalid
+            RuntimeError: If status cannot be retrieved
         """
         return self.proactive_scheduler_client.isJobFinished(str(job_id))
 
     def isTaskFinished(self, job_id, task_name):
         """
         Checks if the specified task within a job has finished execution.
-
-        :param job_id: The ID of the job containing the task.
-        :param task_name: The name of the task to check.
-        :return: True if the task is finished, False otherwise.
+        Args:
+            job_id (str): The ID of the job containing the task
+            task_name (str): The name of the task to check
+        Returns:
+            bool: True if the task is finished, False otherwise
+        Raises:
+            ValueError: If job_id or task_name is invalid
+            RuntimeError: If status cannot be retrieved
         """
         return self.proactive_scheduler_client.isTaskFinished(str(job_id), task_name)
 
     def getJobInfo(self, job_id):
         """
-        Get the job info
-
-        :param job_id: A valid job ID
-        :return: The job info
+        Retrieves information about a specific job.
+        Args:
+            job_id (str): ID of the job to get information for
+        Returns:
+            JobInfo: Information about the specified job
+        Raises:
+            ValueError: If job_id is invalid
+            RuntimeError: If job info cannot be retrieved
         """
         return self.proactive_scheduler_client.getJobInfo(str(job_id))
 
     def waitForJob(self, job_id, timeout=60000):
         """
         Waits for a job to finish execution within the specified timeout.
-
-        :param job_id: The ID of the job to wait for.
-        :param timeout: The timeout in milliseconds. Default is 60000 milliseconds (1 minute).
-        :return: The job info upon completion.
+        Args:
+            job_id (str): The ID of the job to wait for
+            timeout (int, optional): The timeout in milliseconds. Defaults to 60000 milliseconds (1 minute)
+        Returns:
+            JobInfo: Information about the completed job
+        Raises:
+            TimeoutException: If the timeout is reached before job completion
+            RuntimeError: If waiting for the job fails
         """
         return self.proactive_scheduler_client.waitForJob(str(job_id), timeout)
 
     def waitJobIsFinished(self, job_id, time_to_check=0.5):
+        """
+        Waits for a job to finish execution by polling its status.
+        Args:
+            job_id (str): The ID of the job to wait for
+            time_to_check (float, optional): Time in seconds to wait between status checks. Defaults to 0.5
+        Returns:
+            None
+        Raises:
+            ValueError: If job_id is invalid
+            RuntimeError: If job status cannot be retrieved
+        """
         # Monitor job status
         is_finished = False
         while not is_finished:
@@ -643,24 +863,26 @@ class ProActiveGateway:
                 # Wait before checking again
                 time.sleep(time_to_check)
 
-    def getAllJobs(self, max_number_of_jobs=1000, my_jobs_only=False, pending=False, running=True, finished=False,
-                   withIssuesOnly=False, child_jobs=True, job_name=None, project_name=None, user_name=None, tenant=None, parent_id=None):
+    def getAllJobs(self, max_number_of_jobs=1000, my_jobs_only=False, pending=False, running=True, finished=False, withIssuesOnly=False, child_jobs=True, job_name=None, project_name=None, user_name=None, tenant=None, parent_id=None):
         """
         Retrieves a list of jobs from the ProActive scheduler based on the specified filters.
-
-        :param max_number_of_jobs: The maximum number of jobs to retrieve.
-        :param my_jobs_only: If True, only retrieves jobs submitted by the current user.
-        :param pending: If True, includes jobs in PENDING state.
-        :param running: If True, includes jobs in RUNNING state.
-        :param finished: If True, includes jobs in FINISHED state.
-        :param withIssuesOnly: If True, only includes jobs that have issues.
-        :param child_jobs: If True, includes child jobs.
-        :param job_name: Filters jobs by name.
-        :param project_name: Filters jobs by project name.
-        :param user_name: Filters jobs by the submitting user's name.
-        :param tenant: Filters jobs by tenant.
-        :param parent_id: Filters jobs by parent job ID.
-        :return: A list of jobs matching the specified filters.
+        Args:
+            max_number_of_jobs (int, optional): The maximum number of jobs to retrieve. Defaults to 1000
+            my_jobs_only (bool, optional): If True, only retrieves jobs submitted by the current user. Defaults to False
+            pending (bool, optional): If True, includes jobs in PENDING state. Defaults to False
+            running (bool, optional): If True, includes jobs in RUNNING state. Defaults to True
+            finished (bool, optional): If True, includes jobs in FINISHED state. Defaults to False
+            withIssuesOnly (bool, optional): If True, only includes jobs that have issues. Defaults to False
+            child_jobs (bool, optional): If True, includes child jobs. Defaults to True
+            job_name (str, optional): Filters jobs by name. Defaults to None
+            project_name (str, optional): Filters jobs by project name. Defaults to None
+            user_name (str, optional): Filters jobs by the submitting user's name. Defaults to None
+            tenant (str, optional): Filters jobs by tenant. Defaults to None
+            parent_id (str, optional): Filters jobs by parent job ID. Defaults to None
+        Returns:
+            list: A list of jobs matching the specified filters
+        Raises:
+            RuntimeError: If retrieving jobs fails
         """
         job_filter_criteria = self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.JobFilterCriteriaBuilder().myJobsOnly(my_jobs_only).pending(pending).running(running).finished(finished).withIssuesOnly(withIssuesOnly).childJobs(child_jobs).jobName(job_name).projectName(project_name).userName(user_name).tenant(tenant).parentId(parent_id).build()
         jobs_page = self.proactive_scheduler_client.getJobs(0, max_number_of_jobs, job_filter_criteria, None)
@@ -673,11 +895,15 @@ class ProActiveGateway:
     def getJobOutput(self, job_id, timeout=-1):
         """
         Retrieves the output of the specified job. Can operate in blocking or non-blocking mode.
-
-        :param job_id: The unique identifier of the job whose output is to be fetched.
-        :param timeout: The maximum time in seconds to wait for job completion before fetching the output. 
-                        A negative value indicates an indefinite wait (blocking mode).
-        :return: The full log output of the job as a string.
+        Args:
+            job_id (int): The unique identifier of the job whose output is to be fetched
+            timeout (int, optional): The maximum time in seconds to wait for job completion before fetching the output.
+                A negative value indicates an indefinite wait (blocking mode). Defaults to -1
+        Returns:
+            str: The full log output of the job
+        Raises:
+            ValueError: If job_id is invalid
+            RuntimeError: If job output cannot be retrieved
         """
         if timeout < 0:
             self.logger.debug("Waiting job execution to be finished...")
@@ -692,10 +918,13 @@ class ProActiveGateway:
     def getJobResult(self, job_id, timeout=60000):
         """
         Retrieves the result of a completed job.
-
-        :param job_id: The ID of the job to fetch the result for.
-        :param timeout: The timeout in milliseconds for waiting for the job to finish.
-        :return: The result of the job if available within the timeout period.
+        Args:
+            job_id (int): The ID of the job to fetch the result for
+            timeout (int, optional): The timeout in milliseconds for waiting for the job to finish. Defaults to 60000
+        Returns:
+            str: The combined results of all tasks in the job as a string
+        Raises:
+            RuntimeError: If job results cannot be retrieved
         """
         self.logger.debug('Getting job\'s results')
         job_result = self.proactive_scheduler_client.waitForJob(str(job_id), timeout)
@@ -711,31 +940,40 @@ class ProActiveGateway:
     def getJobResultMap(self, job_id, timeout=60000):
         """
         Retrieves the resultMap of a completed job.
-
-        :param job_id: The ID of the job to fetch the result for.
-        :param timeout: The timeout in milliseconds for waiting for the job to finish.
-        :return: The result of the job if available within the timeout period.
+        Args:
+            job_id (int): The ID of the job to fetch the result for
+            timeout (int, optional): The timeout in milliseconds for waiting for the job to finish. Defaults to 60000
+        Returns:
+            dict: The result map containing task results from the completed job
+        Raises:
+            RuntimeError: If job results cannot be retrieved
         """
         return self.proactive_scheduler_client.waitForJob(str(job_id), timeout).getResultMap()
 
     def getJobPreciousResults(self, job_id, timeout=60000):
         """
         Retrieves the precious results of a completed job.
-
-        :param job_id: The ID of the job to fetch the result for.
-        :param timeout: The timeout in milliseconds for waiting for the job to finish.
-        :return: The result of the job if available within the timeout period.
+        Args:
+            job_id (int): The ID of the job to fetch the result for
+            timeout (int, optional): The timeout in milliseconds for waiting for the job to finish. Defaults to 60000
+        Returns:
+            dict: The precious results from the completed job
+        Raises:
+            RuntimeError: If job results cannot be retrieved
         """
         return self.proactive_scheduler_client.waitForJob(str(job_id), timeout).getPreciousResults()
 
     def getTaskResult(self, job_id, task_name, timeout=60000):
         """
         Retrieves the result of a specified task from a job.
-
-        :param job_id: The ID of the job containing the task.
-        :param task_name: The name of the task to fetch the result for.
-        :param timeout: The timeout in milliseconds for waiting for the task to finish.
-        :return: The result of the task if available within the timeout period.
+        Args:
+            job_id (int): The ID of the job containing the task
+            task_name (str): The name of the task to fetch the result for
+            timeout (int, optional): The timeout in milliseconds for waiting for the task to finish. Defaults to 60000
+        Returns:
+            Any: The result of the task if available within the timeout period
+        Raises:
+            RuntimeError: If task result cannot be retrieved
         """
         self.logger.debug('Getting results of the task \'' + task_name + '\'')
         task_result = self.proactive_scheduler_client.waitForTask(str(job_id), task_name, timeout)
@@ -747,21 +985,27 @@ class ProActiveGateway:
     def getTaskPreciousResult(self, job_id, task_name, timeout=60000):
         """
         Retrieves the precious results of a specified task from a job.
-
-        :param job_id: The ID of the job to fetch the result for.
-        :param task_name: The name of the task to fetch the result for.
-        :param timeout: The timeout in milliseconds for waiting for the job to finish.
-        :return: The result of the job if available within the timeout period.
+        Args:
+            job_id (int): The ID of the job to fetch the result for
+            task_name (str): The name of the task to fetch the result for
+            timeout (int, optional): The timeout in milliseconds for waiting for the job to finish. Defaults to 60000
+        Returns:
+            Any: The precious result of the task if available within the timeout period
+        Raises:
+            RuntimeError: If task result cannot be retrieved
         """
         return self.proactive_scheduler_client.waitForJob(str(job_id), timeout).getPreciousResults().get(task_name).value()
 
     def printJobOutput(self, job_id, timeout=60000):
         """
-        Get the job output
-
-        :param job_id: A valid job ID
-        :param timeout: A timeout in milliseconds
-        :return: The job outputs
+        Retrieves and formats the output logs from all tasks in a job.
+        Args:
+            job_id (int): The ID of the job to fetch outputs for
+            timeout (int, optional): The timeout in milliseconds for waiting for the job to finish. Defaults to 60000
+        Returns:
+            str: The concatenated stdout logs from all tasks in the job, with each task's output separated by newlines
+        Raises:
+            RuntimeError: If job outputs cannot be retrieved
         """
         self.logger.debug('Getting job\'s outputs')
         job_result = self.proactive_scheduler_client.waitForJob(str(job_id), timeout)
@@ -773,12 +1017,15 @@ class ProActiveGateway:
 
     def printTaskOutput(self, job_id, task_name, timeout=60000):
         """
-        Get the task outputs
-
-        :param job_id: A valid job ID
-        :param task_name: A valid task name
-        :param timeout: A timeout in milliseconds
-        :return: The task outputs
+        Retrieves the output logs from a specific task in a job.
+        Args:
+            job_id (int): The ID of the job containing the task
+            task_name (str): The name of the task to fetch outputs for
+            timeout (int, optional): The timeout in milliseconds for waiting for the task to finish. Defaults to 60000
+        Returns:
+            str: The stdout logs from the specified task, with whitespace trimmed
+        Raises:
+            RuntimeError: If task outputs cannot be retrieved
         """
         self.logger.debug('Getting the task \'' + task_name + '\'\'s outputs')
         task_output = self.proactive_scheduler_client.waitForTask(str(job_id), task_name, timeout).getOutput()
@@ -787,10 +1034,11 @@ class ProActiveGateway:
     def exportJob2XML(self, job_model, debug=False):
         """
         Exports the specified job to an XML representation.
-
-        :param job_model: The job model to export.
-        :param debug: If True, prints the job XML for debugging purposes.
-        :return: The XML representation of the job.
+        Args:
+            job_model: The job model to export
+            debug (bool, optional): If True, prints the job XML for debugging purposes. Defaults to False
+        Returns:
+            str: The XML representation of the job
         """
         proactive_job = self.buildJob(job_model, debug)
         self.logger.info('Transforming the job \'' + job_model.getJobName() + '\' to an XML string')
@@ -800,10 +1048,14 @@ class ProActiveGateway:
     def saveJob2XML(self, job_model, xml_file_path, debug=False):
         """
         Saves the specified job model to an XML file.
-
-        :param job_model: The job model to save.
-        :param xml_file_path: The file path where the XML should be saved.
-        :param debug: If True, prints the job XML to the console for debugging purposes.
+        Args:
+            job_model: The job model to save
+            xml_file_path (str): The file path where the XML should be saved
+            debug (bool, optional): If True, prints the job XML to the console for debugging purposes. Defaults to False
+        Returns:
+            None
+        Raises:
+            IOError: If the XML file cannot be written
         """
         self.logger.info('Saving the job \'' + job_model.getJobName() + '\' to the XML file \'' + xml_file_path + '\'')
         job_xml_data = self.exportJob2XML(job_model, debug)
@@ -811,19 +1063,121 @@ class ProActiveGateway:
             text_file.write("{0}".format(job_xml_data))
 
     def killJob(self, job_id):
+        """Kills a job and all its running tasks.
+        This method will kill all running tasks of the job and remove it from the scheduler.
+        The job will not be terminated normally and will not produce results.
+        Only the job owner can kill their jobs.
+        Args:
+            job_id (str): The ID of the job to kill.
+        Returns:
+            bool: True if the job was successfully killed, False otherwise
+        Raises:
+            NotConnectedException: If not authenticated
+            UnknownJobException: If the specified job does not exist
+            PermissionException: If user lacks permissions to kill this job
+        """
         return self.proactive_scheduler_client.killJob(str(job_id))
 
+    def pauseJob(self, job_id):
+        """Pauses the execution of a job.
+        This method will complete all currently running tasks of the job before pausing it.
+        The job must be resumed explicitly to continue execution.
+        Args:
+            job_id (str): The ID of the job to pause.
+        Returns:
+            bool: True if the job was successfully paused, False otherwise
+        Raises:
+            NotConnectedException: If not authenticated
+            UnknownJobException: If the specified job does not exist
+            PermissionException: If user lacks permissions to pause this job
+        Note:
+            Users can only pause their own jobs.
+        """
+        return self.proactive_scheduler_client.pauseJob(str(job_id))
+
+    def resumeJob(self, job_id):
+        """Resumes the execution of a paused job.
+        This method will restart all non-finished tasks of the job.
+        Args:
+            job_id (str): The ID of the job to resume.
+        Returns:
+            bool: True if the job was successfully resumed, False otherwise
+        Raises:
+            NotConnectedException: If not authenticated
+            UnknownJobException: If the specified job does not exist
+            PermissionException: If user lacks permissions to resume this job
+        Note:
+            Users can only resume their own jobs.
+        """
+        return self.proactive_scheduler_client.resumeJob(str(job_id))
+
     def killTask(self, job_id, task_name):
+        """Attempts to kill a specific task within a job.
+        Tries to kill the specified task if it exists and is running.
+        Only the task owner can kill their tasks.
+        Args:
+            job_id (str): ID of the job containing the task to kill
+            task_name (str): Name of the task to kill
+        Returns:
+            bool: True if task was successfully killed, False if task couldn't be killed (not running)
+        Raises:
+            NotConnectedException: If not authenticated
+            UnknownJobException: If job does not exist
+            UnknownTaskException: If task does not exist in job
+            PermissionException: If lacking permissions to access job/task
+        """
         return self.proactive_scheduler_client.killTask(str(job_id), task_name)
+
+    def restartTask(self, job_id, task_name, delay_in_seconds=0):
+        """Attempts to restart a task within a job.
+        Restarts the specified task if it exists and is running. Only the task owner 
+        can restart their tasks. The task will be terminated and rescheduled after 
+        the specified delay.
+        Possible outcomes after restart:
+        - If task hasn't reached max executions: Rescheduled after delay
+        - If task has reached max executions: Marked as faulty
+        - If task has reached max executions with cancelJobOnError: Marked faulty and job terminates
+        Args:
+            job_id (str): ID of the job containing the task to restart.
+            task_name (str): Name of the task to restart.
+            delay_in_seconds (int, optional): Delay in seconds before task is eligible for rescheduling. Defaults to 0.
+        Returns:
+            bool: True if task was successfully restarted, False if task couldn't be restarted (not running)
+        Raises:
+            NotConnectedException: If not authenticated
+            UnknownJobException: If job does not exist
+            UnknownTaskException: If task does not exist in job
+            PermissionException: If lacking permissions to access job/task
+        """
+        return self.proactive_scheduler_client.restartTask(str(job_id), task_name, delay_in_seconds)
+
+    def preemptTask(self, job_id, task_name, delay_in_seconds=0):
+        """Attempts to stop and restart a task execution within a job.
+        Args:
+            job_id (str): ID of the job containing the task to be stopped
+            task_name (str): Name of the task to stop
+            delay_in_seconds (int, optional): Delay between task termination and re-scheduling eligibility. Defaults to 0.
+        Returns:
+            bool: True if task was successfully stopped, False if task couldn't be stopped (not running)
+        Raises:
+            NotConnectedException: If not authenticated
+            UnknownJobException: If job does not exist
+            UnknownTaskException: If task does not exist in job
+            PermissionException: If lacking permissions to access job/task
+        """
+        return self.proactive_scheduler_client.preemptTask(str(job_id), task_name, delay_in_seconds)
 
     def sendSignal(self, job_id, signal, variables):
         """
         Sends a signal to the specified job.
-
-        :param job_id: The ID of the job to send the signal to.
-        :param timeout: The name of the signal to be sent.
-        :param variables: A dictionary containing variables names and values to be sent with the signal.
-        :return: True if the signal is sent successfully, False otherwise.
+        Args:
+            job_id (str): ID of the job to send the signal to
+            signal (str): Name of the signal to be sent
+            variables (dict): Dictionary containing variable names and values to be sent with the signal
+        Returns:
+            bool: True if signal was sent successfully, False otherwise
+        Raises:
+            ConnectionError: If connection to the server fails
         """
         sessionid = self.proactive_scheduler_client.getSession()
         url = '{}/rest/scheduler/job/{}/signals?signal={}'.format(self.base_url, job_id, signal)
