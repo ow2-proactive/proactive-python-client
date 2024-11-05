@@ -23,6 +23,8 @@ from .model.ProactiveFlowActionType import *
 from .model.ProactiveTask import *
 from .model.ProactiveJob import *
 
+from .monitoring.ProactiveNodeMBeanClient import ProactiveNodeMBeanClient
+
 from .bucket.ProactiveBucketFactory import *
 
 def convert_java_map_to_python_dict(java_map):
@@ -53,7 +55,6 @@ class ProActiveGateway:
         self.current_path = self.root_dir + "/java/lib/*"
         self.base_url = base_url
         self.gateway = JavaGateway()
-        self.proactive_rest_api = ProactiveRestApi()
         self.javaopts = javaopts
         self.redirect_stdout = None
         self.redirect_stderr = None
@@ -99,6 +100,8 @@ class ProActiveGateway:
         self.proactive_flow_action_type = ProactiveFlowActionType()
 
         self.proactive_scheduler_client = self.proactive_factory.create_smart_proxy()
+        self.proactive_rest_api = ProactiveRestApi()
+        self.proactive_monitoring_client = ProactiveNodeMBeanClient(self)
 
     def connect(self, username=None, password=None, credentials_path=None, insecure=True):
         """
@@ -127,9 +130,13 @@ class ProActiveGateway:
             self.base_url + "/rest", username, password, credentials_file, insecure
         )
         self.logger.debug('Connecting to the ProActive server')
-        self.proactive_scheduler_client.init(connection_info)
-        self.proactive_rest_api.init(connection_info)
-        self.logger.debug('Connected on ' + self.base_url)
+        try:
+            self.proactive_scheduler_client.init(connection_info)
+            self.proactive_rest_api.init(connection_info)
+            self.logger.debug('Connected on ' + self.base_url)
+        except Exception as e:
+            self.logger.error(f'Failed to connect to ProActive server: {str(e)}')
+            raise ConnectionError(f'Failed to connect to ProActive server: {str(e)}')
 
     def isConnected(self):
         """
@@ -159,6 +166,26 @@ class ProActiveGateway:
         self.proactive_rest_api.reconnect()
         self.logger.debug('Reconnected')
 
+    def getSession(self):
+        """
+        Get the current session ID for the ProActive client
+        Args:
+            None
+        Returns:
+            str: The current session ID
+        """
+        return self.proactive_scheduler_client.getSession()
+
+    def getBaseURL(self):
+        """
+        Get the base URL of the ProActive server
+        Args:
+            None
+        Returns:
+            str: The base URL of the ProActive server
+        """
+        return self.base_url
+
     def terminate(self):
         """
         Terminates the connection to the ProActive server and cleans up resources.
@@ -182,6 +209,9 @@ class ProActiveGateway:
 
     def getProactiveRestApi(self):
         return self.proactive_rest_api
+
+    def getProactiveMonitoringClient(self):
+        return self.proactive_monitoring_client
 
     def getRuntimeGateway(self):
         return self.runtime_gateway
