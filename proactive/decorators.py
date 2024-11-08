@@ -8,12 +8,12 @@ class TaskDecorator:
     def __init__(self, language):
         self.language = language
 
-    def __call__(self, name=None, depends_on=None, runtime_env=None, virtual_env=None):
+    def __call__(self, name=None, depends_on=None, runtime_env=None, virtual_env=None, input_files=None, output_files=None):
         def decorator(func):
-            return task(name=name, depends_on=depends_on, language=self.language, runtime_env=runtime_env, virtual_env=virtual_env)(func)
+            return task(name=name, depends_on=depends_on, language=self.language, runtime_env=runtime_env, virtual_env=virtual_env, input_files=input_files, output_files=output_files)(func)
         return decorator
 
-def task(name=None, depends_on=None, language='Python', runtime_env=None, virtual_env=None):
+def task(name=None, depends_on=None, language='Python', runtime_env=None, virtual_env=None, input_files=None, output_files=None):
     """
     Decorator to define a ProActive task.
 
@@ -29,6 +29,8 @@ def task(name=None, depends_on=None, language='Python', runtime_env=None, virtua
         - overwrite (bool): If True, overwrites the existing virtual environment.
         - install_requirements_if_exists (bool): If True, installs requirements even if the virtual environment already exists.
         - requirements_file (str): File containing the list of requirements.
+    :param input_files: Optional list of files to transfer to the task environment.
+    :param output_files: Optional list of output files to be retrieved after task execution.
     """
     def decorator(func):
         @wraps(func)
@@ -42,7 +44,9 @@ def task(name=None, depends_on=None, language='Python', runtime_env=None, virtua
                 'Kwargs': kwargs,
                 'DependsOn': depends_on,
                 'RuntimeEnv': runtime_env,
-                'VirtualEnv': virtual_env
+                'VirtualEnv': virtual_env,
+                'InputFiles': input_files,
+                'OutputFiles': output_files
             }
             registered_tasks.append(task_def)
             # Execute the function as normal
@@ -164,6 +168,16 @@ def job(name, print_job_output=True):
                             install_requirements_if_exists=ve.get('install_requirements_if_exists', False)
                         )
 
+                # Set input files if provided
+                if task_def['InputFiles']:
+                    for file in task_def['InputFiles']:
+                        task.addInputFile(file)
+
+                # Set output files if provided
+                if task_def['OutputFiles']:
+                    for file in task_def['OutputFiles']:
+                        task.addOutputFile(file)
+
                 job.addTask(task)
                 task_objects[task_def['Name']] = task
 
@@ -178,7 +192,10 @@ def job(name, print_job_output=True):
                                 current_task.addDependency(dependency_task)
 
             # Submit the job and get the job ID
-            job_id = gateway.submitJob(job)
+            if any(task_def['InputFiles'] or task_def['OutputFiles'] for task_def in registered_tasks):
+                job_id = gateway.submitJobWithInputsAndOutputsPaths(job)
+            else:
+                job_id = gateway.submitJob(job)
             print(f"Job submitted with ID: {job_id}")
 
             # Print job output if requested
