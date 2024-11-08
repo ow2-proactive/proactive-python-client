@@ -135,8 +135,8 @@ class ProActiveGateway:
             self.proactive_rest_api.init(connection_info)
             self.logger.debug('Connected on ' + self.base_url)
         except Exception as e:
-            self.logger.error(f'Failed to connect to ProActive server: {str(e)}')
-            raise ConnectionError(f'Failed to connect to ProActive server: {str(e)}')
+            self.logger.error('Failed to connect to ProActive server: {}'.format(str(e)))
+            raise ConnectionError('Failed to connect to ProActive server: {}'.format(str(e)))
 
     def isConnected(self):
         """

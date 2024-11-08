@@ -12,3 +12,4 @@ python-dotenv
 wheel
 setuptools
 twine
+humanize
