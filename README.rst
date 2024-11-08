@@ -32,7 +32,7 @@ Getting Started
 Prerequisites
 ~~~~~~~~~~~~~
 
-- Python version 3.5 or later is required.
+- Python version 3.6 or later is required.
 
 Installation
 ~~~~~~~~~~~~

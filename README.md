@@ -64,7 +64,7 @@ The ProActive Python Client (or Proactive Python SDK) enables seamless interacti
 
 ### Prerequisites
 
-- Python version 3.5 or later is required.
+- Python version 3.6 or later is required.
 - Java 8 SDK.
 
 Notes:
