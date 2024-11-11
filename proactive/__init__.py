@@ -11,6 +11,9 @@ from .model.ProactiveScriptLanguage import *
 from .model.ProactiveTask import *
 from .model.ProactiveJob import *
 
+from .monitoring.ProactiveNodeMBeanClient import *
+# from .monitoring.ProActiveNodeMetricsMonitor import *
+
 import os
 version_file = os.path.join(os.path.dirname(__file__), '..', 'VERSION')
 

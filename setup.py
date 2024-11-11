@@ -42,10 +42,11 @@ setup(
         'typer',
         'python-dotenv',
         'wheel',
-        'setuptools'
+        'setuptools',
+        'humanize'
     ],
     package_dir={'proactive': 'proactive'},
     package_data={'proactive': ['java/lib/*.jar', 'java/log4j.properties', 'logging.conf', '../VERSION']},
-    python_requires='>=2.7',
+    python_requires='>=3.6',
     zip_safe=False
 )
