@@ -1,5 +1,5 @@
 from functools import wraps
-from proactive import getProActiveGateway, ProactiveScriptLanguage
+from proactive import getProActiveGateway, ProactiveScriptLanguage, ProactiveFlowBlock
 
 # Global list to store tasks defined by decorators
 registered_tasks = []
@@ -12,6 +12,24 @@ class TaskDecorator:
         def decorator(func):
             return task(name=name, depends_on=depends_on, language=self.language, runtime_env=runtime_env, virtual_env=virtual_env, input_files=input_files, output_files=output_files)(func)
         return decorator
+
+class LoopDecorator:
+    @staticmethod
+    def start():
+        def decorator(func):
+            func._is_loop_start = True
+            return func
+        return decorator
+
+    @staticmethod
+    def end(loop_criteria):
+        def decorator(func):
+            func._is_loop_end = True
+            func._loop_criteria = loop_criteria
+            return func
+        return decorator
+
+loop = LoopDecorator()
 
 def task(name=None, depends_on=None, language='Python', runtime_env=None, virtual_env=None, input_files=None, output_files=None):
     """
@@ -46,7 +64,10 @@ def task(name=None, depends_on=None, language='Python', runtime_env=None, virtua
                 'RuntimeEnv': runtime_env,
                 'VirtualEnv': virtual_env,
                 'InputFiles': input_files,
-                'OutputFiles': output_files
+                'OutputFiles': output_files,
+                'IsLoopStart': getattr(func, '_is_loop_start', False),
+                'IsLoopEnd': getattr(func, '_is_loop_end', False),
+                'LoopCriteria': getattr(func, '_loop_criteria', None)
             }
             registered_tasks.append(task_def)
             # Execute the function as normal
@@ -92,10 +113,13 @@ def job(name, print_job_output=True):
             # Execute the decorated function to register tasks
             func(*args, **kwargs)
 
-            # Dictionary to store task objects for dependency management
+            # Dictionary to store task objects for dependency and loop setup
             task_objects = {}
 
             # Add registered tasks to the job
+            start_task = None
+            end_task = None
+            
             for task_def in registered_tasks:
                 # Create the task according to the specified language
                 if task_def['Language'].lower() == 'python':
@@ -107,7 +131,6 @@ def job(name, print_job_output=True):
                 if task is None:
                     print(f"Error: Failed to create task '{task_def['Name']}' with language '{task_def['Language']}'.")
                     continue
-
                 # Execute the task function to get the script content
                 script_content = task_def['Func'](*task_def['Args'], **task_def['Kwargs'])
 
@@ -181,7 +204,22 @@ def job(name, print_job_output=True):
                 job.addTask(task)
                 task_objects[task_def['Name']] = task
 
-            # Set task dependencies
+                # Set loop start and end blocks
+                if task_def['IsLoopStart']:
+                    start_task = task
+                    start_task.setFlowBlock(ProactiveFlowBlock().start())
+                if task_def['IsLoopEnd']:
+                    end_task = task
+                    end_task.setFlowBlock(ProactiveFlowBlock().end())
+                    if task_def['LoopCriteria']:
+                        loop_script = gateway.createLoopFlowScript(
+                            task_def['LoopCriteria'],
+                            start_task.getTaskName(),
+                            script_language=ProactiveScriptLanguage().python()
+                        )
+                        end_task.setFlowScript(loop_script)
+
+             # Set task dependencies
             for task_def in registered_tasks:
                 if task_def['DependsOn']:
                     current_task = task_objects.get(task_def['Name'])
