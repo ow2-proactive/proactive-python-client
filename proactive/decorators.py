@@ -31,6 +31,24 @@ class LoopDecorator:
 
 loop = LoopDecorator()
 
+class ReplicateDecorator:
+    @staticmethod
+    def start(replicate_criteria):
+        def decorator(func):
+            func._is_replicate_start = True
+            func._replicate_criteria = replicate_criteria
+            return func
+        return decorator
+
+    @staticmethod
+    def end():
+        def decorator(func):
+            func._is_replicate_end = True
+            return func
+        return decorator
+
+replicate = ReplicateDecorator()
+
 def task(name=None, depends_on=None, language='Python', runtime_env=None, virtual_env=None, input_files=None, output_files=None):
     """
     Decorator to define a ProActive task.
@@ -67,7 +85,10 @@ def task(name=None, depends_on=None, language='Python', runtime_env=None, virtua
                 'OutputFiles': output_files,
                 'IsLoopStart': getattr(func, '_is_loop_start', False),
                 'IsLoopEnd': getattr(func, '_is_loop_end', False),
-                'LoopCriteria': getattr(func, '_loop_criteria', None)
+                'LoopCriteria': getattr(func, '_loop_criteria', None),
+                'IsReplicateStart': getattr(func, '_is_replicate_start', False),
+                'IsReplicateEnd': getattr(func, '_is_replicate_end', False),
+                'ReplicateCriteria': getattr(func, '_replicate_criteria', None)
             }
             registered_tasks.append(task_def)
             # Execute the function as normal
@@ -119,7 +140,9 @@ def job(name, print_job_output=True):
             # Add registered tasks to the job
             start_task = None
             end_task = None
-            
+            replicate_start_task = None
+            replicate_end_task = None
+
             for task_def in registered_tasks:
                 # Create the task according to the specified language
                 if task_def['Language'].lower() == 'python':
@@ -131,6 +154,7 @@ def job(name, print_job_output=True):
                 if task is None:
                     print(f"Error: Failed to create task '{task_def['Name']}' with language '{task_def['Language']}'.")
                     continue
+
                 # Execute the task function to get the script content
                 script_content = task_def['Func'](*task_def['Args'], **task_def['Kwargs'])
 
@@ -205,10 +229,10 @@ def job(name, print_job_output=True):
                 task_objects[task_def['Name']] = task
 
                 # Set loop start and end blocks
-                if task_def['IsLoopStart']:
+                if task_def.get('IsLoopStart'):
                     start_task = task
                     start_task.setFlowBlock(ProactiveFlowBlock().start())
-                if task_def['IsLoopEnd']:
+                if task_def.get('IsLoopEnd'):
                     end_task = task
                     end_task.setFlowBlock(ProactiveFlowBlock().end())
                     if task_def['LoopCriteria']:
@@ -219,7 +243,21 @@ def job(name, print_job_output=True):
                         )
                         end_task.setFlowScript(loop_script)
 
-             # Set task dependencies
+                # Set replicate start and end blocks
+                if task_def.get('IsReplicateStart'):
+                    replicate_start_task = task
+                    replicate_start_task.setFlowBlock(ProactiveFlowBlock().start())
+                    replicate_script = gateway.createReplicateFlowScript(
+                        task_def['ReplicateCriteria'],
+                        script_language=ProactiveScriptLanguage().python()
+                    )
+                    replicate_start_task.setFlowScript(replicate_script)
+
+                if task_def.get('IsReplicateEnd'):
+                    replicate_end_task = task
+                    replicate_end_task.setFlowBlock(ProactiveFlowBlock().end())
+
+            # Set task dependencies
             for task_def in registered_tasks:
                 if task_def['DependsOn']:
                     current_task = task_objects.get(task_def['Name'])
