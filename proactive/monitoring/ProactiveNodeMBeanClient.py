@@ -71,7 +71,7 @@ class ProactiveNodeMBeanClient:
         self.node_url = node_url
         self._base_url = f"{gateway.getBaseURL()}/rest"
 
-    def _make_request(self, endpoint: str, params: dict) -> dict:
+    def _make_request(self, endpoint: str, params: Optional[dict] = None) -> dict:
         """Make authenticated request to ProActive REST API."""
         headers = {"sessionid": self.gateway.getSession()}
         url = f"{self._base_url}{endpoint}"
@@ -185,6 +185,53 @@ class ProactiveNodeMBeanClient:
         except Exception as e:
             logger.error(f"Error getting memory metric {metric.value}: {e}")
             return [] if historical else 0.0
+    
+    def list_proactive_jmx_urls(self) -> List[Dict[str, str]]:
+        """
+        List all available ProActive JMX URLs along with nodeSource and hostName.
+        
+        This method fetches all the JMX URLs of nodes from the REST API endpoint:
+        {{PROACTIVE_URL}}/rest/rm/monitoring
+        
+        Returns:
+            List[Dict[str, str]]: A list of dictionaries with unique proactiveJMXUrl, nodeSource, and hostName.
+        """
+        try:
+            endpoint = "/rm/monitoring"
+            response = self._make_request(endpoint)
+            
+            # Extract proactiveJMXUrl, nodeSource, and hostName from the response
+            nodes_info = [
+                {
+                    "proactiveJMXUrl": node.get("proactiveJMXUrl"),
+                    "nodeSource": node.get("nodeSource"),
+                    "hostName": node.get("hostName"),
+                }
+                for node in response.get("nodesEvents", [])
+                if "proactiveJMXUrl" in node and "nodeSource" in node and "hostName" in node
+            ]
+            
+            # Remove duplicates by creating a set of tuples and converting back to a list of dicts
+            unique_nodes_info = list({
+                (info["proactiveJMXUrl"], info["nodeSource"], info["hostName"])
+                for info in nodes_info
+            })
+            
+            # Convert the set of tuples back to a list of dictionaries
+            result = [
+                {
+                    "proactiveJMXUrl": item[0],
+                    "nodeSource": item[1],
+                    "hostName": item[2],
+                }
+                for item in unique_nodes_info
+            ]
+            
+            logger.debug(f"Retrieved {len(result)} unique ProActive JMX URLs with nodeSource and hostName.")
+            return result
+        except Exception as e:
+            logger.error(f"Error listing ProActive JMX URLs: {e}")
+            return []
 
     @staticmethod
     def build_jmx_url(hostname: str, 
