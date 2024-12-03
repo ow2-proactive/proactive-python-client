@@ -49,6 +49,37 @@ class ReplicateDecorator:
 
 replicate = ReplicateDecorator()
 
+class BranchDecorator:
+    @staticmethod
+    def condition():
+        def decorator(func):
+            func._is_condition_task = True
+            return func
+        return decorator
+
+    @staticmethod
+    def on_if():
+        def decorator(func):
+            func._is_if_branch = True
+            return func
+        return decorator
+
+    @staticmethod
+    def on_else():
+        def decorator(func):
+            func._is_else_branch = True
+            return func
+        return decorator
+
+    @staticmethod
+    def continuation():
+        def decorator(func):
+            func._is_continuation_task = True
+            return func
+        return decorator
+
+branch = BranchDecorator()
+
 def task(name=None, depends_on=None, language='Python', runtime_env=None, virtual_env=None, input_files=None, output_files=None):
     """
     Decorator to define a ProActive task.
@@ -88,7 +119,11 @@ def task(name=None, depends_on=None, language='Python', runtime_env=None, virtua
                 'LoopCriteria': getattr(func, '_loop_criteria', None),
                 'IsReplicateStart': getattr(func, '_is_replicate_start', False),
                 'IsReplicateEnd': getattr(func, '_is_replicate_end', False),
-                'ReplicateCriteria': getattr(func, '_replicate_criteria', None)
+                'ReplicateCriteria': getattr(func, '_replicate_criteria', None),
+                'IsConditionTask': getattr(func, '_is_condition_task', False),
+                'IsIfBranch': getattr(func, '_is_if_branch', False),
+                'IsElseBranch': getattr(func, '_is_else_branch', False),
+                'IsContinuationTask': getattr(func, '_is_continuation_task', False),
             }
             registered_tasks.append(task_def)
             # Execute the function as normal
@@ -142,6 +177,10 @@ def job(name, print_job_output=True):
             end_task = None
             replicate_start_task = None
             replicate_end_task = None
+            condition_task = None
+            if_task = None
+            else_task = None
+            continuation_task = None
 
             for task_def in registered_tasks:
                 # Create the task according to the specified language
@@ -256,6 +295,32 @@ def job(name, print_job_output=True):
                 if task_def.get('IsReplicateEnd'):
                     replicate_end_task = task
                     replicate_end_task.setFlowBlock(ProactiveFlowBlock().end())
+
+                # Set condition, branch, and continuation tasks
+                if task_def.get('IsConditionTask'):
+                    condition_task = task
+                    # Set the branch script directly from the function's script content
+                    branch_script = script_content
+                elif task_def.get('IsIfBranch'):
+                    if_task = task
+                elif task_def.get('IsElseBranch'):
+                    else_task = task
+                elif task_def.get('IsContinuationTask'):
+                    continuation_task = task
+
+            # Add branch flow if all necessary tasks are present
+            if condition_task and if_task and else_task and continuation_task:
+                if not branch_script:
+                    raise ValueError("Branch script must be defined for the condition task to determine the flow.")
+
+                flow_script = gateway.createBranchFlowScript(
+                    branch_script,
+                    if_task.getTaskName(),
+                    else_task.getTaskName(),
+                    continuation_task.getTaskName(),
+                    script_language=ProactiveScriptLanguage().python()
+                )
+                condition_task.setFlowScript(flow_script)
 
             # Set task dependencies
             for task_def in registered_tasks:
