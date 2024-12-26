@@ -8,9 +8,9 @@ class TaskDecorator:
     def __init__(self, language):
         self.language = language
 
-    def __call__(self, name=None, depends_on=None, runtime_env=None, virtual_env=None, input_files=None, output_files=None):
+    def __call__(self, name=None, depends_on=None, runtime_env=None, virtual_env=None, input_files=None, output_files=None, prescript=None, postscript=None):
         def decorator(func):
-            return task(name=name, depends_on=depends_on, language=self.language, runtime_env=runtime_env, virtual_env=virtual_env, input_files=input_files, output_files=output_files)(func)
+            return task(name=name, depends_on=depends_on, language=self.language, runtime_env=runtime_env, virtual_env=virtual_env, input_files=input_files, output_files=output_files, prescript=prescript, postscript=postscript)(func)
         return decorator
 
 class LoopDecorator:
@@ -80,7 +80,26 @@ class BranchDecorator:
 
 branch = BranchDecorator()
 
-def task(name=None, depends_on=None, language='Python', runtime_env=None, virtual_env=None, input_files=None, output_files=None):
+class ScriptDecorator:
+    def __init__(self):
+        self.languages = [
+            'python', 'groovy', 'bash', 'shell', 'r', 'powershell', 'perl', 'ruby',
+            'windows_cmd', 'javascript', 'scalaw', 'docker_compose', 'dockerfile',
+            'kubernetes', 'php', 'vbscript', 'jython'
+        ]
+        for lang in self.languages:
+            setattr(self, lang, self.create_decorator(lang))
+
+    def create_decorator(self, language):
+        def decorator(func):
+            @wraps(func)
+            def wrapper():
+                return func()
+            wrapper.language = language
+            return wrapper
+        return decorator
+
+def task(name=None, depends_on=None, language='Python', runtime_env=None, virtual_env=None, input_files=None, output_files=None, prescript=None, postscript=None):
     """
     Decorator to define a ProActive task.
 
@@ -98,6 +117,8 @@ def task(name=None, depends_on=None, language='Python', runtime_env=None, virtua
         - requirements_file (str): File containing the list of requirements.
     :param input_files: Optional list of files to transfer to the task environment.
     :param output_files: Optional list of output files to be retrieved after task execution.
+    :param prescript: Optional pre-script function to execute before the task.
+    :param postscript: Optional post-script function to execute after the task.
     """
     def decorator(func):
         @wraps(func)
@@ -114,6 +135,8 @@ def task(name=None, depends_on=None, language='Python', runtime_env=None, virtua
                 'VirtualEnv': virtual_env,
                 'InputFiles': input_files,
                 'OutputFiles': output_files,
+                'Prescript': prescript,
+                'Postscript': postscript,
                 'IsLoopStart': getattr(func, '_is_loop_start', False),
                 'IsLoopEnd': getattr(func, '_is_loop_end', False),
                 'LoopCriteria': getattr(func, '_loop_criteria', None),
@@ -149,6 +172,10 @@ task.kubernetes = TaskDecorator(language=ProactiveScriptLanguage().kubernetes())
 task.php = TaskDecorator(language=ProactiveScriptLanguage().php())
 task.vbscript = TaskDecorator(language=ProactiveScriptLanguage().vbscript())
 task.jython = TaskDecorator(language=ProactiveScriptLanguage().jython())
+
+# Define pre-script and post-script as part of the task module
+task.prescript = ScriptDecorator()
+task.postscript = ScriptDecorator()
 
 def job(name, print_job_output=True):
     """
@@ -205,7 +232,7 @@ def job(name, print_job_output=True):
                     print(f"Exception details: {e}")
                     continue
 
-                # Set the runtime environment if provided
+                 # Set the runtime environment if provided
                 # Parameters:
                 # - type (str): Specifies the type of container technology to use for running the task. 
                 # Options include "docker", "podman", "singularity", or any other value to indicate a non-containerized execution.
@@ -263,6 +290,18 @@ def job(name, print_job_output=True):
                 if task_def['OutputFiles']:
                     for file in task_def['OutputFiles']:
                         task.addOutputFile(file)
+
+                # Set pre-script if provided
+                if task_def['Prescript']:
+                    pre_script = gateway.createPreScript(getattr(ProactiveScriptLanguage(), task_def['Prescript'].language)())
+                    pre_script.setImplementation(task_def['Prescript']())
+                    task.setPreScript(pre_script)
+
+                # Set post-script if provided
+                if task_def['Postscript']:
+                    post_script = gateway.createPostScript(getattr(ProactiveScriptLanguage(), task_def['Postscript'].language)())
+                    post_script.setImplementation(task_def['Postscript']())
+                    task.setPostScript(post_script)
 
                 job.addTask(task)
                 task_objects[task_def['Name']] = task
