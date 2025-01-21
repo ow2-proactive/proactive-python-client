@@ -84,6 +84,10 @@ class ProactiveTaskBuilder(ProactiveBuilder):
         """
         return self.proactive_task_model
 
+    def __create_task_error_policy__(self, _task_error_policy):
+        self.task_error_policy = self.proactive_factory.create_task_error_policy(_task_error_policy)
+        return self.task_error_policy
+
     def __create_script__(self):
         assert self.proactive_task_model.getScriptLanguage() is not None
         task_implementation = ''
@@ -196,6 +200,14 @@ class ProactiveTaskBuilder(ProactiveBuilder):
         self.script_task.setScript(task_script)
         self.script_task.setPreciousResult(self.proactive_task_model.getPreciousResult())
 
+        if self.proactive_task_model.hasTaskErrorPolicy():
+            self.logger.debug('Building and setting the task error policy')
+            self.script_task.setOnTaskError(
+                self.__create_task_error_policy__(
+                    self.proactive_task_model.getTaskErrorPolicy()
+                )
+            )
+        
         if self.proactive_task_model.hasForkEnvironment():
             self.logger.debug('Building and setting the fork environment')
             self.script_task.setForkEnvironment(

@@ -195,3 +195,13 @@ class ProactiveFactory:
         :return: A StaxJobFactory object
         """
         return self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.job.factories.StaxJobFactory(True) # handleGlobalVariables=True
+
+
+    def create_task_error_policy(self, task_error_policy):
+        """
+        Create a ProActive task error policy.
+
+        :param policy: The error policy type ('continueJobExecution' or 'cancelJob').
+        :return: A OnTaskError object.
+        """
+        return self.runtime_gateway.jvm.org.ow2.proactive.scheduler.common.task.OnTaskError.getInstance(task_error_policy)
