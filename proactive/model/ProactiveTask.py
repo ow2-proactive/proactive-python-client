@@ -45,6 +45,7 @@ class ProactiveTask(object):
         self.flow_script = None
         self.flow_block = None
         self.precious_result = False
+        self.task_error_policy = 'continueJobExecution'  # Default behavior
 
     def __str__(self):
         return self.getTaskName()
@@ -230,6 +231,15 @@ class ProactiveTask(object):
 
     def hasFlowBlock(self):
         return True if self.flow_block is not None else False
+        
+    def setTaskErrorPolicy(self, task_error_policy):
+        self.task_error_policy = task_error_policy
+
+    def getTaskErrorPolicy(self):
+        return self.task_error_policy
+
+    def hasTaskErrorPolicy(self):
+        return True if self.task_error_policy is not None else False
     
     def setSignals(self, taskSignals, scope="prescript"):
         if scope not in ['prescript', 'taskscript', 'postscript']:
