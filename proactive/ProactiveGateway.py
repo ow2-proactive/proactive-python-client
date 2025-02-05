@@ -1197,6 +1197,51 @@ class ProActiveGateway:
         """
         return self.proactive_scheduler_client.preemptTask(str(job_id), task_name, delay_in_seconds)
 
+    def addExternalEndpointUrl(self, job_id, endpoint_name, external_endpoint_url, endpoint_icon_uri=None):
+        """
+        Adds an external endpoint URL to a job.
+        
+        Args:
+            job_id (str): The ID of the job to add the endpoint to
+            endpoint_name (str): Name of the endpoint
+            external_endpoint_url (str): The URL of the external endpoint
+            endpoint_icon_uri (str, optional): URI of the icon to be displayed for this endpoint. Defaults to None
+            
+        Raises:
+            NotConnectedException: If not connected to the scheduler
+            PermissionException: If user lacks permissions
+            UnknownJobException: If the job ID is invalid
+            ValueError: If endpoint_name or external_endpoint_url is None
+        """
+        if endpoint_name is None:
+            raise ValueError("endpoint_name cannot be None")
+        if external_endpoint_url is None:
+            raise ValueError("external_endpoint_url cannot be None")
+            
+        self.logger.info(f'Adding external endpoint URL {external_endpoint_url} with name {endpoint_name} to job {job_id}')
+        self.proactive_scheduler_client.addExternalEndpointUrl(
+            str(job_id),
+            endpoint_name,
+            external_endpoint_url,
+            endpoint_icon_uri
+        )
+    
+    def removeExternalEndpointUrl(self, job_id, endpoint_name):
+        """
+        Removes an external endpoint URL from a job.
+        
+        Args:
+            job_id (str): The ID of the job to remove the endpoint from
+            endpoint_name (str): Name of the endpoint to remove
+            
+        Raises:
+            NotConnectedException: If not connected to the scheduler
+            PermissionException: If user lacks permissions
+            UnknownJobException: If the job ID is invalid
+        """
+        self.logger.info(f'Removing external endpoint {endpoint_name} from job {job_id}')
+        self.proactive_scheduler_client.removeExternalEndpointUrl(str(job_id), endpoint_name)
+    
     def sendSignal(self, job_id, signal, variables):
         """
         Sends a signal to the specified job.
