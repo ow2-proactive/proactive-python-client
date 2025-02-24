@@ -78,7 +78,7 @@ class ProactiveNodeMBeanClient:
         
         logger.debug(f"Making request to {url} with params {params}")
         
-        response = requests.get(url, headers=headers, params=params)
+        response = requests.get(url, headers=headers, params=params, verify=False)
         response.raise_for_status()
         return response.json()
 
