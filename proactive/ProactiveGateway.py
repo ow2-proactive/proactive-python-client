@@ -23,9 +23,10 @@ from .model.ProactiveFlowActionType import *
 from .model.ProactiveTask import *
 from .model.ProactiveJob import *
 
-from .monitoring.ProactiveNodeMBeanClient import ProactiveNodeMBeanClient
+from .monitoring.ProactiveNodeMBeanClient import ProactiveNodeMBeanClient, TimeRange, CPUMetric, MemoryMetric
 
 from .bucket.ProactiveBucketFactory import *
+
 
 def convert_java_map_to_python_dict(java_map):
     return {entry.getKey(): entry.getValue() for entry in java_map.entrySet()}
@@ -1301,6 +1302,116 @@ println("END " + variables.get("PA_TASK_NAME"))
             RuntimeError: If job results cannot be retrieved
         """
         return self.proactive_scheduler_client.waitForJob(str(job_id), timeout).getResultMap()
+
+    def executeJobsAcrossNodeSources(self, proactive_jobs, node_sources=None):
+        if not proactive_jobs:
+            raise ValueError("proactive_jobs cannot be empty")
+
+        if node_sources:
+            logging.info(f'Executing {len(proactive_jobs)} jobs across {len(node_sources)} node sources')
+        else:
+            logging.info(f'Executing {len(proactive_jobs)} jobs with default node source behavior')
+
+        monitoring_client = self.getProactiveMonitoringClient()
+        job_results = []
+        job_queue = list(proactive_jobs)
+        active_jobs = {}
+        target_sources = node_sources if node_sources else [f"default-{i}" for i in range(len(proactive_jobs))]
+
+        while job_queue or active_jobs:
+            logging.debug(f'Jobs in queue: {len(job_queue)}, Active jobs: {len(active_jobs)}')
+
+            completed_sources = []
+            for source, job_id in active_jobs.items():
+                job_status = self.getJobStatus(job_id)
+                if job_status.upper() in ["FINISHED", "CANCELED", "FAILED"]:
+                    logging.info(f'Job {job_id} on source {source} completed with status: {job_status}')
+
+                    metrics = {}
+                    job_info = self.getJobInfo(job_id)
+                    start_time = job_info.getStartTime()
+                    finished_time = job_info.getFinishedTime()
+
+                    if start_time > 0 and finished_time > 0:
+                        duration_minutes = round((finished_time - start_time) / 60000)
+                        time_range = self.get_time_range_from_minutes(duration_minutes)
+
+                        try:
+                            historical_cpu = monitoring_client.get_cpu_metrics(
+                                CPUMetric.COMBINED, historical=True, time_range=time_range)
+                            metrics['cpu_usage'] = sum(historical_cpu) / len(historical_cpu) if historical_cpu else 0.0
+
+                            historical_mem = monitoring_client.get_memory_metrics(
+                                MemoryMetric.USED_PERCENT, historical=True, time_range=time_range)
+                            metrics['ram_usage'] = sum(historical_mem) / len(historical_mem) if historical_mem else 0.0
+                        except Exception as e:
+                            logging.error(f"Error collecting metrics for job {job_id}: {e}")
+                            metrics['cpu_usage'] = 0.0
+                            metrics['ram_usage'] = 0.0
+                    else:
+                        metrics['cpu_usage'] = 0.0
+                        metrics['ram_usage'] = 0.0
+
+                    job_results.append({
+                        'job_id': job_id,
+                        'job_state': job_status,
+                        'hardware_metrics': metrics
+                    })
+
+                    completed_sources.append(source)
+
+            for source in completed_sources:
+                del active_jobs[source]
+
+            available_sources = [ns for ns in target_sources if ns not in active_jobs]
+
+            for source in available_sources:
+                if not job_queue:
+                    break
+
+                job = job_queue.pop(0)
+                if node_sources:
+                    job.addGenericInformation("NODE_SOURCE", source)
+
+                try:
+                    logging.info(f'Submitting job {job.getJobName()} {"to " + source if node_sources else ""}')
+                    job_id = self.submitJob(job)
+                    active_jobs[source] = job_id
+                    logging.info(f'Job {job_id} submitted {"to " + source if node_sources else ""}')
+                except Exception as e:
+                    logging.error(f'Error submitting job {"to " + source if node_sources else ""}: {e}')
+                    job_queue.append(job)
+
+            if job_queue or active_jobs:
+                time.sleep(1)
+
+        return job_results
+
+    def get_time_range_from_minutes(self, minutes):
+        if minutes <= 1:
+            return TimeRange.MINUTE_1
+        elif minutes <= 5:
+            return TimeRange.MINUTE_5
+        elif minutes <= 10:
+            return TimeRange.MINUTE_10
+        elif minutes <= 30:
+            return TimeRange.MINUTE_30
+        elif minutes <= 60:
+            return TimeRange.HOUR_1
+        elif minutes <= 120:
+            return TimeRange.HOUR_2
+        elif minutes <= 240:
+            return TimeRange.HOUR_4
+        elif minutes <= 480:
+            return TimeRange.HOUR_8
+        elif minutes <= 1440:
+            return TimeRange.DAY_1
+        elif minutes <= 10080:
+            return TimeRange.WEEK_1
+        elif minutes <= 43200:
+            return TimeRange.MONTH_1
+        else:
+            return TimeRange.YEAR_1
 
     def getJobPreciousResults(self, job_id, timeout=60000):
         """
