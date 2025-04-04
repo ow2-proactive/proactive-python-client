@@ -303,6 +303,9 @@ println("Service Bucket_name: " + bucketName + ", Workflow_name: " + workflowNam
 def instanceName = workflowName.toLowerCase() + "-" + jobID
 println(instanceName)
 
+def endpointId = workflowName.toLowerCase() + "-endpoint-" + jobID
+println(endpointId)
+
 def publishService = Boolean.parseBoolean("${publishService}")
 def enableServiceActions = Boolean.parseBoolean("${enableServiceActions}")
 
@@ -341,7 +344,7 @@ for (ServiceInstanceData serviceInstanceData : service_instances) {
 
 
 
-def workflowVariables = [INSTANCE_NAME: "tensorboard-" + jobID, ENDPOINT_ID: "tensorboard-endpoint-" + jobID]
+def workflowVariables = [INSTANCE_NAME: instanceName, ENDPOINT_ID: endpointId]
 
 if (!instance_exists){
     // Retrieve and update workflow variables
