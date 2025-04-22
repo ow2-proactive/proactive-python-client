@@ -511,7 +511,7 @@ println("END " + variables.get("PA_TASK_NAME"))
         println("No endpoints found to remove.")
     }
 
-    // Attempt to stop Docker container by instance name
+    // Stop Docker container by instance name
     def instanceName = service_instance_data.getVariables().get("INSTANCE_NAME")
     def stopCommand = "docker stop ${instanceName}"
     println("Stopping container with command: " + stopCommand)
