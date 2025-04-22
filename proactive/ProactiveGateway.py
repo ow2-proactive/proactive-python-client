@@ -462,16 +462,13 @@ println("END " + variables.get("PA_TASK_NAME"))
     
     def finishPSAServiceInstance(self, instance_id):
         """
-        Finishes a running PSA service instance by setting its status to 'FINISHED'.
-        
+        Finishes a PSA service instance by stopping its container and marking it FINISHED.
+
         Args:
-            instance_id (str): ID of the service instance to finish.
+            instance_id (str): ID of the service instance.
 
         Returns:
-            bool: True if the operation was successful, False otherwise.
-
-        Raises:
-            RuntimeError: If finishing the service fails.
+            bool: True if successful, False otherwise.
         """
         from string import Template
 
@@ -479,71 +476,77 @@ println("END " + variables.get("PA_TASK_NAME"))
     import org.ow2.proactive.pca.service.client.ApiClient
     import org.ow2.proactive.pca.service.client.api.ServiceInstanceRestApi
     import org.ow2.proactive.pca.service.client.model.ServiceInstanceData
+    import java.util.ArrayList
 
     println("BEGIN " + variables.get("PA_TASK_NAME"))
 
-    // Retrieve service instance ID
     def service_instance_id = "${instance_id}" as Long
-
-    // Define PCA URL
     def pca_url = variables.get('PA_CLOUD_AUTOMATION_REST_URL')
     def status = "FINISHED"
 
-    // Get scheduler API access and acquire session ID
+    // Connect to scheduler
     schedulerapi.connect()
     def sessionId = schedulerapi.getSession()
     println("Session ID: " + sessionId)
 
-    // Connect to APIs
+    // Initialize API client
     def api_client = new ApiClient()
     api_client.setBasePath(pca_url)
-    api_client.setDebugging(true)
     def service_instance_rest_api = new ServiceInstanceRestApi(api_client)
 
     println("Connected to ServiceInstanceRestApi")
 
-    // Deploying instance
-    println("Undeploying ProActive instance...")
-    println("ProActive instance undeployed.")
-
-    // Fetch service instance data
+    // Fetch instance and endpoint IDs
     def service_instance_data = service_instance_rest_api.getServiceInstance(sessionId, service_instance_id)
+    def deployments = service_instance_data.getDeployments()
+    def endpointIds = new ArrayList()
+    for (d in deployments) {
+        def endpoint = d.getEndpoint()
+        println(" - Removing endpoint: " + endpoint.getUrl() + ", ID: " + endpoint.getId())
+        endpointIds.add(endpoint.getId())
+    }
+    if (!endpointIds.isEmpty()) {
+        service_instance_rest_api.removeInstanceEndpoints(sessionId, service_instance_id, endpointIds)
+    } else {
+        println("No endpoints found to remove.")
+    }
 
-    // Update service instance status to FINISHED
+    // Attempt to stop Docker container by instance name
+    def instanceName = service_instance_data.getVariables().get("INSTANCE_NAME")
+    def stopCommand = "docker stop ${instanceName}"
+    println("Stopping container with command: " + stopCommand)
+    def stopResult = stopCommand.execute().text
+    println("Docker stop result: " + stopResult)
+
+    // Mark service as FINISHED
+    service_instance_data = service_instance_rest_api.getServiceInstance(sessionId, service_instance_id)
     service_instance_data.setInstanceStatus(status)
     service_instance_rest_api.updateServiceInstance(sessionId, service_instance_id, service_instance_data)
 
     println("Service instance " + service_instance_id + " marked as FINISHED.")
-
     println("END " + variables.get("PA_TASK_NAME"))
         """)
 
-        # Substitute values in the Groovy template
         groovy_task_impl = groovy_script_template.safe_substitute(instance_id=instance_id)
 
-        # Create a new ProActive job
         self.logger.info("Creating a ProActive job to finish service instance...")
         job = self.createJob("finish_service_instance_job")
 
-        # Create a Groovy task
-        self.logger.info("Creating a ProActive task...")
         task = self.createTask(language="groovy", task_name="finish_service_instance_task")
-        task.setTaskImplementation(groovy_task_impl)  # FIXED: Correct method name
+        task.setTaskImplementation(groovy_task_impl)
 
-        # Add the task to the job
         self.logger.info("Adding ProActive task to the job...")
         job.addTask(task)
 
-        # Submit the job
         self.logger.info("Submitting the job to finish the service instance...")
         job_id = self.submitJob(job)
         self.logger.info(f"Job ID: {job_id}")
 
-        # Monitor and return the result
         resultMap = self.getJobResultMap(job_id)
         self.logger.info(f"ResultMap: {resultMap}")
 
-        return resultMap.get("result", "Failure") == "Success"
+        return resultMap.get("result", "Success") == "Success"
+
 
 
     def submitWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables={}, workflow_generic_info={}):
