@@ -1307,29 +1307,62 @@ println("END " + variables.get("PA_TASK_NAME"))
         return self.proactive_scheduler_client.waitForJob(str(job_id), timeout).getResultMap()
 
     def executeJobsAcrossNodeSources(self, proactive_jobs, node_sources=None):
+        """
+        Executes the given proactive jobs on all available node sources or on a specified subset.
+
+        Args:
+            proactive_jobs (iterable): Jobs to be executed (must not be empty).
+            node_sources (list[str], optional): Specific node source names to use. If None, will auto-discover all available sources.
+
+        Returns:
+            List[dict]: A list of result dictionaries, each containing:
+            - 'job_id': the ID of the job
+            - 'job_state': final state of the job ('FINISHED', 'CANCELED', or 'FAILED')
+            - 'hardware_metrics': dict with 'cpu_usage' and 'ram_usage' averaged over the job duration
+
+        Raises:
+            ValueError: If proactive_jobs is empty, or node_sources is provided but empty.
+            RuntimeError: If no node sources are available or none of the specified sources are valid.
+        """
         if not proactive_jobs:
             raise ValueError("proactive_jobs cannot be empty")
-
-        if node_sources:
-            logging.info(f'Executing {len(proactive_jobs)} jobs across {len(node_sources)} node sources')
-        else:
-            logging.info(f'Executing {len(proactive_jobs)} jobs with default node source behavior')
 
         monitoring_client = self.getProactiveMonitoringClient()
         job_results = []
         job_queue = list(proactive_jobs)
         active_jobs = {}
-        target_sources = node_sources if node_sources else [f"default-{i}" for i in range(len(proactive_jobs))]
+
+        # Get available node sources
+        available_nodes = monitoring_client.list_proactive_jmx_urls()
+        available_sources_set = {node["nodeSource"] for node in available_nodes}
+
+        if node_sources is None:
+            target_sources = list(available_sources_set)
+            if not target_sources:
+                raise RuntimeError("No available node sources were found.")
+            logging.info("Detected %d available node source%s: %s", len(target_sources), "" if len(target_sources) == 1 else "s", ", ".join(target_sources))
+        else:
+            if not node_sources:
+                raise ValueError("The node_sources list is empty.")
+
+            # Filter only those that are actually available
+            valid_sources = [src for src in node_sources if src in available_sources_set]
+            invalid_sources = [src for src in node_sources if src not in available_sources_set]
+
+            for src in invalid_sources:
+                logging.warning(f"Node source '{src}' is not available and will be skipped.")
+
+            if not valid_sources:
+                raise RuntimeError("None of the specified node sources are currently available.")
+
+            target_sources = valid_sources
+            logging.info(f"Using valid node sources: {target_sources}")
 
         while job_queue or active_jobs:
-            logging.debug(f'Jobs in queue: {len(job_queue)}, Active jobs: {len(active_jobs)}')
-
             completed_sources = []
             for source, job_id in active_jobs.items():
                 job_status = self.getJobStatus(job_id)
                 if job_status.upper() in ["FINISHED", "CANCELED", "FAILED"]:
-                    logging.info(f'Job {job_id} on source {source} completed with status: {job_status}')
-
                     metrics = {}
                     job_info = self.getJobInfo(job_id)
                     start_time = job_info.getStartTime()
@@ -1366,23 +1399,21 @@ println("END " + variables.get("PA_TASK_NAME"))
             for source in completed_sources:
                 del active_jobs[source]
 
-            available_sources = [ns for ns in target_sources if ns not in active_jobs]
+            available_slots = [ns for ns in target_sources if ns not in active_jobs]
 
-            for source in available_sources:
+            for source in available_slots:
                 if not job_queue:
                     break
 
                 job = job_queue.pop(0)
-                if node_sources:
-                    job.addGenericInformation("NODE_SOURCE", source)
-
+                job.addGenericInformation("NODE_SOURCE", source)
                 try:
-                    logging.info(f'Submitting job {job.getJobName()} {"to " + source if node_sources else ""}')
+                    logging.info(f'Submitting job {job.getJobName()} to {source}')
                     job_id = self.submitJob(job)
                     active_jobs[source] = job_id
-                    logging.info(f'Job {job_id} submitted {"to " + source if node_sources else ""}')
+                    logging.info(f'Job {job_id} submitted to {source}')
                 except Exception as e:
-                    logging.error(f'Error submitting job {"to " + source if node_sources else ""}: {e}')
+                    logging.error(f'Error submitting job to {source}: {e}')
                     job_queue.append(job)
 
             if job_queue or active_jobs:
