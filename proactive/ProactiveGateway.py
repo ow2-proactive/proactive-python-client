@@ -1381,7 +1381,7 @@ class ProActiveGateway:
             self.logger.info('Failed to send signal. Status code: {}, Response: {}'.format(response.status_code, response.text))
             return False
 
-    def startServiceViaRest(self, bucket_name, workflow_name, variables, insecure=True):
+    def startService(self, bucket_name, workflow_name, variables, insecure=True):
         """
         Starts a service via REST API using POST.
         
@@ -1414,7 +1414,7 @@ class ProActiveGateway:
             raise Exception(f"[POST] Failed to start service: {response.status_code} {response.text}")
         return response.json()
 
-    def finishServiceViaRest(self, instance_id, bucket_name, workflow_name, variables=None, insecure=True):
+    def finishService(self, instance_id, bucket_name, workflow_name, variables=None, insecure=True):
         """
         Finishes a service via REST API using PUT.
         
