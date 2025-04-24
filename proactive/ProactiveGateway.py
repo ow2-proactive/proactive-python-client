@@ -221,331 +221,6 @@ class ProActiveGateway:
         self.logger.debug('Returning the bucket: ' + bucket_name)
         return ProactiveBucketFactory().getBucket(self, bucket_name)
 
-    def startPSAWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables={}, publish_service=True, enable_service_actions=True, instance_name=None, endpoint_id=None):
-        """
-        Submits a PSA workflow from the ProActive catalog to the scheduler.
-        Args:
-            bucket_name (str): Name of the bucket containing the workflow.
-            workflow_name (str): Name of the workflow to submit.
-            workflow_variables (dict, optional): Variables to pass to the workflow. Defaults to {}.
-            publish_service (bool, optional): Whether to register the service after execution. Defaults to True.
-            enable_service_actions (bool, optional): Whether to enable service actions when registering. Defaults to True.
-            instance_name (str, optional): Custom name for the service instance. If None, a default instance name is generated.
-            endpoint_id (str, optional): Custom endpoint identifier. If None, a default endpoint ID is generated.
-        Returns:
-            tuple: A tuple containing:
-                - job_id (int): ID of the submitted ProActive job.
-                - instance_id (str): Instance ID of the created service.
-                - service_job_id (str): Job ID of the running service.
-                - list_of_service_endpoints (str): The service endpoint URL.
-                - service_description (str): Description of the submitted service.
-        Raises:
-            RuntimeError: If submission fails
-        """
-
-        if instance_name is None:
-            instance_name = (workflow_name).lower() + "-$PA_JOB_ID"
-        workflow_variables['INSTANCE_NAME'] = instance_name
-
-        if endpoint_id is None:
-            endpoint_id = (workflow_name).lower() + "-endpoint-$PA_JOB_ID"
-        workflow_variables['ENDPOINT_ID'] = endpoint_id
-        
-        from string import Template
-        groovy_task_template = Template("""
-import org.ow2.proactive.pca.service.client.ApiClient
-import org.ow2.proactive.pca.service.client.api.ServiceInstanceRestApi
-import org.ow2.proactive.pca.service.client.model.ServiceInstanceData
-import org.ow2.proactive.pca.service.client.model.ServiceDescription
-import org.ow2.proactive.pca.service.client.model.CloudAutomationWorkflow
-import org.ow2.proactive.pca.service.client.api.CatalogRestApi
-import com.google.common.base.Strings;
-
-println("BEGIN " + variables.get("PA_TASK_NAME"))
-
-// Get schedulerapi access
-schedulerapi.connect()
-
-println("schedulerapi connected")
-
-// Acquire session id
-def sessionId = schedulerapi.getSession()
-
-println(sessionId)
-
-// Define PCA URL
-def pcaUrl = variables.get('PA_CLOUD_AUTOMATION_REST_URL')
-
-// Connect to APIs
-def apiClient = new ApiClient()
-apiClient.setBasePath(pcaUrl)
-// apiClient.setDebugging(true)
-def serviceInstanceRestApi = new ServiceInstanceRestApi(apiClient)
-def catalogRestApi = new CatalogRestApi(apiClient)
-
-println("connected to apis")
-
-def serviceId
-def bucketName
-def workflowName
-def serviceVariables
-
-
-def jobID = variables.get("PA_JOB_ID").toString()  // Explicitly get the job ID as a string
-println("Job ID: " + jobID)
-
-bucketName = "${bucketName}"
-workflowName = "${workflowName}"
-
-println("Service Bucket_name: " + bucketName + ", Workflow_name: " + workflowName)
-
-
-def instanceName = workflowName.toLowerCase() + "-" + jobID
-println(instanceName)
-
-def endpointId = workflowName.toLowerCase() + "-endpoint-" + jobID
-println(endpointId)
-
-def publishService = Boolean.parseBoolean("${publishService}")
-def enableServiceActions = Boolean.parseBoolean("${enableServiceActions}")
-
-// Identifying the starting workflow, the service ID and the default variables inside the catalog
-def cloudAutomationWorkflow = catalogRestApi.getWorkflowByCatalogObject(sessionId, bucketName, workflowName)
-if (cloudAutomationWorkflow != null) {
-    serviceId = cloudAutomationWorkflow.getGenericInformation().getServiceId()
-    serviceVariables = cloudAutomationWorkflow.getVariables().collectEntries {var -> [var.getName(), var.getValue()]}
-    println("Found Service_id : " + serviceId)
-}
-
-println("SERVICE_ID: " + serviceId)
-println("INSTANCE_NAME: " + instanceName)
-
-// Check existing service instances
-boolean instance_exists = false
-List<ServiceInstanceData> service_instances = serviceInstanceRestApi.getServiceInstances(sessionId, null)
-for (ServiceInstanceData serviceInstanceData : service_instances) {
-    if ( (serviceInstanceData.getServiceId() == serviceId) && (serviceInstanceData.getInstanceStatus()  == "RUNNING")){
-        if (serviceInstanceData.getVariables().get("INSTANCE_NAME") == instanceName) {
-            instance_exists = true
-            def instanceId = serviceInstanceData.getInstanceId()
-            endpoint = serviceInstanceData.getDeployments().iterator().next().getEndpoint().getUrl()
-            println("INSTANCE_ID: " + instanceId)
-            println("ENDPOINT:    " + endpoint)
-            variables.put("INSTANCE_ID_" + instanceName, instanceId)
-            variables.put("ENDPOINT_" + instanceName, endpoint)
-            if (publishService) {
-                schedulerapi.registerService(variables.get("PA_JOB_ID"), instanceId as int, enableServiceActions)
-            }
-            result = endpoint
-            break
-        }
-    }
-}
-
-
-
-def workflowVariables = [INSTANCE_NAME: instanceName, ENDPOINT_ID: endpointId]
-
-if (!instance_exists){
-    // Retrieve and update workflow variables
-    if (!workflowVariables.isEmpty()) {
-        for (String var : workflowVariables.keySet()) {
-            serviceVariables.put(var, workflowVariables.get(var))
-            }
-        }
-    }
-    // Prepare service description
-    ServiceDescription serviceDescription = new ServiceDescription()
-    serviceDescription.setBucketName(bucketName)
-    serviceDescription.setWorkflowName(workflowName)
-    if( !serviceVariables.isEmpty() ){
-        serviceVariables.each{ k, v -> serviceDescription.putVariablesItem("${k}", "${v}") }
-    }
-    // Add INSTANCE_NAME variable which is conventionnally required for docker-based PCA Services
-    serviceDescription.putVariablesItem("INSTANCE_NAME", instanceName)
-
-    // Run service
-    def serviceInstanceData = serviceInstanceRestApi.createRunningServiceInstance(sessionId, serviceDescription, Integer.parseInt(variables.get("PA_JOB_ID")))
-
-    // Acquire service Instance ID
-    def serviceInstanceId = serviceInstanceData.getInstanceId()
-
-    // Create synchro channel
-    def channel = "Service_Instance_" + serviceInstanceId
-    println("CHANNEL: " + channel)
-    synchronizationapi.createChannelIfAbsent(channel, false)
-
-    // Wait until the service is RUNNING or in ERROR
-    synchronizationapi.waitUntil(channel, "RUNNING_STATE", "{k,x -> x > 0}")
-    def runningState = synchronizationapi.get(channel, "RUNNING_STATE") as int
-
-    // If RUNNING
-    if (runningState == 1) {
-
-        // Acquire service endpoint
-        serviceInstanceData = serviceInstanceRestApi.getServiceInstance(sessionId, serviceInstanceId)
-        endpoint = serviceInstanceData.getDeployments().iterator().next().getEndpoint().getUrl()
-
-        // Acquire service job id
-        serviceJobId = serviceInstanceData.getJobSubmissions().get(0).getJobId().toString()
-        variables.put("SERVICE_JOB_ID", serviceJobId)
-        println("SERVICE_JOB_ID: " + serviceJobId)
-
-        if (publishService) {
-            schedulerapi.registerService(variables.get("PA_JOB_ID"), serviceInstanceId as int, enableServiceActions)
-        }
-
-        println("INSTANCE_ID: " + serviceInstanceId)
-        println("ENDPOINT: " + endpoint)
-        variables.put("INSTANCE_ID_" + instanceName, serviceInstanceId)
-        variables.put("ENDPOINT_" + instanceName, endpoint)
-        result = endpoint
-        
-        resultMap.put("INSTANCE_ID", serviceInstanceId)
-        resultMap.put("SERVICE_JOB_ID", serviceJobId)
-        resultMap.put("SERVICE_ENDPOINT", endpoint)
-        resultMap.put("SERVICE_DESCRIPTION", serviceDescription.toString())
-
-        // If in ERROR
-    } else if (runningState == 2) {
-
-        // Make the task in error
-        def deployErrorMessage = synchronizationapi.get(channel, "DEPLOY_ERROR_MESSAGE")
-        println deployErrorMessage
-        throw new Exception()
-    }
-
-
-println("END " + variables.get("PA_TASK_NAME"))
-        """)
-        
-        groovy_formatted_variables = "[" + ", ".join(f'{k}: "{v}"' for k, v in {k: v.replace("$", "\\$") for k, v in workflow_variables.items()}.items()) + "]"
-
-
-        groovy_task_impl = groovy_task_template.safe_substitute(
-            bucketName=bucket_name,
-            workflowName=workflow_name,
-            publishService=str(publish_service).lower(),
-            enableServiceActions=str(enable_service_actions).lower(),
-            instanceName=instance_name if instance_name else 'null',
-            workflowVariables=groovy_formatted_variables
-        )
-
-        # Create a new ProActive job
-        self.logger.info("Creating a proactive job...")
-        job = self.createJob("demo_service_start_job")
-
-        # Create a Groovy task
-        self.logger.info("Creating a proactive task...")
-        task = self.createTask(language="groovy", task_name="demo_service_start_task")
-        task.setTaskImplementation(groovy_task_impl)
-
-        # Add the Python task to the job
-        self.logger.info("Adding proactive tasks to the proactive job...")
-        job.addTask(task)
-
-        # Job submission
-        self.logger.info("Submitting the job to the proactive scheduler...")
-        job_id = self.submitJob(job)
-        self.logger.info("job_id: " + str(job_id))
-
-        resultMap = self.getJobResultMap(job_id)
-        #self.logger.info("resultMap: " + str(resultMap))
-
-        service_job_id = resultMap["SERVICE_JOB_ID"]
-        list_of_service_endpoints = resultMap["SERVICE_ENDPOINT"]
-        service_description = resultMap["SERVICE_DESCRIPTION"]
-        instance_id = resultMap["INSTANCE_ID"]
-
-        return job_id, instance_id, service_job_id, list_of_service_endpoints, service_description
-
-    
-    def finishPSAServiceInstance(self, instance_id):
-        """
-        Finishes a running PSA service instance by setting its status to 'FINISHED'.
-        
-        Args:
-            instance_id (str): ID of the service instance to finish.
-
-        Returns:
-            bool: True if the operation was successful, False otherwise.
-
-        Raises:
-            RuntimeError: If finishing the service fails.
-        """
-        from string import Template
-
-        groovy_script_template = Template("""
-    import org.ow2.proactive.pca.service.client.ApiClient
-    import org.ow2.proactive.pca.service.client.api.ServiceInstanceRestApi
-    import org.ow2.proactive.pca.service.client.model.ServiceInstanceData
-
-    println("BEGIN " + variables.get("PA_TASK_NAME"))
-
-    // Retrieve service instance ID
-    def service_instance_id = "${instance_id}" as Long
-
-    // Define PCA URL
-    def pca_url = variables.get('PA_CLOUD_AUTOMATION_REST_URL')
-    def status = "FINISHED"
-
-    // Get scheduler API access and acquire session ID
-    schedulerapi.connect()
-    def sessionId = schedulerapi.getSession()
-    println("Session ID: " + sessionId)
-
-    // Connect to APIs
-    def api_client = new ApiClient()
-    api_client.setBasePath(pca_url)
-    api_client.setDebugging(true)
-    def service_instance_rest_api = new ServiceInstanceRestApi(api_client)
-
-    println("Connected to ServiceInstanceRestApi")
-
-    // Deploying instance
-    println("Undeploying ProActive instance...")
-    println("ProActive instance undeployed.")
-
-    // Fetch service instance data
-    def service_instance_data = service_instance_rest_api.getServiceInstance(sessionId, service_instance_id)
-
-    // Update service instance status to FINISHED
-    service_instance_data.setInstanceStatus(status)
-    service_instance_rest_api.updateServiceInstance(sessionId, service_instance_id, service_instance_data)
-
-    println("Service instance " + service_instance_id + " marked as FINISHED.")
-
-    println("END " + variables.get("PA_TASK_NAME"))
-        """)
-
-        # Substitute values in the Groovy template
-        groovy_task_impl = groovy_script_template.safe_substitute(instance_id=instance_id)
-
-        # Create a new ProActive job
-        self.logger.info("Creating a ProActive job to finish service instance...")
-        job = self.createJob("finish_service_instance_job")
-
-        # Create a Groovy task
-        self.logger.info("Creating a ProActive task...")
-        task = self.createTask(language="groovy", task_name="finish_service_instance_task")
-        task.setTaskImplementation(groovy_task_impl)  # FIXED: Correct method name
-
-        # Add the task to the job
-        self.logger.info("Adding ProActive task to the job...")
-        job.addTask(task)
-
-        # Submit the job
-        self.logger.info("Submitting the job to finish the service instance...")
-        job_id = self.submitJob(job)
-        self.logger.info(f"Job ID: {job_id}")
-
-        # Monitor and return the result
-        resultMap = self.getJobResultMap(job_id)
-        self.logger.info(f"ResultMap: {resultMap}")
-
-        return resultMap.get("result", "Failure") == "Success"
-
-
     def submitWorkflowFromCatalog(self, bucket_name, workflow_name, workflow_variables={}, workflow_generic_info={}):
         """
         Submits a workflow from the ProActive catalog to the scheduler.
@@ -1705,3 +1380,73 @@ println("END " + variables.get("PA_TASK_NAME"))
         else:
             self.logger.info('Failed to send signal. Status code: {}, Response: {}'.format(response.status_code, response.text))
             return False
+
+    def startServiceViaRest(self, bucket_name, workflow_name, variables, insecure=True):
+        """
+        Starts a service via REST API using POST.
+        
+        Args:
+            bucket_name (str): The catalog bucket name
+            workflow_name (str): The name of the workflow to launch
+            variables (dict): Dictionary of variables to pass to the workflow
+            insecure (bool): Skip SSL verification if True
+            
+        Returns:
+            dict: Response JSON containing service instance info
+            
+        Raises:
+            Exception: If REST call fails
+        """
+        session_id = self.proactive_scheduler_client.getSession()
+        url = f"{self.base_url}/cloud-automation-service/serviceInstances"
+        headers = {
+            "Content-Type": "application/json",
+            "sessionid": session_id
+        }
+        payload = {
+            "bucket_name": bucket_name,
+            "workflow_name": workflow_name,
+            "variables": variables
+        }
+
+        response = requests.post(url, headers=headers, json=payload, verify=not insecure)
+        if response.status_code != 200:
+            raise Exception(f"[POST] Failed to start service: {response.status_code} {response.text}")
+        return response.json()
+
+    def finishServiceViaRest(self, instance_id, bucket_name, workflow_name, variables=None, insecure=True):
+        """
+        Finishes a service via REST API using PUT.
+        
+        Args:
+            instance_id (int): The service instance ID to finish
+            bucket_name (str): Catalog bucket containing the finish workflow
+            workflow_name (str): The name of the teardown workflow
+            variables (dict): Optional variables for the finish workflow
+            insecure (bool): Skip SSL verification if True
+
+        Returns:
+            dict: Response JSON from PCA
+            
+        Raises:
+            Exception: If REST call fails
+        """
+        if variables is None:
+            variables = {}
+
+        session_id = self.proactive_scheduler_client.getSession()
+        url = f"{self.base_url}/cloud-automation-service/serviceInstances/{instance_id}/action"
+        headers = {
+            "Content-Type": "application/json",
+            "sessionid": session_id
+        }
+        payload = {
+            "bucket_name": bucket_name,
+            "workflow_name": workflow_name,
+            "variables": variables
+        }
+
+        response = requests.put(url, headers=headers, json=payload, verify=not insecure)
+        if response.status_code != 200:
+            raise Exception(f"[PUT] Failed to finish service: {response.status_code} {response.text}")
+        return response.json()
