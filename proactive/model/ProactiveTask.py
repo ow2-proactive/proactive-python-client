@@ -46,6 +46,7 @@ class ProactiveTask(object):
         self.flow_block = None
         self.precious_result = False
         self.task_error_policy = 'continueJobExecution'  # Default behavior
+        self.default_python = 'python3'
 
     def __str__(self):
         return self.getTaskName()
@@ -462,7 +463,7 @@ if ("{verbosity}" == "true") {{
             task_implementation += "\n"
             task_implementation += "print('Running " + task_file + " with " + params_string + " as parameters...')"
             task_implementation += "\n"
-            task_implementation += "result = subprocess.check_output('python " + task_file + " " + params_string + "', shell=True).strip()"
+            task_implementation += "result = subprocess.check_output('" + self.default_python + " " + task_file + " " + params_string + "', shell=True).strip()"
             task_implementation += "\n"
             if displayTaskResultOnScheduler:
                 task_implementation += "print('-' * 10)"
